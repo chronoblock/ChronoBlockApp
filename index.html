@@ -349,7 +349,46 @@
             });
 
             blocksContainer.addEventListener('click', (e) => {
-                const blockEl = e.target.closest('[data-id]');
+                // First, check for task-specific actions
+                const taskEl = e.target.closest('li[data-id]');
+                if (taskEl) {
+                    const blockEl = taskEl.closest('div[data-id]');
+                    const blockId = Number(blockEl.dataset.id);
+                    const taskId = Number(taskEl.dataset.id);
+
+                    // Delete Task
+                    if (e.target.matches('.delete-task-btn')) {
+                        const block = state.blocks.find(b => b.id === blockId);
+                        block.tasks = block.tasks.filter(t => t.id !== taskId);
+                        saveState();
+                        render();
+                        return;
+                    }
+
+                    // Toggle Task Completion
+                    if (e.target.matches('.task-checkbox')) {
+                        const block = state.blocks.find(b => b.id === blockId);
+                        const task = block.tasks.find(t => t.id === taskId);
+                        task.completed = e.target.checked;
+                        taskEl.classList.toggle('task-completed', task.completed);
+                        saveState();
+                        return;
+                    }
+
+                    // Open Task Details Modal
+                    if (e.target.matches('.task-text')) {
+                        const block = state.blocks.find(b => b.id === blockId);
+                        const task = block.tasks.find(t => t.id === taskId);
+                        state.editingTaskId = { blockId, taskId };
+                        taskModalTitle.textContent = `Details for: "${task.text}"`;
+                        taskNotesInput.value = task.notes || '';
+                        openModal(taskDetailsModal);
+                        return;
+                    }
+                }
+
+                // Then check for block-level actions
+                const blockEl = e.target.closest('div[data-id]');
                 if (!blockEl) return;
                 const blockId = Number(blockEl.dataset.id);
 
@@ -358,6 +397,7 @@
                     state.blocks = state.blocks.filter(b => b.id !== blockId);
                     saveState();
                     render();
+                    return;
                 }
 
                 // Add Task
@@ -376,37 +416,7 @@
                         saveState();
                         render();
                     }
-                }
-                
-                const taskEl = e.target.closest('li[data-id]');
-                if (!taskEl) return;
-                const taskId = Number(taskEl.dataset.id);
-
-                // Delete Task
-                if (e.target.matches('.delete-task-btn')) {
-                    const block = state.blocks.find(b => b.id === blockId);
-                    block.tasks = block.tasks.filter(t => t.id !== taskId);
-                    saveState();
-                    render();
-                }
-
-                // Toggle Task Completion
-                if (e.target.matches('.task-checkbox')) {
-                    const block = state.blocks.find(b => b.id === blockId);
-                    const task = block.tasks.find(t => t.id === taskId);
-                    task.completed = e.target.checked;
-                    taskEl.classList.toggle('task-completed', task.completed);
-                    saveState();
-                }
-
-                // Open Task Details Modal
-                if (e.target.matches('.task-text')) {
-                    const block = state.blocks.find(b => b.id === blockId);
-                    const task = block.tasks.find(t => t.id === taskId);
-                    state.editingTaskId = { blockId, taskId };
-                    taskModalTitle.textContent = `Details for: "${task.text}"`;
-                    taskNotesInput.value = task.notes || '';
-                    openModal(taskDetailsModal);
+                    return;
                 }
             });
 
