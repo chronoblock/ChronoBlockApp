@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daily Time Planner</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="https://emojigraph.org/media/apple/spiral-calendar_1f5d3-fe0f.png">
     <!-- Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts: Inter -->
@@ -119,7 +121,7 @@
         .dark input[type="number"]:focus,
         .dark textarea:focus {
             border-color: var(--border-focus);
-            ring-color: var(--border-focus);
+            --tw-ring-color: var(--border-focus);
         }
 
         /* Dark mode title override */
@@ -212,7 +214,49 @@
                 <h3 class="text-lg leading-6 font-medium text-gray-900">Create a New Time Block</h3>
                 <div class="mt-2 px-7 py-3">
                     <input type="text" id="block-purpose-input" placeholder="Purpose (e.g., Morning Routine)" class="mb-3 px-3 py-2 text-gray-900 placeholder-gray-500 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                    <input type="number" id="block-duration-input" placeholder="Duration (in minutes)" class="px-3 py-2 text-gray-900 placeholder-gray-500 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    
+                    <!-- Time Selection Mode Toggle -->
+                    <div class="mb-4">
+                        <div class="flex items-center justify-center space-x-4">
+                            <label class="flex items-center">
+                                <input type="radio" name="time-mode" value="duration" id="duration-mode" checked class="mr-2">
+                                <span class="text-sm text-gray-700">Duration Mode</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="time-mode" value="range" id="range-mode" class="mr-2">
+                                <span class="text-sm text-gray-700">Time Range Mode</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Duration Mode (Default) -->
+                    <div id="duration-mode-section">
+                        <div class="flex space-x-2 mb-3">
+                            <div class="flex-1">
+                                <input type="number" id="block-hours-input" placeholder="Hours" min="0" max="23" value="1" class="px-3 py-2 text-gray-900 placeholder-gray-500 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                            <div class="flex-1">
+                                <input type="number" id="block-minutes-input" placeholder="Minutes" min="0" max="59" value="0" class="px-3 py-2 text-gray-900 placeholder-gray-500 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Time Range Mode (Hidden by default) -->
+                    <div id="range-mode-section" class="hidden">
+                        <div class="space-y-3 mb-3">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 text-left">Start Time</label>
+                                <input type="time" id="block-start-time" value="09:00" class="px-3 py-2 text-gray-900 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 text-left">End Time</label>
+                                <input type="time" id="block-end-time" value="10:00" class="px-3 py-2 text-gray-900 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                            <div id="calculated-duration" class="text-sm text-gray-600 text-left">
+                                Duration: <span id="duration-display">--</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="items-center px-4 py-3">
                     <button id="save-block-btn" class="px-4 py-2 bg-indigo-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-300">
@@ -304,7 +348,18 @@
             // Modals
             const addBlockModal = document.getElementById('add-block-modal');
             const blockPurposeInput = document.getElementById('block-purpose-input');
-            const blockDurationInput = document.getElementById('block-duration-input');
+            
+            // New time selection elements
+            const durationModeRadio = document.getElementById('duration-mode');
+            const rangeModeRadio = document.getElementById('range-mode');
+            const durationModeSection = document.getElementById('duration-mode-section');
+            const rangeModeSection = document.getElementById('range-mode-section');
+            const blockHoursInput = document.getElementById('block-hours-input');
+            const blockMinutesInput = document.getElementById('block-minutes-input');
+            const blockStartTimeInput = document.getElementById('block-start-time');
+            const blockEndTimeInput = document.getElementById('block-end-time');
+            const durationDisplay = document.getElementById('duration-display');
+            
             const saveBlockBtn = document.getElementById('save-block-btn');
             const cancelBlockBtn = document.getElementById('cancel-block-btn');
 
@@ -370,6 +425,95 @@
                 applyTheme(enabled);
                 saveState();
             };
+
+            // --- TIME BLOCK MODE UTILITIES ---
+            const switchTimeMode = (mode) => {
+                if (mode === 'duration') {
+                    durationModeSection.classList.remove('hidden');
+                    rangeModeSection.classList.add('hidden');
+                } else if (mode === 'range') {
+                    durationModeSection.classList.add('hidden');
+                    rangeModeSection.classList.remove('hidden');
+                    updateCalculatedDuration();
+                }
+            };
+
+            const updateCalculatedDuration = () => {
+                const startTime = blockStartTimeInput.value;
+                const endTime = blockEndTimeInput.value;
+                
+                if (startTime && endTime) {
+                    const startMinutes = timeToMinutes(startTime);
+                    const endMinutes = timeToMinutes(endTime);
+                    
+                    if (endMinutes > startMinutes) {
+                        const duration = endMinutes - startMinutes;
+                        durationDisplay.textContent = minutesToHM(duration);
+                        return duration;
+                    } else {
+                        durationDisplay.textContent = 'Invalid time range';
+                        return 0;
+                    }
+                } else {
+                    durationDisplay.textContent = '--';
+                    return 0;
+                }
+            };
+
+            const validateTimeRange = (startTime, endTime) => {
+                const wakeMinutes = timeToMinutes(state.wakeTime);
+                const sleepMinutes = timeToMinutes(state.sleepTime);
+                const startMinutes = timeToMinutes(startTime);
+                const endMinutes = timeToMinutes(endTime);
+
+                // Check if times are within wake/sleep schedule
+                if (startMinutes < wakeMinutes || endMinutes > sleepMinutes) {
+                    return `Time must be within your day schedule (${state.wakeTime} - ${state.sleepTime})`;
+                }
+
+                // Sort blocks by start time (same logic as renderBlocks)
+                const sortedBlocks = [...state.blocks].sort((a, b) => {
+                    if (a.startTime && b.startTime) {
+                        return timeToMinutes(a.startTime) - timeToMinutes(b.startTime);
+                    } else if (a.startTime && !b.startTime) {
+                        return -1; // Scheduled blocks come first
+                    } else if (!a.startTime && b.startTime) {
+                        return 1;
+                    }
+                    return 0; // Keep original order for non-scheduled blocks
+                });
+
+                let cumulativeTime = wakeMinutes; // Track sequential block timing
+
+                for (const block of sortedBlocks) {
+                    let blockStart, blockEnd;
+                    
+                    if (block.startTime && block.endTime) {
+                        // Block has specific start/end times
+                        blockStart = timeToMinutes(block.startTime);
+                        blockEnd = timeToMinutes(block.endTime);
+                        // Update cumulative time if this scheduled block extends past current time
+                        if (blockEnd > cumulativeTime) {
+                            cumulativeTime = blockEnd;
+                        }
+                    } else {
+                        // Block uses sequential timing - starts after previous blocks
+                        blockStart = cumulativeTime;
+                        blockEnd = cumulativeTime + block.duration;
+                        cumulativeTime = blockEnd;
+                    }
+                    
+                    // Check for overlap: new block overlaps if it starts before existing ends AND ends after existing starts
+                    if (startMinutes < blockEnd && endMinutes > blockStart) {
+                        const blockTimeDisplay = block.startTime && block.endTime 
+                            ? `${block.startTime} - ${block.endTime}`
+                            : `${minutesToTime(blockStart)} - ${minutesToTime(blockEnd)}`;
+                        return `Time range overlaps with existing block: "${block.purpose}" (${blockTimeDisplay})`;
+                    }
+                }
+
+                return null; // No validation errors
+            };
             
             // --- STATE MANAGEMENT & PERSISTENCE ---
             const saveState = () => {
@@ -425,14 +569,37 @@
                 blocksContainer.innerHTML = '';
                 let cumulativeTime = timeToMinutes(state.wakeTime);
 
-                state.blocks.forEach(block => {
+                // Sort blocks by start time if they have specific times, otherwise by order
+                const sortedBlocks = [...state.blocks].sort((a, b) => {
+                    if (a.startTime && b.startTime) {
+                        return timeToMinutes(a.startTime) - timeToMinutes(b.startTime);
+                    } else if (a.startTime && !b.startTime) {
+                        return -1; // Scheduled blocks come first
+                    } else if (!a.startTime && b.startTime) {
+                        return 1;
+                    }
+                    return 0; // Keep original order for non-scheduled blocks
+                });
+
+                sortedBlocks.forEach(block => {
                     const blockEl = document.createElement('div');
                     blockEl.className = 'bg-white p-5 rounded-lg shadow-md fade-in';
                     blockEl.dataset.id = block.id;
 
-                    const startTime = minutesToTime(cumulativeTime);
-                    cumulativeTime += block.duration;
-                    const endTime = minutesToTime(cumulativeTime);
+                    let startTime, endTime, timeDisplay;
+
+                    if (block.startTime && block.endTime) {
+                        // Block has specific start/end times
+                        startTime = block.startTime;
+                        endTime = block.endTime;
+                        timeDisplay = `${minutesToHM(block.duration)} (${startTime} - ${endTime}) ⏰`;
+                    } else {
+                        // Block uses sequential timing
+                        startTime = minutesToTime(cumulativeTime);
+                        cumulativeTime += block.duration;
+                        endTime = minutesToTime(cumulativeTime);
+                        timeDisplay = `${minutesToHM(block.duration)} (${startTime} - ${endTime})`;
+                    }
 
                     let tasksHtml = block.tasks.map(task => `
                         <li class="flex items-center justify-between py-2 border-b" data-id="${task.id}">
@@ -448,7 +615,7 @@
                         <div class="flex justify-between items-start mb-4">
                             <div>
                                 <h3 class="text-xl font-bold text-indigo-700">${block.purpose}</h3>
-                                <p class="text-sm text-gray-500">${minutesToHM(block.duration)} (${startTime} - ${endTime})</p>
+                                <p class="text-sm text-gray-500">${timeDisplay}</p>
                             </div>
                             <button class="text-red-600 hover:text-red-800 font-bold delete-block-btn">✕</button>
                         </div>
@@ -485,32 +652,113 @@
             });
 
             addBlockBtn.addEventListener('click', () => {
+                // Set default values for all form fields
                 blockPurposeInput.value = '';
-                blockDurationInput.value = '';
+                blockHoursInput.value = '1';
+                blockMinutesInput.value = '0';
+                blockStartTimeInput.value = '09:00';
+                blockEndTimeInput.value = '10:00';
+                
+                // Set default mode to duration
+                durationModeRadio.checked = true;
+                switchTimeMode('duration');
+                
                 openModal(addBlockModal);
                 blockPurposeInput.focus();
             });
 
             cancelBlockBtn.addEventListener('click', () => closeModal(addBlockModal));
+
+            // Time mode switching event listeners
+            durationModeRadio.addEventListener('change', () => {
+                if (durationModeRadio.checked) {
+                    switchTimeMode('duration');
+                }
+            });
+
+            rangeModeRadio.addEventListener('change', () => {
+                if (rangeModeRadio.checked) {
+                    switchTimeMode('range');
+                }
+            });
+
+            // Update calculated duration when time range changes
+            blockStartTimeInput.addEventListener('input', updateCalculatedDuration);
+            blockEndTimeInput.addEventListener('input', updateCalculatedDuration);
             
             saveBlockBtn.addEventListener('click', () => {
                 const purpose = blockPurposeInput.value.trim();
-                const duration = parseInt(blockDurationInput.value, 10);
-                if (!purpose || isNaN(duration) || duration <= 0) {
-                    alert('Please enter a valid purpose and duration.');
+                
+                if (!purpose) {
+                    alert('Please enter a purpose for the block.');
                     return;
                 }
 
-                state.blocks.push({
+                let duration, startTime, endTime, validationError;
+
+                // Check which mode is selected
+                if (durationModeRadio.checked) {
+                    // Duration Mode - Enhanced with hours and minutes
+                    const hours = parseInt(blockHoursInput.value, 10) || 0;
+                    const minutes = parseInt(blockMinutesInput.value, 10) || 0;
+                    duration = hours * 60 + minutes;
+                    
+                    if (duration <= 0) {
+                        alert('Please enter a valid duration (hours and/or minutes).');
+                        return;
+                    }
+                } else {
+                    // Time Range Mode - New functionality
+                    startTime = blockStartTimeInput.value;
+                    endTime = blockEndTimeInput.value;
+                    
+                    if (!startTime || !endTime) {
+                        alert('Please select both start and end times.');
+                        return;
+                    }
+                    
+                    // Validate time range
+                    validationError = validateTimeRange(startTime, endTime);
+                    if (validationError) {
+                        alert(validationError);
+                        return;
+                    }
+                    
+                    // Calculate duration from time range
+                    duration = updateCalculatedDuration();
+                    if (duration <= 0) {
+                        alert('End time must be after start time.');
+                        return;
+                    }
+                }
+
+                // Create new block
+                const newBlock = {
                     id: Date.now(),
                     purpose,
                     duration,
                     tasks: []
-                });
+                };
 
+                // Add start/end times if in range mode
+                if (rangeModeRadio.checked) {
+                    newBlock.startTime = startTime;
+                    newBlock.endTime = endTime;
+                }
+
+                state.blocks.push(newBlock);
                 saveState();
                 render();
                 closeModal(addBlockModal);
+                
+                // Reset form
+                blockPurposeInput.value = '';
+                blockHoursInput.value = '';
+                blockMinutesInput.value = '';
+                blockStartTimeInput.value = '';
+                blockEndTimeInput.value = '';
+                durationModeRadio.checked = true;
+                switchTimeMode('duration');
             });
 
             blocksContainer.addEventListener('click', (e) => {
@@ -545,7 +793,7 @@
                         const block = state.blocks.find(b => b.id === blockId);
                         const task = block.tasks.find(t => t.id === taskId);
                         state.editingTaskId = { blockId, taskId };
-                        taskModalTitle.textContent = `Details for: "${task.text}"`;
+                        taskModalTitle.textContent = `Details for: ${task.text}`;
                         taskNotesInput.value = task.notes || '';
                         openModal(taskDetailsModal);
                         return;

@@ -846,7 +846,277 @@ const TimePlannerTests = {
         }
     },
 
-    // Error Handling Tests
+    // Time Validation Tests
+    timeValidationTests: {
+        basicOverlapDetection: function() {
+            // Mock state with existing blocks
+            const mockState = {
+                wakeTime: '07:00',
+                sleepTime: '23:00',
+                blocks: [
+                    { id: 1, purpose: 'Morning Routine', startTime: '08:00', endTime: '09:30', duration: 90, tasks: [] },
+                    { id: 2, purpose: 'Work Block', duration: 120, tasks: [] } // Sequential block without specific times
+                ]
+            };
+
+            // Save original state
+            const originalState = window.state;
+            window.state = mockState;
+
+            // Use the same validation logic as the main app
+            const validateOverlap = (startTime, endTime) => {
+                const wakeMinutes = TimePlannerTests.utils.timeToMinutes(mockState.wakeTime);
+                const sleepMinutes = TimePlannerTests.utils.timeToMinutes(mockState.sleepTime);
+                const startMinutes = TimePlannerTests.utils.timeToMinutes(startTime);
+                const endMinutes = TimePlannerTests.utils.timeToMinutes(endTime);
+
+                // Check if times are within wake/sleep schedule
+                if (startMinutes < wakeMinutes || endMinutes > sleepMinutes) {
+                    return `Time must be within schedule`;
+                }
+
+                // Sort blocks: scheduled blocks first, then sequential
+                const sortedBlocks = [...mockState.blocks].sort((a, b) => {
+                    if (a.startTime && b.startTime) {
+                        return TimePlannerTests.utils.timeToMinutes(a.startTime) - TimePlannerTests.utils.timeToMinutes(b.startTime);
+                    } else if (a.startTime && !b.startTime) {
+                        return -1; // Scheduled blocks come first
+                    } else if (!a.startTime && b.startTime) {
+                        return 1;
+                    }
+                    return 0; // Keep original order for non-scheduled blocks
+                });
+
+                let cumulativeTime = wakeMinutes; // Track sequential block timing
+
+                for (const block of sortedBlocks) {
+                    let blockStart, blockEnd;
+                    
+                    if (block.startTime && block.endTime) {
+                        // Block has specific start/end times
+                        blockStart = TimePlannerTests.utils.timeToMinutes(block.startTime);
+                        blockEnd = TimePlannerTests.utils.timeToMinutes(block.endTime);
+                        // Update cumulative time if this scheduled block extends past current time
+                        if (blockEnd > cumulativeTime) {
+                            cumulativeTime = blockEnd;
+                        }
+                    } else {
+                        // Block uses sequential timing - starts after previous blocks
+                        blockStart = cumulativeTime;
+                        blockEnd = cumulativeTime + block.duration;
+                        cumulativeTime = blockEnd;
+                    }
+                    
+                    // Check for overlap
+                    if (startMinutes < blockEnd && endMinutes > blockStart) {
+                        return `Overlap with: ${block.purpose}`;
+                    }
+                }
+                return null;
+            };
+
+            // Test case 1: Should detect overlap with scheduled block (08:00-09:30)
+            const overlap1 = validateOverlap('08:30', '10:00');
+            TimePlannerTests.assert(
+                overlap1 !== null,
+                'Detects overlap with existing scheduled block',
+                'timeValidation'
+            );
+
+            // Test case 2: Should detect overlap with sequential block
+            const overlap2 = validateOverlap('10:00', '11:00'); // This should overlap with the 2-hour work block
+            TimePlannerTests.assert(
+                overlap2 !== null,
+                'Detects overlap with existing sequential block',
+                'timeValidation'
+            );
+
+            // Test case 3: Should allow non-overlapping time
+            const noOverlap = validateOverlap('12:00', '13:00'); // After both blocks
+            TimePlannerTests.assert(
+                noOverlap === null,
+                'Allows non-overlapping time ranges',
+                'timeValidation'
+            );
+
+            // Restore original state
+            window.state = originalState;
+        },
+
+        scheduleTimeValidation: function() {
+            const mockState = {
+                wakeTime: '07:00',
+                sleepTime: '23:00',
+                blocks: []
+            };
+
+            const validateSchedule = (startTime, endTime) => {
+                const wakeMinutes = TimePlannerTests.utils.timeToMinutes(mockState.wakeTime);
+                const sleepMinutes = TimePlannerTests.utils.timeToMinutes(mockState.sleepTime);
+                const startMinutes = TimePlannerTests.utils.timeToMinutes(startTime);
+                const endMinutes = TimePlannerTests.utils.timeToMinutes(endTime);
+
+                return !(startMinutes < wakeMinutes || endMinutes > sleepMinutes);
+            };
+
+            // Test case 1: Valid time within schedule
+            TimePlannerTests.assert(
+                validateSchedule('08:00', '09:00'),
+                'Accepts time within wake/sleep schedule',
+                'timeValidation'
+            );
+
+            // Test case 2: Invalid - too early
+            TimePlannerTests.assert(
+                !validateSchedule('06:00', '08:00'),
+                'Rejects time before wake time',
+                'timeValidation'
+            );
+
+            // Test case 3: Invalid - too late
+            TimePlannerTests.assert(
+                !validateSchedule('22:00', '24:00'),
+                'Rejects time after sleep time',
+                'timeValidation'
+            );
+        },
+
+        complexOverlapScenarios: function() {
+            const mockState = {
+                wakeTime: '07:00',
+                sleepTime: '23:00',
+                blocks: [
+                    { id: 1, purpose: 'Morning', startTime: '08:00', endTime: '10:00', duration: 120, tasks: [] },
+                    { id: 2, purpose: 'Lunch', startTime: '12:00', endTime: '13:00', duration: 60, tasks: [] },
+                    { id: 3, purpose: 'Sequential Block', duration: 90, tasks: [] } // This would be at 13:00-14:30
+                ]
+            };
+
+            const checkComplexOverlap = (startTime, endTime) => {
+                const startMinutes = TimePlannerTests.utils.timeToMinutes(startTime);
+                const endMinutes = TimePlannerTests.utils.timeToMinutes(endTime);
+                let cumulativeTime = TimePlannerTests.utils.timeToMinutes(mockState.wakeTime);
+                
+                for (const block of mockState.blocks) {
+                    let blockStart, blockEnd;
+                    
+                    if (block.startTime && block.endTime) {
+                        blockStart = TimePlannerTests.utils.timeToMinutes(block.startTime);
+                        blockEnd = TimePlannerTests.utils.timeToMinutes(block.endTime);
+                        // Reset cumulative time to end of last scheduled block
+                        if (blockEnd > cumulativeTime) {
+                            cumulativeTime = blockEnd;
+                        }
+                    } else {
+                        blockStart = cumulativeTime;
+                        blockEnd = cumulativeTime + block.duration;
+                        cumulativeTime = blockEnd;
+                    }
+                    
+                    if (startMinutes < blockEnd && endMinutes > blockStart) {
+                        return true; // Overlap detected
+                    }
+                }
+                return false;
+            };
+
+            // Test case 1: Overlap with scheduled morning block
+            TimePlannerTests.assert(
+                checkComplexOverlap('09:00', '11:00'),
+                'Detects overlap with scheduled morning block',
+                'timeValidation'
+            );
+
+            // Test case 2: Overlap with sequential block after lunch
+            TimePlannerTests.assert(
+                checkComplexOverlap('13:30', '15:00'),
+                'Detects overlap with sequential block',
+                'timeValidation'
+            );
+
+            // Test case 3: Valid gap between blocks
+            TimePlannerTests.assert(
+                !checkComplexOverlap('10:30', '11:30'),
+                'Allows time in valid gap between blocks',
+                'timeValidation'
+            );
+        },
+
+        edgeCaseValidation: function() {
+            const mockState = {
+                wakeTime: '07:00',
+                sleepTime: '23:00',
+                blocks: [
+                    { id: 1, purpose: 'Morning', startTime: '08:00', endTime: '09:00', duration: 60, tasks: [] }
+                ]
+            };
+
+            const validateEdgeCase = (startTime, endTime) => {
+                const wakeMinutes = TimePlannerTests.utils.timeToMinutes(mockState.wakeTime);
+                const sleepMinutes = TimePlannerTests.utils.timeToMinutes(mockState.sleepTime);
+                const startMinutes = TimePlannerTests.utils.timeToMinutes(startTime);
+                const endMinutes = TimePlannerTests.utils.timeToMinutes(endTime);
+
+                // Basic schedule validation
+                if (startMinutes < wakeMinutes || endMinutes > sleepMinutes) {
+                    return false;
+                }
+
+                // Check exact boundary cases
+                for (const block of mockState.blocks) {
+                    if (block.startTime && block.endTime) {
+                        const blockStart = TimePlannerTests.utils.timeToMinutes(block.startTime);
+                        const blockEnd = TimePlannerTests.utils.timeToMinutes(block.endTime);
+                        
+                        if (startMinutes < blockEnd && endMinutes > blockStart) {
+                            return false; // Overlap
+                        }
+                    }
+                }
+                return true;
+            };
+
+            // Test case 1: Exact boundary - should be valid (9:00-10:00 after 8:00-9:00)
+            TimePlannerTests.assert(
+                validateEdgeCase('09:00', '10:00'),
+                'Allows block starting exactly when previous ends',
+                'timeValidation'
+            );
+
+            // Test case 2: Exact boundary - should be valid (7:00-8:00 before 8:00-9:00)
+            TimePlannerTests.assert(
+                validateEdgeCase('07:00', '08:00'),
+                'Allows block ending exactly when next starts',
+                'timeValidation'
+            );
+
+            // Test case 3: One minute overlap - should be invalid
+            TimePlannerTests.assert(
+                !validateEdgeCase('08:30', '09:30'),
+                'Correctly detects one-minute overlap',
+                'timeValidation'
+            );
+        },
+
+        // NEGATIVE TESTS - These should fail to verify our testing framework
+        negativeTest_ValidationShouldFail: function() {
+            TimePlannerTests.assert(
+                true === false, // This should always fail
+                'NEGATIVE TEST: Basic boolean inequality should fail',
+                'timeValidation'
+            );
+        },
+
+        negativeTest_OverlapShouldFail: function() {
+            // This test should fail - we're saying no overlap when there clearly is one
+            const overlap = '08:00' === '09:00' && '09:00' === '08:00'; // Impossible condition
+            TimePlannerTests.assert(
+                overlap, // This will be false, so test should fail
+                'NEGATIVE TEST: Impossible overlap condition should fail',
+                'timeValidation'
+            );
+        }
+    },
     errorTests: {
         invalidBlockData: function() {
             const validPurpose = 'Morning Routine';
@@ -997,7 +1267,7 @@ const TimePlannerTests = {
         console.log('🚀 Starting Complete Test Suite for Daily Time Planner\n');
         this.setup();
 
-        const categories = ['state', 'timeCalculation', 'daySetup', 'timeBlock', 'task', 'settings', 'ui', 'integration', 'error', 'dom'];
+        const categories = ['state', 'timeCalculation', 'daySetup', 'timeBlock', 'task', 'settings', 'timeValidation', 'ui', 'integration', 'error', 'dom'];
         
         categories.forEach(category => {
             const categoryTests = this[category + 'Tests'];
@@ -1129,6 +1399,7 @@ window.testState = () => TimePlannerTests.runCategory('state');
 window.testTasks = () => TimePlannerTests.runCategory('task');
 window.testBlocks = () => TimePlannerTests.runCategory('timeBlock');
 window.testSettings = () => TimePlannerTests.runCategory('settings');
+window.testTimeValidation = () => TimePlannerTests.runCategory('timeValidation');
 window.testDarkMode = () => TimePlannerTests.runCategory('settings'); // Dark mode tests are in settings
 
 // Auto-display usage instructions
@@ -1137,12 +1408,13 @@ console.log(`
 =====================================
 
 Quick Commands:
-• runTests()        - Run all tests
-• quickTest()       - Run core functionality tests only
-• testTasks()       - Test task management
-• testBlocks()      - Test time block management  
-• testSettings()    - Test settings functionality
-• testState()       - Test data persistence
+• runTests()           - Run all tests
+• quickTest()          - Run core functionality tests only
+• testTasks()          - Test task management
+• testBlocks()         - Test time block management  
+• testSettings()       - Test settings functionality
+• testTimeValidation() - Test time overlap validation
+• testState()          - Test data persistence
 
 Advanced:
 • TimePlannerTests.runCategory('categoryName')
