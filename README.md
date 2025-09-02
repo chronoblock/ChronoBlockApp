@@ -9,6 +9,7 @@ A simple, elegant web application for planning and organizing your daily schedul
 - **Task Management**: Add, complete, and delete tasks within each time block
 - **Task Notes**: Add detailed notes and comments to individual tasks
 - **Settings**: Easily adjust your wake-up and sleep times at any point
+- **Dark Mode**: Toggle between light and dark themes with persistent preference
 - **Time Tracking**: Visual display of total, allocated, and remaining time
 - **Data Persistence**: All your data is saved in localStorage and persists across browser sessions
 
@@ -97,3 +98,13 @@ Each category includes **negative tests** that are designed to fail, ensuring th
 - **Tailwind CSS** - Responsive styling and design
 - **Vanilla JavaScript** - Application logic and interactivity
 - **localStorage** - Client-side data persistence
+
+## 📋 To-Do List
+
+- [x] ~~Settings with the Wake-up Time and Sleep Time~~
+- [x] ~~Unit testing~~
+- [x] ~~Dark mode~~
+- [ ] Blocks need to have the option of custom start and end time
+- [ ] Export/import functionality
+- [ ] Weekly/monthly view
+- [ ] Task categories and priorities

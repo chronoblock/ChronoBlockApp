@@ -12,24 +12,84 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Custom Styles -->
     <style>
+        /* CSS Variables for Theme Support */
+        :root {
+            --bg-primary: #f3f4f6;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f9fafb;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --text-accent: #4f46e5;
+            --border-color: #d1d5db;
+            --border-focus: #6366f1;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --shadow-lg: rgba(0, 0, 0, 0.15);
+        }
+
+        .dark {
+            --bg-primary: #1f2937;
+            --bg-secondary: #374151;
+            --bg-tertiary: #4b5563;
+            --text-primary: #f9fafb;
+            --text-secondary: #d1d5db;
+            --text-accent: #818cf8;
+            --border-color: #4b5563;
+            --border-focus: #818cf8;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --shadow-lg: rgba(0, 0, 0, 0.4);
+        }
+
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6; /* A light gray background */
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
-        /* Custom scrollbar for a cleaner look */
+
+        /* Update existing styles to use variables */
+        .bg-white { background-color: var(--bg-secondary) !important; }
+        .text-gray-800 { color: var(--text-primary) !important; }
+        .text-gray-600 { color: var(--text-secondary) !important; }
+        .text-gray-500 { color: var(--text-secondary) !important; }
+        .text-gray-700 { color: var(--text-primary) !important; }
+        .border-gray-300 { border-color: var(--border-color) !important; }
+        .bg-gray-50 { background-color: var(--bg-tertiary) !important; }
+
+        /* Dark mode specific overrides */
+        .dark .shadow-md { box-shadow: 0 4px 6px -1px var(--shadow), 0 2px 4px -1px var(--shadow); }
+        .dark .shadow-lg { box-shadow: 0 10px 15px -3px var(--shadow-lg), 0 4px 6px -2px var(--shadow); }
+        .dark .shadow-sm { box-shadow: 0 1px 2px 0 var(--shadow); }
+
+        /* Custom scrollbar for both themes */
         ::-webkit-scrollbar {
             width: 8px;
         }
         ::-webkit-scrollbar-track {
-            background: #f1f1f1;
+            background: var(--bg-tertiary);
         }
         ::-webkit-scrollbar-thumb {
-            background: #888;
+            background: var(--text-secondary);
             border-radius: 4px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: #555;
+            background: var(--text-primary);
         }
+
+        /* Dark mode toggle switch styles */
+        .toggle-checkbox {
+            transition: all 0.3s ease;
+        }
+        .toggle-checkbox:checked {
+            transform: translateX(100%);
+            border-color: #4f46e5;
+        }
+        .toggle-label {
+            transition: background-color 0.3s ease;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #4f46e5;
+        }
+
         /* Simple animation for modals and blocks */
         .fade-in {
             animation: fadeIn 0.3s ease-in-out;
@@ -41,7 +101,40 @@
         /* Style for completed tasks */
         .task-completed span {
             text-decoration: line-through;
-            color: #6b7280; /* Gray text for completed tasks */
+            color: var(--text-secondary);
+        }
+
+        /* Dark mode input and button overrides */
+        .dark input[type="time"],
+        .dark input[type="text"],
+        .dark input[type="number"],
+        .dark textarea {
+            background-color: var(--bg-tertiary);
+            border-color: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .dark input[type="time"]:focus,
+        .dark input[type="text"]:focus,
+        .dark input[type="number"]:focus,
+        .dark textarea:focus {
+            border-color: var(--border-focus);
+            ring-color: var(--border-focus);
+        }
+
+        /* Dark mode title override */
+        .dark h1 {
+            color: var(--text-primary) !important;
+        }
+
+        /* Dark mode modal titles override (only for modal h3 elements) */
+        .dark .fixed h3 {
+            color: var(--text-primary) !important;
+        }
+
+        /* Dark mode cancel button text override */
+        .dark button[id*="cancel"] {
+            color: #1f2937 !important; /* Dark text for light gray buttons */
         }
     </style>
 </head>
@@ -170,6 +263,13 @@
                         <label for="settings-sleep-time" class="block text-sm font-medium text-gray-700">Sleep Time</label>
                         <input type="time" id="settings-sleep-time" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                     </div>
+                    <div class="flex items-center justify-between pt-2">
+                        <label for="dark-mode-toggle" class="text-sm font-medium text-gray-700">🌙 Dark Mode</label>
+                        <div class="relative inline-block w-12 mr-2 align-middle select-none">
+                            <input type="checkbox" id="dark-mode-toggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-2 appearance-none cursor-pointer transform transition-transform duration-300 ease-in-out"/>
+                            <label for="dark-mode-toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer transition-colors duration-300 ease-in-out"></label>
+                        </div>
+                    </div>
                 </div>
                 <div class="items-center px-4 py-3 mt-6 text-right">
                     <button id="save-settings-btn" class="px-4 py-2 bg-indigo-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-300">
@@ -220,6 +320,7 @@
             const settingsSleepTimeInput = document.getElementById('settings-sleep-time');
             const saveSettingsBtn = document.getElementById('save-settings-btn');
             const cancelSettingsBtn = document.getElementById('cancel-settings-btn');
+            const darkModeToggle = document.getElementById('dark-mode-toggle');
 
             // --- APPLICATION STATE ---
             let state = {
@@ -228,6 +329,7 @@
                 sleepTime: '23:00',
                 blocks: [],
                 editingTaskId: null, // format: { blockId, taskId }
+                darkMode: false, // NEW: Dark mode preference
             };
 
             // --- UTILITY FUNCTIONS ---
@@ -248,6 +350,26 @@
                 const m = minutes % 60;
                 return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
             };
+
+            // --- DARK MODE UTILITIES ---
+            const applyTheme = (isDark) => {
+                document.body.classList.toggle('dark', isDark);
+                // Update any dynamic elements that need theme awareness
+                const modals = document.querySelectorAll('[id$="-modal"]');
+                modals.forEach(modal => {
+                    const content = modal.querySelector('.bg-white');
+                    if (content) {
+                        content.style.backgroundColor = isDark ? 'var(--bg-secondary)' : '';
+                        content.style.color = isDark ? 'var(--text-primary)' : '';
+                    }
+                });
+            };
+
+            const toggleDarkMode = (enabled) => {
+                state.darkMode = enabled;
+                applyTheme(enabled);
+                saveState();
+            };
             
             // --- STATE MANAGEMENT & PERSISTENCE ---
             const saveState = () => {
@@ -258,6 +380,8 @@
                 const savedState = localStorage.getItem('timePlannerState');
                 if (savedState) {
                     state = JSON.parse(savedState);
+                    // Apply theme after loading state
+                    applyTheme(state.darkMode || false);
                 }
             };
             
@@ -481,11 +605,17 @@
             settingsBtn.addEventListener('click', () => {
                 settingsWakeTimeInput.value = state.wakeTime;
                 settingsSleepTimeInput.value = state.sleepTime;
+                darkModeToggle.checked = state.darkMode || false;
                 openModal(settingsModal);
             });
 
             cancelSettingsBtn.addEventListener('click', () => {
                 closeModal(settingsModal);
+            });
+
+            // Dark mode toggle handler
+            darkModeToggle.addEventListener('change', (e) => {
+                toggleDarkMode(e.target.checked);
             });
 
             saveSettingsBtn.addEventListener('click', () => {
@@ -499,6 +629,7 @@
 
                 state.wakeTime = newWakeTime;
                 state.sleepTime = newSleepTime;
+                // Dark mode is already handled by the toggle event listener
                 saveState();
                 render();
                 closeModal(settingsModal);

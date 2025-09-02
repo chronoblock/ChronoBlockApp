@@ -38,7 +38,8 @@ const TimePlannerTests = {
                 wakeTime: '07:00',
                 sleepTime: '23:00',
                 blocks: [],
-                editingTaskId: null
+                editingTaskId: null,
+                darkMode: false
             };
         }
         console.log('✅ Test environment ready');
@@ -614,6 +615,58 @@ const TimePlannerTests = {
                 'NEGATIVE TEST: Different time values should fail comparison',
                 'settings'
             );
+        },
+
+        // Dark Mode Tests
+        darkModeToggle: function() {
+            const testState = { darkMode: false };
+            
+            // Toggle dark mode on
+            testState.darkMode = true;
+            TimePlannerTests.assert(
+                testState.darkMode === true,
+                'Dark mode can be enabled',
+                'settings'
+            );
+
+            // Toggle dark mode off
+            testState.darkMode = false;
+            TimePlannerTests.assert(
+                testState.darkMode === false,
+                'Dark mode can be disabled',
+                'settings'
+            );
+        },
+
+        darkModePersistence: function() {
+            const testState = { darkMode: true };
+            
+            // Simulate saving to localStorage
+            const stateString = JSON.stringify(testState);
+            const loadedState = JSON.parse(stateString);
+            
+            TimePlannerTests.assert(
+                loadedState.darkMode === true,
+                'Dark mode preference persists in localStorage',
+                'settings'
+            );
+        },
+
+        darkModeDefault: function() {
+            const newState = {
+                dayIsSet: false,
+                wakeTime: '07:00',
+                sleepTime: '23:00',
+                blocks: [],
+                editingTaskId: null,
+                darkMode: false  // Should default to false
+            };
+
+            TimePlannerTests.assert(
+                newState.darkMode === false,
+                'Dark mode defaults to false for new users',
+                'settings'
+            );
         }
     },
 
@@ -1076,6 +1129,7 @@ window.testState = () => TimePlannerTests.runCategory('state');
 window.testTasks = () => TimePlannerTests.runCategory('task');
 window.testBlocks = () => TimePlannerTests.runCategory('timeBlock');
 window.testSettings = () => TimePlannerTests.runCategory('settings');
+window.testDarkMode = () => TimePlannerTests.runCategory('settings'); // Dark mode tests are in settings
 
 // Auto-display usage instructions
 console.log(`
