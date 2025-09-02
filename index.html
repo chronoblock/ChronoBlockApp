@@ -654,7 +654,9 @@ __Underlined__ ==Highlighted==
                             sleepTime: state.sleepTime,
                             blocks: state.blocks,
                             darkMode: state.darkMode,
-                            dayIsSet: state.dayIsSet
+                            dayIsSet: state.dayIsSet,
+                            editingTaskId: state.editingTaskId,
+                            isNotesPreviewMode: state.isNotesPreviewMode
                         }
                     };
 
@@ -697,12 +699,14 @@ __Underlined__ ==Highlighted==
                         return;
                     }
 
-                    // Import the data
+                    // Import the data with fallbacks for missing fields
                     state.wakeTime = importedData.data.wakeTime;
                     state.sleepTime = importedData.data.sleepTime;
                     state.blocks = importedData.data.blocks || [];
                     state.darkMode = importedData.data.darkMode || false;
                     state.dayIsSet = importedData.data.dayIsSet || false;
+                    state.editingTaskId = importedData.data.editingTaskId || null;
+                    state.isNotesPreviewMode = importedData.data.isNotesPreviewMode || false;
 
                     // Update UI
                     applyTheme(state.darkMode);
@@ -793,6 +797,57 @@ __Underlined__ ==Highlighted==
                 }, 3000);
             };
 
+            // --- DEBUG UTILITIES ---
+            const debugTimeValidation = (startTime, endTime) => {
+                console.log('🔍 TIME VALIDATION DEBUG:');
+                console.log('==========================');
+                
+                const wakeMinutes = timeToMinutes(state.wakeTime);
+                const sleepMinutes = timeToMinutes(state.sleepTime);
+                const startMinutes = timeToMinutes(startTime);
+                const endMinutes = timeToMinutes(endTime);
+                const isOvernightSchedule = sleepMinutes <= wakeMinutes;
+                
+                console.log('📊 Current Schedule:');
+                console.log(`🌅 Wake: ${state.wakeTime} (${wakeMinutes} min)`);
+                console.log(`🌙 Sleep: ${state.sleepTime} (${sleepMinutes} min)`);
+                console.log(`🌃 Overnight schedule: ${isOvernightSchedule}`);
+                
+                console.log('\n🎯 Testing Times:');
+                console.log(`🕐 Start: ${startTime} (${startMinutes} min)`);
+                console.log(`🕕 End: ${endTime} (${endMinutes} min)`);
+                
+                if (isOvernightSchedule) {
+                    const validSameDay = startMinutes >= wakeMinutes && endMinutes <= 1440;
+                    const validNextDay = startMinutes >= 0 && endMinutes <= sleepMinutes && endMinutes > 0;
+                    const spansMidnight = startMinutes >= wakeMinutes && endMinutes <= sleepMinutes && startMinutes > endMinutes;
+                    
+                    console.log('\n✅ Overnight Validation:');
+                    console.log(`📅 Valid same day (${wakeMinutes}-1440): ${validSameDay}`);
+                    console.log(`📅 Valid next day (0-${sleepMinutes}): ${validNextDay}`);
+                    console.log(`📅 Spans midnight: ${spansMidnight}`);
+                    console.log(`🎯 Overall valid: ${validSameDay || validNextDay || spansMidnight}`);
+                } else {
+                    const valid = startMinutes >= wakeMinutes && endMinutes <= sleepMinutes;
+                    console.log(`\n✅ Same Day Validation: ${valid}`);
+                }
+                
+                console.log('\n📦 Existing Blocks:');
+                state.blocks.forEach((block, i) => {
+                    console.log(`   ${i+1}. ${block.purpose} - ${block.duration}min`);
+                    if (block.startTime) console.log(`      ⏰ ${block.startTime}-${block.endTime}`);
+                });
+                
+                // Run actual validation
+                const result = validateTimeRange(startTime, endTime);
+                console.log('\n🔍 Validation Result:', result || '✅ VALID');
+                
+                return result;
+            };
+
+            // Make debug function globally accessible
+            window.debugTimeValidation = debugTimeValidation;
+
             // --- TIME BLOCK MODE UTILITIES ---
             const switchTimeMode = (mode) => {
                 if (mode === 'duration') {
@@ -833,9 +888,27 @@ __Underlined__ ==Highlighted==
                 const startMinutes = timeToMinutes(startTime);
                 const endMinutes = timeToMinutes(endTime);
 
-                // Check if times are within wake/sleep schedule
-                if (startMinutes < wakeMinutes || endMinutes > sleepMinutes) {
-                    return `Time must be within your day schedule (${state.wakeTime} - ${state.sleepTime})`;
+                // DETECT OVERNIGHT SCHEDULE (e.g., 7:00 AM to 1:00 AM next day)
+                const isOvernightSchedule = sleepMinutes <= wakeMinutes;
+                
+                if (isOvernightSchedule) {
+                    // For overnight schedules, valid times are:
+                    // 1. Same day: wake time to 23:59 (e.g., 7:00 AM - 11:59 PM)
+                    // 2. Next day: 00:00 to sleep time (e.g., 12:00 AM - 1:00 AM)
+                    
+                    const validSameDay = startMinutes >= wakeMinutes && endMinutes <= 1440; // Before midnight
+                    const validNextDay = startMinutes >= 0 && endMinutes <= sleepMinutes && endMinutes > 0; // After midnight until sleep
+                    const spansMidnight = startMinutes >= wakeMinutes && endMinutes <= sleepMinutes && startMinutes > endMinutes;
+                    
+                    if (!(validSameDay || validNextDay || spansMidnight)) {
+                        const sleepDisplay = sleepMinutes === 0 ? '12:00 AM (midnight)' : state.sleepTime;
+                        return `Time must be within your overnight schedule (${state.wakeTime} - ${sleepDisplay} next day)`;
+                    }
+                } else {
+                    // NORMAL SAME-DAY SCHEDULE (e.g., 7:00 AM to 11:00 PM)
+                    if (startMinutes < wakeMinutes || endMinutes > sleepMinutes) {
+                        return `Time must be within your day schedule (${state.wakeTime} - ${state.sleepTime})`;
+                    }
                 }
 
                 // Sort blocks by start time (same logic as renderBlocks)
@@ -859,6 +932,12 @@ __Underlined__ ==Highlighted==
                         // Block has specific start/end times
                         blockStart = timeToMinutes(block.startTime);
                         blockEnd = timeToMinutes(block.endTime);
+                        
+                        // Handle overnight blocks
+                        if (isOvernightSchedule && blockStart > blockEnd) {
+                            blockEnd += 1440; // Add 24 hours for next day
+                        }
+                        
                         // Update cumulative time if this scheduled block extends past current time
                         if (blockEnd > cumulativeTime) {
                             cumulativeTime = blockEnd;
@@ -870,8 +949,22 @@ __Underlined__ ==Highlighted==
                         cumulativeTime = blockEnd;
                     }
                     
+                    // Check for overlap with consideration for overnight schedules
+                    let checkStart = startMinutes;
+                    let checkEnd = endMinutes;
+                    
+                    if (isOvernightSchedule) {
+                        // For overnight schedules, handle time wrapping
+                        if (checkStart > checkEnd) {
+                            checkEnd += 1440; // Add 24 hours for next day
+                        }
+                        if (blockStart > blockEnd && block.startTime && block.endTime) {
+                            blockEnd += 1440; // Add 24 hours for overnight blocks
+                        }
+                    }
+                    
                     // Check for overlap: new block overlaps if it starts before existing ends AND ends after existing starts
-                    if (startMinutes < blockEnd && endMinutes > blockStart) {
+                    if (checkStart < blockEnd && checkEnd > blockStart) {
                         const blockTimeDisplay = block.startTime && block.endTime 
                             ? `${block.startTime} - ${block.endTime}`
                             : `${minutesToTime(blockStart)} - ${minutesToTime(blockEnd)}`;

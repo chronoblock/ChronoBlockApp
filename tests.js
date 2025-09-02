@@ -1072,6 +1072,121 @@ const TimePlannerTests = {
             );
         },
 
+        overnightScheduleValidation: function() {
+            // Test overnight schedule (7 AM to 1 AM next day)
+            const overnightState = {
+                wakeTime: '07:00',
+                sleepTime: '01:00', // 1 AM next day
+                blocks: []
+            };
+
+            const validateOvernight = (startTime, endTime) => {
+                const wakeMinutes = TimePlannerTests.utils.timeToMinutes(overnightState.wakeTime);
+                const sleepMinutes = TimePlannerTests.utils.timeToMinutes(overnightState.sleepTime);
+                const startMinutes = TimePlannerTests.utils.timeToMinutes(startTime);
+                const endMinutes = TimePlannerTests.utils.timeToMinutes(endTime);
+                
+                // Detect overnight schedule
+                const isOvernightSchedule = sleepMinutes <= wakeMinutes;
+                
+                if (isOvernightSchedule) {
+                    const validSameDay = startMinutes >= wakeMinutes && endMinutes <= 1440;
+                    const validNextDay = startMinutes >= 0 && endMinutes <= sleepMinutes && endMinutes > 0;
+                    const spansMidnight = startMinutes >= wakeMinutes && endMinutes <= sleepMinutes && startMinutes > endMinutes;
+                    
+                    return validSameDay || validNextDay || spansMidnight;
+                }
+                
+                return startMinutes >= wakeMinutes && endMinutes <= sleepMinutes;
+            };
+
+            TimePlannerTests.assert(
+                validateOvernight('08:00', '09:00'),
+                'Overnight schedule allows morning times (8-9 AM)',
+                'timeValidation'
+            );
+
+            TimePlannerTests.assert(
+                validateOvernight('18:00', '20:00'),
+                'Overnight schedule allows evening times (6-8 PM)',
+                'timeValidation'
+            );
+
+            TimePlannerTests.assert(
+                validateOvernight('23:00', '00:30'),
+                'Overnight schedule allows midnight crossing times (11 PM - 12:30 AM)',
+                'timeValidation'
+            );
+
+            TimePlannerTests.assert(
+                validateOvernight('00:30', '01:00'),
+                'Overnight schedule allows early morning times (12:30-1 AM)',
+                'timeValidation'
+            );
+
+            TimePlannerTests.assert(
+                !validateOvernight('02:00', '03:00'),
+                'Overnight schedule rejects times after sleep (2-3 AM)',
+                'timeValidation'
+            );
+
+            TimePlannerTests.assert(
+                !validateOvernight('05:00', '06:00'),
+                'Overnight schedule rejects times before wake (5-6 AM)',
+                'timeValidation'
+            );
+        },
+
+        midnightScheduleValidation: function() {
+            // Test midnight sleep time (7 AM to 12 AM)
+            const midnightState = {
+                wakeTime: '07:00',
+                sleepTime: '00:00', // Midnight
+                blocks: []
+            };
+
+            const validateMidnight = (startTime, endTime) => {
+                const wakeMinutes = TimePlannerTests.utils.timeToMinutes(midnightState.wakeTime);
+                const sleepMinutes = TimePlannerTests.utils.timeToMinutes(midnightState.sleepTime);
+                const startMinutes = TimePlannerTests.utils.timeToMinutes(startTime);
+                const endMinutes = TimePlannerTests.utils.timeToMinutes(endTime);
+                
+                // Handle midnight as end of day (1440 minutes)
+                const effectiveSleepMinutes = sleepMinutes === 0 ? 1440 : sleepMinutes;
+                const isOvernightSchedule = effectiveSleepMinutes <= wakeMinutes;
+                
+                if (isOvernightSchedule) {
+                    return startMinutes >= wakeMinutes && endMinutes <= effectiveSleepMinutes;
+                }
+                
+                return startMinutes >= wakeMinutes && endMinutes <= effectiveSleepMinutes;
+            };
+
+            TimePlannerTests.assert(
+                validateMidnight('07:00', '08:00'),
+                'Midnight schedule allows morning times (7-8 AM)',
+                'timeValidation'
+            );
+
+            TimePlannerTests.assert(
+                validateMidnight('18:00', '20:00'),
+                'Midnight schedule allows evening times (6-8 PM)',
+                'timeValidation'
+            );
+
+            TimePlannerTests.assert(
+                validateMidnight('22:00', '23:59'),
+                'Midnight schedule allows late evening (10 PM - 11:59 PM)',
+                'timeValidation'
+            );
+
+            TimePlannerTests.assert(
+                !validateMidnight('00:30', '01:00'),
+                'Midnight schedule rejects times after midnight',
+                'timeValidation'
+            );
+        },
+
         // NEGATIVE TESTS - These should fail to verify our testing framework
         negativeTest_ValidationShouldFail: function() {
             TimePlannerTests.assert(
