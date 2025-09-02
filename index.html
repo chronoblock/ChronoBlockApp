@@ -174,6 +174,12 @@
             color: var(--text-primary);
         }
 
+        /* Dark mode time input clock icon fix */
+        .dark input[type="time"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            cursor: pointer;
+        }
+
         .dark input[type="time"]:focus,
         .dark input[type="text"]:focus,
         .dark input[type="number"]:focus,
@@ -194,7 +200,68 @@
 
         /* Dark mode cancel button text override */
         .dark button[id*="cancel"] {
-            color: #1f2937 !important; /* Dark text for light gray buttons */
+            color: white !important; /* White text for cancel buttons in dark mode */
+        }
+
+        /* Dark mode Notes Edit/Preview buttons */
+        .dark #notes-edit-btn {
+            background-color: var(--bg-secondary) !important;
+            color: var(--text-secondary) !important;
+            border: 1px solid var(--border-color) !important;
+        }
+
+        .dark #notes-edit-btn:hover {
+            background-color: var(--bg-tertiary) !important;
+            color: var(--text-primary) !important;
+        }
+
+        /* Keep Edit button purple when active in dark mode */
+        .dark #notes-edit-btn.bg-indigo-500 {
+            background-color: #4f46e5 !important;
+            color: white !important;
+            border: 1px solid #4f46e5 !important;
+        }
+
+        .dark #notes-edit-btn.bg-indigo-500:hover {
+            background-color: #4338ca !important;
+        }
+
+        .dark #notes-preview-btn {
+            background-color: var(--bg-secondary) !important;
+            color: var(--text-secondary) !important;
+            border: 1px solid var(--border-color) !important;
+        }
+
+        .dark #notes-preview-btn:hover {
+            background-color: var(--bg-tertiary) !important;
+            color: var(--text-primary) !important;
+        }
+
+        /* Keep Preview button purple when active in dark mode */
+        .dark #notes-preview-btn.bg-indigo-500 {
+            background-color: #4f46e5 !important;
+            color: white !important;
+            border: 1px solid #4f46e5 !important;
+        }
+
+        .dark #notes-preview-btn.bg-indigo-500:hover {
+            background-color: #4338ca !important;
+        }
+
+        /* Dark mode Notes & Comments label */
+        .dark label[for="task-notes-input"] {
+            color: var(--text-primary) !important;
+        }
+
+        /* Dark mode toggle container background */
+        .dark .bg-gray-100 {
+            background-color: var(--bg-tertiary) !important;
+        }
+
+        /* Dark mode gray backgrounds for buttons */
+        .dark .bg-gray-200 {
+            background-color: var(--bg-tertiary) !important;
+            color: var(--text-primary) !important;
         }
     </style>
 </head>
@@ -1249,8 +1316,9 @@ __Underlined__ ==Highlighted==
                         taskModalTitle.textContent = `Details for: ${task.text}`;
                         taskNotesInput.value = task.notes || '';
                         
-                        // Reset to Edit mode when opening modal
-                        state.isNotesPreviewMode = false;
+                        // Set default mode based on notes content
+                        const hasNotes = task.notes && task.notes.trim().length > 0;
+                        state.isNotesPreviewMode = hasNotes; // Preview if has notes, Edit if empty
                         updateNotesToggleUI();
                         
                         openModal(taskDetailsModal);

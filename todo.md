@@ -12,3 +12,5 @@
 - [ ] Weekly/monthly view
 - [ ] Task categories and priorities
 - [ ] add styling customization for blocks of time
+- [ ] making EDIT available for BLOCKS, TASKS
+- [ ] remove normal alert from the application 
