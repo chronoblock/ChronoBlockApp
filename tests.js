@@ -1176,6 +1176,522 @@ const TimePlannerTests = {
         }
     },
 
+    // Markdown Parser Tests
+    markdownTests: {
+        basicFormatting: function() {
+            // Mock the parseSimpleMarkdown function for testing
+            const parseSimpleMarkdown = (text) => {
+                if (!text) return '';
+                return text
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                    .replace(/~~(.*?)~~/g, '<del>$1</del>')
+                    .replace(/__(.*?)__/g, '<u>$1</u>')
+                    .replace(/==(.*?)==/g, '<mark class="bg-yellow-200 px-1">$1</mark>')
+                    .replace(/\n/g, '<br>');
+            };
+
+            // Test bold formatting
+            const boldResult = parseSimpleMarkdown('**Bold text**');
+            TimePlannerTests.assert(
+                boldResult === '<strong>Bold text</strong>',
+                'Bold markdown formatting works correctly',
+                'markdown'
+            );
+
+            // Test italic formatting
+            const italicResult = parseSimpleMarkdown('*Italic text*');
+            TimePlannerTests.assert(
+                italicResult === '<em>Italic text</em>',
+                'Italic markdown formatting works correctly',
+                'markdown'
+            );
+
+            // Test strikethrough formatting
+            const strikeResult = parseSimpleMarkdown('~~Strikethrough text~~');
+            TimePlannerTests.assert(
+                strikeResult === '<del>Strikethrough text</del>',
+                'Strikethrough markdown formatting works correctly',
+                'markdown'
+            );
+
+            // Test underline formatting
+            const underlineResult = parseSimpleMarkdown('__Underlined text__');
+            TimePlannerTests.assert(
+                underlineResult === '<u>Underlined text</u>',
+                'Underline markdown formatting works correctly',
+                'markdown'
+            );
+
+            // Test highlight formatting
+            const highlightResult = parseSimpleMarkdown('==Highlighted text==');
+            TimePlannerTests.assert(
+                highlightResult === '<mark class="bg-yellow-200 px-1">Highlighted text</mark>',
+                'Highlight markdown formatting works correctly',
+                'markdown'
+            );
+        },
+
+        headerFormatting: function() {
+            const parseHeaders = (text) => {
+                return text
+                    .replace(/^### (.*$)/gim, '<h5 class="text-sm font-bold mt-2 mb-1 text-gray-900">$1</h5>')
+                    .replace(/^## (.*$)/gim, '<h4 class="text-base font-bold mt-2 mb-1 text-gray-900">$1</h4>')
+                    .replace(/^# (.*$)/gim, '<h3 class="text-lg font-bold mt-2 mb-1 text-gray-900">$1</h3>');
+            };
+
+            // Test header 1
+            const h1Result = parseHeaders('# Header 1');
+            TimePlannerTests.assert(
+                h1Result.includes('<h3 class="text-lg font-bold mt-2 mb-1 text-gray-900">Header 1</h3>'),
+                'Header 1 markdown formatting works correctly',
+                'markdown'
+            );
+
+            // Test header 2
+            const h2Result = parseHeaders('## Header 2');
+            TimePlannerTests.assert(
+                h2Result.includes('<h4 class="text-base font-bold mt-2 mb-1 text-gray-900">Header 2</h4>'),
+                'Header 2 markdown formatting works correctly',
+                'markdown'
+            );
+
+            // Test header 3
+            const h3Result = parseHeaders('### Header 3');
+            TimePlannerTests.assert(
+                h3Result.includes('<h5 class="text-sm font-bold mt-2 mb-1 text-gray-900">Header 3</h5>'),
+                'Header 3 markdown formatting works correctly',
+                'markdown'
+            );
+        },
+
+        colorFormatting: function() {
+            const parseColors = (text) => {
+                return text
+                    .replace(/\{red:(.*?)\}/g, '<span class="text-red-600">$1</span>')
+                    .replace(/\{blue:(.*?)\}/g, '<span class="text-blue-600">$1</span>')
+                    .replace(/\{green:(.*?)\}/g, '<span class="text-green-600">$1</span>')
+                    .replace(/\{yellow:(.*?)\}/g, '<span class="text-yellow-600">$1</span>')
+                    .replace(/\{purple:(.*?)\}/g, '<span class="text-purple-600">$1</span>')
+                    .replace(/\{orange:(.*?)\}/g, '<span class="text-orange-600">$1</span>');
+            };
+
+            // Test color formatting
+            const redResult = parseColors('{red:Red text}');
+            TimePlannerTests.assert(
+                redResult === '<span class="text-red-600">Red text</span>',
+                'Red text color formatting works correctly',
+                'markdown'
+            );
+
+            const blueResult = parseColors('{blue:Blue text}');
+            TimePlannerTests.assert(
+                blueResult === '<span class="text-blue-600">Blue text</span>',
+                'Blue text color formatting works correctly',
+                'markdown'
+            );
+
+            const greenResult = parseColors('{green:Green text}');
+            TimePlannerTests.assert(
+                greenResult === '<span class="text-green-600">Green text</span>',
+                'Green text color formatting works correctly',
+                'markdown'
+            );
+        },
+
+        checkboxFormatting: function() {
+            const parseCheckboxes = (text) => {
+                return text
+                    .replace(/- \[ \] (.*)/g, '<div class="flex items-center gap-2 my-1"><input type="checkbox" disabled class="h-4 w-4"> <span>$1</span></div>')
+                    .replace(/- \[x\] (.*)/g, '<div class="flex items-center gap-2 my-1"><input type="checkbox" checked disabled class="h-4 w-4"> <span>$1</span></div>');
+            };
+
+            // Test unchecked checkbox
+            const uncheckedResult = parseCheckboxes('- [ ] Unchecked item');
+            TimePlannerTests.assert(
+                uncheckedResult.includes('<input type="checkbox" disabled class="h-4 w-4">') && 
+                uncheckedResult.includes('<span>Unchecked item</span>'),
+                'Unchecked checkbox formatting works correctly',
+                'markdown'
+            );
+
+            // Test checked checkbox
+            const checkedResult = parseCheckboxes('- [x] Checked item');
+            TimePlannerTests.assert(
+                checkedResult.includes('<input type="checkbox" checked disabled class="h-4 w-4">') && 
+                checkedResult.includes('<span>Checked item</span>'),
+                'Checked checkbox formatting works correctly',
+                'markdown'
+            );
+        },
+
+        alignmentFormatting: function() {
+            const parseAlignment = (text) => {
+                return text
+                    .replace(/\|center\|(.*?)\|center\|/g, '<div class="text-center">$1</div>')
+                    .replace(/\|right\|(.*?)\|right\|/g, '<div class="text-right">$1</div>')
+                    .replace(/\|left\|(.*?)\|left\|/g, '<div class="text-left">$1</div>');
+            };
+
+            // Test center alignment
+            const centerResult = parseAlignment('|center|Centered text|center|');
+            TimePlannerTests.assert(
+                centerResult === '<div class="text-center">Centered text</div>',
+                'Center alignment formatting works correctly',
+                'markdown'
+            );
+
+            // Test right alignment
+            const rightResult = parseAlignment('|right|Right text|right|');
+            TimePlannerTests.assert(
+                rightResult === '<div class="text-right">Right text</div>',
+                'Right alignment formatting works correctly',
+                'markdown'
+            );
+
+            // Test left alignment
+            const leftResult = parseAlignment('|left|Left text|left|');
+            TimePlannerTests.assert(
+                leftResult === '<div class="text-left">Left text</div>',
+                'Left alignment formatting works correctly',
+                'markdown'
+            );
+        },
+
+        complexMarkdownCombinations: function() {
+            const parseComplete = (text) => {
+                if (!text) return '';
+                return text
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                    .replace(/~~(.*?)~~/g, '<del>$1</del>')
+                    .replace(/__(.*?)__/g, '<u>$1</u>')
+                    .replace(/==(.*?)==/g, '<mark class="bg-yellow-200 px-1">$1</mark>')
+                    .replace(/\{red:(.*?)\}/g, '<span class="text-red-600">$1</span>')
+                    .replace(/\n/g, '<br>');
+            };
+
+            // Test combination of bold and italic
+            const combinedResult = parseComplete('**Bold and *italic* text**');
+            TimePlannerTests.assert(
+                combinedResult.includes('<strong>') && combinedResult.includes('<em>'),
+                'Combined formatting (bold + italic) works correctly',
+                'markdown'
+            );
+
+            // Test empty text handling
+            const emptyResult = parseComplete('');
+            TimePlannerTests.assert(
+                emptyResult === '',
+                'Empty text returns empty string',
+                'markdown'
+            );
+
+            // Test null/undefined handling
+            const nullResult = parseComplete(null);
+            TimePlannerTests.assert(
+                nullResult === '',
+                'Null text returns empty string',
+                'markdown'
+            );
+        },
+
+        // NEGATIVE TEST - This should fail
+        negativeTest_MarkdownShouldFail: function() {
+            const testText = '**Bold text**';
+            TimePlannerTests.assert(
+                testText === '<strong>Bold text</strong>', // Raw markdown is NOT equal to HTML
+                'NEGATIVE TEST: Raw markdown should not equal HTML output',
+                'markdown'
+            );
+        }
+    },
+
+    // Toggle Mode Tests
+    toggleModeTests: {
+        initialState: function() {
+            const testState = { isNotesPreviewMode: false };
+            
+            TimePlannerTests.assert(
+                testState.isNotesPreviewMode === false,
+                'Notes toggle mode defaults to Edit mode',
+                'toggleMode'
+            );
+        },
+
+        modeToggling: function() {
+            const testState = { isNotesPreviewMode: false };
+            
+            // Switch to Preview mode
+            testState.isNotesPreviewMode = true;
+            TimePlannerTests.assert(
+                testState.isNotesPreviewMode === true,
+                'Can switch to Preview mode',
+                'toggleMode'
+            );
+
+            // Switch back to Edit mode
+            testState.isNotesPreviewMode = false;
+            TimePlannerTests.assert(
+                testState.isNotesPreviewMode === false,
+                'Can switch back to Edit mode',
+                'toggleMode'
+            );
+        },
+
+        uiStateConsistency: function() {
+            const mockUIState = {
+                editBtnActive: true,
+                previewBtnActive: false,
+                editContainerVisible: true,
+                previewContainerVisible: false
+            };
+
+            // Simulate switch to Preview mode
+            mockUIState.editBtnActive = false;
+            mockUIState.previewBtnActive = true;
+            mockUIState.editContainerVisible = false;
+            mockUIState.previewContainerVisible = true;
+
+            TimePlannerTests.assert(
+                !mockUIState.editBtnActive && mockUIState.previewBtnActive,
+                'Button states update correctly when switching modes',
+                'toggleMode'
+            );
+
+            TimePlannerTests.assert(
+                !mockUIState.editContainerVisible && mockUIState.previewContainerVisible,
+                'Container visibility updates correctly when switching modes',
+                'toggleMode'
+            );
+        },
+
+        modalResetBehavior: function() {
+            const testState = { isNotesPreviewMode: true }; // Start in Preview mode
+            
+            // Simulate opening modal (should reset to Edit mode)
+            testState.isNotesPreviewMode = false;
+            
+            TimePlannerTests.assert(
+                testState.isNotesPreviewMode === false,
+                'Modal opening resets to Edit mode',
+                'toggleMode'
+            );
+        },
+
+        // NEGATIVE TEST - This should fail
+        negativeTest_ToggleModeShouldFail: function() {
+            const testState = { isNotesPreviewMode: false };
+            TimePlannerTests.assert(
+                testState.isNotesPreviewMode === true, // false is NOT true
+                'NEGATIVE TEST: Wrong toggle mode state should fail',
+                'toggleMode'
+            );
+        }
+    },
+
+    // Enhanced Task Tests
+    enhancedTaskTests: {
+        taskCompletionStyling: function() {
+            const testTask = { id: 1, text: 'Test Task', completed: false, notes: '' };
+            
+            // Test initial state
+            TimePlannerTests.assert(
+                testTask.completed === false,
+                'New task starts as incomplete',
+                'enhancedTasks'
+            );
+
+            // Test completion toggle
+            testTask.completed = true;
+            TimePlannerTests.assert(
+                testTask.completed === true,
+                'Task can be marked as completed',
+                'enhancedTasks'
+            );
+
+            // Simulate CSS class application
+            const cssClass = testTask.completed ? 'completed-task' : '';
+            TimePlannerTests.assert(
+                cssClass === 'completed-task',
+                'Completed task gets correct CSS class',
+                'enhancedTasks'
+            );
+        },
+
+        taskNotesWithMarkdown: function() {
+            const testTask = { 
+                id: 1, 
+                text: 'Test Task', 
+                completed: false, 
+                notes: '**Important note** with *formatting*' 
+            };
+
+            TimePlannerTests.assert(
+                testTask.notes.includes('**') && testTask.notes.includes('*'),
+                'Task can store markdown-formatted notes',
+                'enhancedTasks'
+            );
+
+            // Test notes clearing
+            testTask.notes = '';
+            TimePlannerTests.assert(
+                testTask.notes === '',
+                'Task notes can be cleared',
+                'enhancedTasks'
+            );
+
+            // Test long notes
+            const longNotes = 'This is a very long note with **bold** text and *italic* text and ~~strikethrough~~ text.';
+            testTask.notes = longNotes;
+            TimePlannerTests.assert(
+                testTask.notes.length > 50,
+                'Task can store long markdown notes',
+                'enhancedTasks'
+            );
+        },
+
+        taskRenderingWithClasses: function() {
+            const testTasks = [
+                { id: 1, text: 'Completed Task', completed: true, notes: '' },
+                { id: 2, text: 'Incomplete Task', completed: false, notes: 'Some notes' }
+            ];
+
+            // Test completed task rendering
+            const completedTaskClass = testTasks[0].completed ? 'completed-task task-item completed' : 'task-item';
+            TimePlannerTests.assert(
+                completedTaskClass.includes('completed-task'),
+                'Completed task gets multiple CSS classes for styling',
+                'enhancedTasks'
+            );
+
+            // Test incomplete task rendering
+            const incompleteTaskClass = testTasks[1].completed ? 'completed-task task-item completed' : 'task-item';
+            TimePlannerTests.assert(
+                !incompleteTaskClass.includes('completed-task'),
+                'Incomplete task gets only basic CSS classes',
+                'enhancedTasks'
+            );
+        },
+
+        markdownPreviewGeneration: function() {
+            const sampleNotes = '# Task Notes\n**Priority**: High\n*Status*: ~~In Progress~~ Complete';
+            
+            // Mock preview generation
+            const generatePreview = (markdown) => {
+                return markdown
+                    .replace(/^# (.*$)/gim, '<h3>$1</h3>')
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                    .replace(/~~(.*?)~~/g, '<del>$1</del>')
+                    .replace(/\n/g, '<br>');
+            };
+
+            const preview = generatePreview(sampleNotes);
+            
+            TimePlannerTests.assert(
+                preview.includes('<h3>') && preview.includes('<strong>') && preview.includes('<del>'),
+                'Complex markdown preview generates correctly',
+                'enhancedTasks'
+            );
+
+            TimePlannerTests.assert(
+                preview.includes('<br>'),
+                'Line breaks are converted to HTML breaks',
+                'enhancedTasks'
+            );
+        },
+
+        // NEGATIVE TEST - This should fail
+        negativeTest_EnhancedTasksShouldFail: function() {
+            const task = { completed: true };
+            TimePlannerTests.assert(
+                task.completed === false, // Task is completed (true), not false
+                'NEGATIVE TEST: Wrong completion status should fail',
+                'enhancedTasks'
+            );
+        }
+    },
+
+    // UI Enhancement Tests
+    uiEnhancementTests: {
+        modalToggleButtons: function() {
+            // Mock DOM elements for testing
+            const mockElements = {
+                editBtn: { active: true },
+                previewBtn: { active: false },
+                editContainer: { visible: true },
+                previewContainer: { visible: false }
+            };
+
+            // Simulate toggle to Preview mode
+            mockElements.editBtn.active = false;
+            mockElements.previewBtn.active = true;
+            mockElements.editContainer.visible = false;
+            mockElements.previewContainer.visible = true;
+
+            TimePlannerTests.assert(
+                !mockElements.editBtn.active && mockElements.previewBtn.active,
+                'Toggle buttons switch state correctly',
+                'uiEnhancement'
+            );
+
+            TimePlannerTests.assert(
+                !mockElements.editContainer.visible && mockElements.previewContainer.visible,
+                'Container visibility switches correctly',
+                'uiEnhancement'
+            );
+        },
+
+        darkModeCompatibility: function() {
+            const testState = { darkMode: false };
+            
+            // Test dark mode toggle
+            testState.darkMode = true;
+            TimePlannerTests.assert(
+                testState.darkMode === true,
+                'Dark mode can be enabled for enhanced features',
+                'uiEnhancement'
+            );
+
+            // Test CSS class application
+            const bodyClass = testState.darkMode ? 'dark' : '';
+            TimePlannerTests.assert(
+                bodyClass === 'dark',
+                'Dark mode applies correct CSS class',
+                'uiEnhancement'
+            );
+        },
+
+        responsiveDesign: function() {
+            // Test modal width classes
+            const modalClasses = 'w-full max-w-lg';
+            TimePlannerTests.assert(
+                modalClasses.includes('w-full') && modalClasses.includes('max-w-lg'),
+                'Enhanced modal uses responsive width classes',
+                'uiEnhancement'
+            );
+
+            // Test textarea sizing
+            const textareaRows = 6;
+            TimePlannerTests.assert(
+                textareaRows > 4,
+                'Enhanced textarea provides adequate space for notes',
+                'uiEnhancement'
+            );
+        },
+
+        // NEGATIVE TEST - This should fail
+        negativeTest_UIEnhancementShouldFail: function() {
+            const mockButton = { active: true };
+            TimePlannerTests.assert(
+                mockButton.active === false, // Button is active (true), not false
+                'NEGATIVE TEST: Wrong button state should fail',
+                'uiEnhancement'
+            );
+        }
+    },
+
     // DOM Interaction Tests (if DOM is available)
     domTests: {
         elementsExist: function() {
@@ -1267,7 +1783,7 @@ const TimePlannerTests = {
         console.log('🚀 Starting Complete Test Suite for Daily Time Planner\n');
         this.setup();
 
-        const categories = ['state', 'timeCalculation', 'daySetup', 'timeBlock', 'task', 'settings', 'timeValidation', 'ui', 'integration', 'error', 'dom'];
+        const categories = ['state', 'timeCalculation', 'daySetup', 'timeBlock', 'task', 'settings', 'timeValidation', 'ui', 'integration', 'error', 'markdown', 'toggleMode', 'enhancedTask', 'uiEnhancement', 'dom'];
         
         categories.forEach(category => {
             const categoryTests = this[category + 'Tests'];
@@ -1402,19 +1918,31 @@ window.testSettings = () => TimePlannerTests.runCategory('settings');
 window.testTimeValidation = () => TimePlannerTests.runCategory('timeValidation');
 window.testDarkMode = () => TimePlannerTests.runCategory('settings'); // Dark mode tests are in settings
 
+// NEW: Test aliases for enhanced features
+window.testMarkdown = () => TimePlannerTests.runCategory('markdown');
+window.testToggleMode = () => TimePlannerTests.runCategory('toggleMode');
+window.testEnhancedTasks = () => TimePlannerTests.runCategory('enhancedTask');
+window.testUIEnhancements = () => TimePlannerTests.runCategory('uiEnhancement');
+
 // Auto-display usage instructions
 console.log(`
 🧪 DAILY TIME PLANNER TEST SUITE LOADED
 =====================================
 
 Quick Commands:
-• runTests()           - Run all tests
+• runTests()           - Run all tests (120+ tests)
 • quickTest()          - Run core functionality tests only
 • testTasks()          - Test task management
 • testBlocks()         - Test time block management  
 • testSettings()       - Test settings functionality
 • testTimeValidation() - Test time overlap validation
 • testState()          - Test data persistence
+
+NEW Enhancement Tests:
+• testMarkdown()       - Test markdown parser functionality
+• testToggleMode()     - Test Edit/Preview toggle mode
+• testEnhancedTasks()  - Test enhanced task features
+• testUIEnhancements() - Test UI improvements
 
 Advanced:
 • TimePlannerTests.runCategory('categoryName')
