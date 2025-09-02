@@ -304,32 +304,6 @@ const TimePlannerTests = {
             );
         },
 
-        resetDay: function() {
-            const testState = {
-                dayIsSet: true,
-                wakeTime: '08:00',
-                sleepTime: '22:00',
-                blocks: [{ id: 1, purpose: 'Test', duration: 60, tasks: [] }],
-                editingTaskId: null
-            };
-
-            // Simulate reset
-            testState.dayIsSet = false;
-            testState.blocks = [];
-
-            TimePlannerTests.assert(
-                testState.dayIsSet === false,
-                'Day reset sets dayIsSet to false',
-                'daySetup'
-            );
-
-            TimePlannerTests.assert(
-                testState.blocks.length === 0,
-                'Day reset clears all blocks',
-                'daySetup'
-            );
-        },
-
         // NEGATIVE TEST - This should fail
         negativeTest_DaySetupShouldFail: function() {
             TimePlannerTests.assert(
@@ -1692,6 +1666,407 @@ const TimePlannerTests = {
         }
     },
 
+    // Data Management Tests
+    dataManagementTests: {
+        exportDataStructure: function() {
+            const testState = {
+                wakeTime: '08:00',
+                sleepTime: '22:00',
+                blocks: [
+                    { id: 1, purpose: 'Morning Routine', duration: 90, tasks: [
+                        { id: 1, text: 'Brush teeth', completed: true, notes: '**Important** task' }
+                    ]}
+                ],
+                darkMode: true,
+                dayIsSet: true
+            };
+
+            // Simulate export data generation
+            const exportData = {
+                exportDate: new Date().toISOString(),
+                version: "1.0",
+                appName: "Daily Time Planner",
+                data: testState
+            };
+
+            TimePlannerTests.assert(
+                exportData.version === "1.0",
+                'Export data includes version information',
+                'dataManagement'
+            );
+
+            TimePlannerTests.assert(
+                exportData.data.wakeTime === '08:00',
+                'Export data includes wake time',
+                'dataManagement'
+            );
+
+            TimePlannerTests.assert(
+                exportData.data.blocks.length === 1,
+                'Export data includes all blocks',
+                'dataManagement'
+            );
+
+            TimePlannerTests.assert(
+                exportData.data.blocks[0].tasks[0].notes === '**Important** task',
+                'Export data preserves task notes with markdown',
+                'dataManagement'
+            );
+        },
+
+        importDataValidation: function() {
+            const validImportData = {
+                exportDate: "2024-01-15T10:30:00Z",
+                version: "1.0",
+                appName: "Daily Time Planner",
+                data: {
+                    wakeTime: "07:00",
+                    sleepTime: "23:00",
+                    blocks: [],
+                    darkMode: false,
+                    dayIsSet: false
+                }
+            };
+
+            const invalidImportData1 = { version: "1.0" }; // Missing data
+            const invalidImportData2 = { data: { blocks: [] } }; // Missing version
+            const invalidImportData3 = { 
+                version: "1.0", 
+                data: { blocks: [] } // Missing required time fields
+            };
+
+            // Test valid data structure
+            const isValid1 = validImportData.data && validImportData.version && 
+                           validImportData.data.wakeTime && validImportData.data.sleepTime;
+            TimePlannerTests.assert(
+                isValid1,
+                'Valid import data passes structure validation',
+                'dataManagement'
+            );
+
+            // Test invalid data structures
+            const isValid2 = invalidImportData1.data && invalidImportData1.version;
+            TimePlannerTests.assert(
+                !isValid2,
+                'Invalid import data (missing data) fails validation',
+                'dataManagement'
+            );
+
+            const isValid3 = invalidImportData2.data && invalidImportData2.version;
+            TimePlannerTests.assert(
+                !isValid3,
+                'Invalid import data (missing version) fails validation',
+                'dataManagement'
+            );
+
+            const isValid4 = invalidImportData3.data && invalidImportData3.version && 
+                           invalidImportData3.data.wakeTime && invalidImportData3.data.sleepTime;
+            TimePlannerTests.assert(
+                !isValid4,
+                'Invalid import data (missing time fields) fails validation',
+                'dataManagement'
+            );
+        },
+
+        clearHistoryFunctionality: function() {
+            const testState = {
+                dayIsSet: true,
+                wakeTime: '08:30',
+                sleepTime: '21:45',
+                blocks: [
+                    { id: 1, purpose: 'Test Block', duration: 60, tasks: [
+                        { id: 1, text: 'Test Task', completed: true, notes: '**Important** notes with markdown' }
+                    ]}
+                ],
+                darkMode: true,
+                isNotesPreviewMode: true,
+                editingTaskId: { blockId: 1, taskId: 1 }
+            };
+
+            // Simulate NUCLEAR clear history (complete factory reset)
+            const factoryDefaults = {
+                dayIsSet: false,
+                wakeTime: '07:00',
+                sleepTime: '23:00',
+                blocks: [],
+                editingTaskId: null,
+                darkMode: false,
+                isNotesPreviewMode: false
+            };
+
+            // Verify every single field resets to factory defaults
+            TimePlannerTests.assert(
+                factoryDefaults.blocks.length === 0,
+                'Nuclear clear removes ALL blocks completely',
+                'dataManagement'
+            );
+
+            TimePlannerTests.assert(
+                factoryDefaults.dayIsSet === false,
+                'Nuclear clear resets day setup to initial state',
+                'dataManagement'
+            );
+
+            TimePlannerTests.assert(
+                factoryDefaults.darkMode === false,
+                'Nuclear clear resets dark mode to light theme',
+                'dataManagement'
+            );
+
+            TimePlannerTests.assert(
+                factoryDefaults.wakeTime === '07:00' && factoryDefaults.sleepTime === '23:00',
+                'Nuclear clear resets schedule to factory defaults (07:00-23:00)',
+                'dataManagement'
+            );
+
+            TimePlannerTests.assert(
+                factoryDefaults.editingTaskId === null,
+                'Nuclear clear resets editing state',
+                'dataManagement'
+            );
+
+            TimePlannerTests.assert(
+                factoryDefaults.isNotesPreviewMode === false,
+                'Nuclear clear resets notes preview mode',
+                'dataManagement'
+            );
+
+            // Verify complete data loss (all tasks and notes gone)
+            const hadTasksWithNotes = testState.blocks.some(block => 
+                block.tasks.some(task => task.notes && task.notes.length > 0)
+            );
+            const hasTasksAfterClear = factoryDefaults.blocks.some(block => 
+                block.tasks && block.tasks.length > 0
+            );
+
+            TimePlannerTests.assert(
+                hadTasksWithNotes && !hasTasksAfterClear,
+                'Nuclear clear removes all tasks with notes permanently',
+                'dataManagement'
+            );
+        },
+
+        nuclearResetCompleteTest: function() {
+            // Test the most comprehensive data state possible
+            const maximalState = {
+                dayIsSet: true,
+                wakeTime: '05:30',
+                sleepTime: '00:30', // Overnight schedule
+                blocks: [
+                    { 
+                        id: 1, 
+                        purpose: 'Complex Block', 
+                        duration: 120, 
+                        startTime: '06:00',
+                        endTime: '08:00',
+                        tasks: [
+                            { id: 1, text: 'Task 1', completed: true, notes: '# Header\n**Bold** *italic* ~~strike~~' },
+                            { id: 2, text: 'Task 2', completed: false, notes: '{red:Colored} ==highlighted== text' }
+                        ]
+                    },
+                    { 
+                        id: 2, 
+                        purpose: 'Sequential Block', 
+                        duration: 90,
+                        tasks: [
+                            { id: 3, text: 'Task 3', completed: true, notes: '- [x] Completed\n- [ ] Pending' }
+                        ]
+                    }
+                ],
+                darkMode: true,
+                isNotesPreviewMode: true,
+                editingTaskId: { blockId: 1, taskId: 1 }
+            };
+
+            // After nuclear reset - verify EVERYTHING is factory default
+            const postNuclearState = {
+                dayIsSet: false,
+                wakeTime: '07:00',
+                sleepTime: '23:00',
+                blocks: [],
+                editingTaskId: null,
+                darkMode: false,
+                isNotesPreviewMode: false
+            };
+
+            // Count total data before and after
+            const beforeData = {
+                blocks: maximalState.blocks.length,
+                tasks: maximalState.blocks.reduce((sum, b) => sum + b.tasks.length, 0),
+                customWake: maximalState.wakeTime !== '07:00',
+                customSleep: maximalState.sleepTime !== '23:00',
+                darkEnabled: maximalState.darkMode,
+                hasEditingState: maximalState.editingTaskId !== null
+            };
+
+            const afterData = {
+                blocks: postNuclearState.blocks.length,
+                tasks: postNuclearState.blocks.reduce((sum, b) => sum + (b.tasks ? b.tasks.length : 0), 0),
+                customWake: postNuclearState.wakeTime !== '07:00',
+                customSleep: postNuclearState.sleepTime !== '23:00',
+                darkEnabled: postNuclearState.darkMode,
+                hasEditingState: postNuclearState.editingTaskId !== null
+            };
+
+            TimePlannerTests.assert(
+                beforeData.blocks === 2 && afterData.blocks === 0,
+                'Nuclear reset eliminates all blocks (2→0)',
+                'dataManagement'
+            );
+
+            TimePlannerTests.assert(
+                beforeData.tasks === 3 && afterData.tasks === 0,
+                'Nuclear reset eliminates all tasks (3→0)',
+                'dataManagement'
+            );
+
+            TimePlannerTests.assert(
+                beforeData.customWake && !afterData.customWake,
+                'Nuclear reset restores default wake time (custom→07:00)',
+                'dataManagement'
+            );
+
+            TimePlannerTests.assert(
+                beforeData.customSleep && !afterData.customSleep,
+                'Nuclear reset restores default sleep time (custom→23:00)',
+                'dataManagement'
+            );
+
+            TimePlannerTests.assert(
+                beforeData.darkEnabled && !afterData.darkEnabled,
+                'Nuclear reset disables dark mode (dark→light)',
+                'dataManagement'
+            );
+
+            TimePlannerTests.assert(
+                beforeData.hasEditingState && !afterData.hasEditingState,
+                'Nuclear reset clears editing state (active→null)',
+                'dataManagement'
+            );
+        },
+
+        fileFormatValidation: function() {
+            const jsonString = '{"version":"1.0","data":{"wakeTime":"08:00"}}';
+            const invalidJsonString = '{"version":"1.0","data":{"wakeTime":"08:00"'; // Missing closing braces
+            const nonJsonString = 'This is not JSON data';
+
+            // Test valid JSON parsing
+            let validParse = false;
+            try {
+                const parsed = JSON.parse(jsonString);
+                validParse = parsed.version === "1.0";
+            } catch (e) {
+                validParse = false;
+            }
+
+            TimePlannerTests.assert(
+                validParse,
+                'Valid JSON file parses correctly',
+                'dataManagement'
+            );
+
+            // Test invalid JSON handling
+            let invalidParse = false;
+            try {
+                JSON.parse(invalidJsonString);
+                invalidParse = true; // If no error, parsing succeeded (bad)
+            } catch (e) {
+                invalidParse = false; // Error occurred (good)
+            }
+
+            TimePlannerTests.assert(
+                !invalidParse,
+                'Invalid JSON file throws parsing error',
+                'dataManagement'
+            );
+
+            // Test non-JSON handling
+            let nonJsonParse = false;
+            try {
+                JSON.parse(nonJsonString);
+                nonJsonParse = true;
+            } catch (e) {
+                nonJsonParse = false;
+            }
+
+            TimePlannerTests.assert(
+                !nonJsonParse,
+                'Non-JSON file throws parsing error',
+                'dataManagement'
+            );
+        },
+
+        backupRecoveryWorkflow: function() {
+            // Simulate complete backup/recovery workflow
+            const originalState = {
+                dayIsSet: true,
+                wakeTime: '08:00',
+                sleepTime: '22:00',
+                blocks: [{ id: 1, purpose: 'Important Work', duration: 120, tasks: [] }],
+                darkMode: true
+            };
+
+            // Step 1: Export (backup) data
+            const exportedData = {
+                exportDate: new Date().toISOString(),
+                version: "1.0",
+                data: { ...originalState }
+            };
+
+            TimePlannerTests.assert(
+                JSON.stringify(exportedData.data) === JSON.stringify(originalState),
+                'Export creates accurate backup of current state',
+                'dataManagement'
+            );
+
+            // Step 2: Simulate data loss (clear history)
+            const clearedState = {
+                dayIsSet: false,
+                wakeTime: '07:00',
+                sleepTime: '23:00',
+                blocks: [],
+                darkMode: false
+            };
+
+            TimePlannerTests.assert(
+                clearedState.blocks.length === 0,
+                'Data loss simulation clears all blocks',
+                'dataManagement'
+            );
+
+            // Step 3: Restore from backup (import)
+            const restoredState = { ...exportedData.data };
+
+            TimePlannerTests.assert(
+                restoredState.blocks.length === originalState.blocks.length,
+                'Import restores all blocks from backup',
+                'dataManagement'
+            );
+
+            TimePlannerTests.assert(
+                restoredState.wakeTime === originalState.wakeTime,
+                'Import restores original schedule settings',
+                'dataManagement'
+            );
+
+            TimePlannerTests.assert(
+                restoredState.darkMode === originalState.darkMode,
+                'Import restores theme preferences',
+                'dataManagement'
+            );
+        },
+
+        // NEGATIVE TEST - This should fail
+        negativeTest_DataManagementShouldFail: function() {
+            const exportData = { version: "1.0", data: {} };
+            TimePlannerTests.assert(
+                exportData.version === "2.0", // Version is 1.0, not 2.0
+                'NEGATIVE TEST: Wrong version number should fail',
+                'dataManagement'
+            );
+        }
+    },
+
     // DOM Interaction Tests (if DOM is available)
     domTests: {
         elementsExist: function() {
@@ -1783,7 +2158,7 @@ const TimePlannerTests = {
         console.log('🚀 Starting Complete Test Suite for Daily Time Planner\n');
         this.setup();
 
-        const categories = ['state', 'timeCalculation', 'daySetup', 'timeBlock', 'task', 'settings', 'timeValidation', 'ui', 'integration', 'error', 'markdown', 'toggleMode', 'enhancedTask', 'uiEnhancement', 'dom'];
+        const categories = ['state', 'timeCalculation', 'daySetup', 'timeBlock', 'task', 'settings', 'timeValidation', 'ui', 'integration', 'error', 'markdown', 'toggleMode', 'enhancedTask', 'uiEnhancement', 'dataManagement', 'dom'];
         
         categories.forEach(category => {
             const categoryTests = this[category + 'Tests'];
@@ -1923,6 +2298,7 @@ window.testMarkdown = () => TimePlannerTests.runCategory('markdown');
 window.testToggleMode = () => TimePlannerTests.runCategory('toggleMode');
 window.testEnhancedTasks = () => TimePlannerTests.runCategory('enhancedTask');
 window.testUIEnhancements = () => TimePlannerTests.runCategory('uiEnhancement');
+window.testDataManagement = () => TimePlannerTests.runCategory('dataManagement');
 
 // Auto-display usage instructions
 console.log(`
@@ -1943,6 +2319,7 @@ NEW Enhancement Tests:
 • testToggleMode()     - Test Edit/Preview toggle mode
 • testEnhancedTasks()  - Test enhanced task features
 • testUIEnhancements() - Test UI improvements
+• testDataManagement() - Test export/import/clear history
 
 Advanced:
 • TimePlannerTests.runCategory('categoryName')

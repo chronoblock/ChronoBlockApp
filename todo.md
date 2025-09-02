@@ -5,8 +5,10 @@
 - [x] ~~Dark mode~~
 - [x] ~~Blocks need to have the option of custom start and end time~~
 - [x] ~~Adding markdown to the note taking for the task~~
+- [x] ~~Clear history functionality (nuclear option)~~
+- [x] ~~Export/import functionality~~
+- [x] ~~Remove "Reset Day Plan" button (simplified to nuclear clear only)~~
 
-- [ ] clear history
-- [ ] Export/import functionality
 - [ ] Weekly/monthly view
 - [ ] Task categories and priorities
+- [ ] add styling customization for blocks of time
