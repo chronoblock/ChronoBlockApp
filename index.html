@@ -50,7 +50,14 @@
     <!-- Main Application Container -->
     <div id="app" class="container mx-auto max-w-4xl p-4 sm:p-6 lg:p-8">
         
-        <header class="text-center mb-8">
+        <header class="text-center mb-8 relative">
+            <!-- Settings Button -->
+            <button id="settings-btn" class="absolute top-0 right-0 p-2 text-gray-600 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded-md">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+            </button>
             <h1 class="text-4xl font-bold text-gray-900">🗓️ Daily Time Planner</h1>
             <p class="text-lg text-gray-600 mt-2">Structure your day, budget your time, and get things done.</p>
         </header>
@@ -149,6 +156,33 @@
         </div>
     </div>
 
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white fade-in">
+            <div class="mt-3">
+                <h3 class="text-lg leading-6 font-medium text-gray-900 text-center mb-4">Settings</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label for="settings-wake-time" class="block text-sm font-medium text-gray-700">Wake-up Time</label>
+                        <input type="time" id="settings-wake-time" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label for="settings-sleep-time" class="block text-sm font-medium text-gray-700">Sleep Time</label>
+                        <input type="time" id="settings-sleep-time" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                </div>
+                <div class="items-center px-4 py-3 mt-6 text-right">
+                    <button id="save-settings-btn" class="px-4 py-2 bg-indigo-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+                        Save Settings
+                    </button>
+                    <button id="cancel-settings-btn" class="ml-2 px-4 py-2 bg-gray-200 text-gray-800 text-base font-medium rounded-md shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- JavaScript Application Logic -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -179,6 +213,13 @@
             const taskNotesInput = document.getElementById('task-notes-input');
             const saveTaskDetailsBtn = document.getElementById('save-task-details-btn');
             const cancelTaskDetailsBtn = document.getElementById('cancel-task-details-btn');
+
+            const settingsBtn = document.getElementById('settings-btn');
+            const settingsModal = document.getElementById('settings-modal');
+            const settingsWakeTimeInput = document.getElementById('settings-wake-time');
+            const settingsSleepTimeInput = document.getElementById('settings-sleep-time');
+            const saveSettingsBtn = document.getElementById('save-settings-btn');
+            const cancelSettingsBtn = document.getElementById('cancel-settings-btn');
 
             // --- APPLICATION STATE ---
             let state = {
@@ -434,6 +475,36 @@
             cancelTaskDetailsBtn.addEventListener('click', () => {
                 closeModal(taskDetailsModal);
                 state.editingTaskId = null;
+            });
+
+            // Settings modal handlers
+            settingsBtn.addEventListener('click', () => {
+                settingsWakeTimeInput.value = state.wakeTime;
+                settingsSleepTimeInput.value = state.sleepTime;
+                openModal(settingsModal);
+            });
+
+            cancelSettingsBtn.addEventListener('click', () => {
+                closeModal(settingsModal);
+            });
+
+            saveSettingsBtn.addEventListener('click', () => {
+                const newWakeTime = settingsWakeTimeInput.value;
+                const newSleepTime = settingsSleepTimeInput.value;
+                
+                if (!newWakeTime || !newSleepTime) {
+                    alert('Please select valid wake-up and sleep times.');
+                    return;
+                }
+
+                state.wakeTime = newWakeTime;
+                state.sleepTime = newSleepTime;
+                saveState();
+                render();
+                closeModal(settingsModal);
+                
+                // Show a confirmation message
+                alert('Settings saved successfully!');
             });
             
             // --- INITIALIZATION ---
