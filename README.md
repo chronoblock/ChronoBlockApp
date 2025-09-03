@@ -1,5 +1,7 @@
 # Daily Time Planner Web App
 
+[![Netlify Status](https://api.netlify.com/api/v1/badges/029addff-0c26-43a4-a524-c60fbbdc4a4f/deploy-status)](https://app.netlify.com/projects/timemana/deploys)
+
 A simple, elegant web application for planning and organizing your daily schedule. Structure your day by creating time blocks, adding tasks, and tracking your progress.
 
 ## ✨ Features
