@@ -1468,7 +1468,13 @@ __Underlined__ ==Highlighted==
                     // Pre-populate form with existing block data
                     blockPurposeInput.value = block.purpose;
                     
-                    if (block.duration) {
+                    if (block.startTime && block.endTime) {
+                        // Time range mode - block has specific start/end times
+                        document.getElementById('range-mode').checked = true;
+                        document.getElementById('block-start-time').value = block.startTime;
+                        document.getElementById('block-end-time').value = block.endTime;
+                        switchTimeMode('range');
+                    } else {
                         // Duration mode - split duration into hours and minutes
                         document.getElementById('duration-mode').checked = true;
                         const hours = Math.floor(block.duration / 60);
@@ -1476,12 +1482,6 @@ __Underlined__ ==Highlighted==
                         document.getElementById('block-hours-input').value = hours;
                         document.getElementById('block-minutes-input').value = minutes;
                         switchTimeMode('duration');
-                    } else {
-                        // Time range mode
-                        document.getElementById('range-mode').checked = true;
-                        document.getElementById('block-start-time').value = block.startTime;
-                        document.getElementById('block-end-time').value = block.endTime;
-                        switchTimeMode('range');
                     }
                     
                     // Update modal title and button
