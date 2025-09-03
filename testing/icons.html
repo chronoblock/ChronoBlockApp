@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Icon Test</title>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+</head>
+<body>
+    <div id="test-container">
+        <h2>Testing Icon Visibility</h2>
+        <div id="test-results"></div>
+        <button onclick="runIconTest()">Run Icon Test</button>
+    </div>
+
+    <script>
+        function runIconTest() {
+            const results = document.getElementById('test-results');
+            results.innerHTML = '';
+
+            // Test 1: Check if Lucide is loaded
+            const lucideLoaded = typeof lucide !== 'undefined';
+            results.innerHTML += `<p>✅ Lucide loaded: ${lucideLoaded}</p>`;
+
+            // Test 2: Create test icons
+            const testHtml = `
+                <div>
+                    <button class="edit-btn"><i data-lucide="edit" class="w-6 h-6"></i></button>
+                    <button class="delete-btn"><i data-lucide="trash-2" class="w-6 h-6"></i></button>
+                    <button class="check-btn" style="display: none;"><i data-lucide="check" class="w-6 h-6"></i></button>
+                    <button class="x-btn" style="display: none;"><i data-lucide="x" class="w-6 h-6"></i></button>
+                </div>
+            `;
+            
+            const testDiv = document.createElement('div');
+            testDiv.innerHTML = testHtml;
+            document.body.appendChild(testDiv);
+
+            // Initialize icons
+            if (lucideLoaded) {
+                lucide.createIcons();
+            }
+
+            // Test 3: Check if icons exist in DOM
+            const editIcon = document.querySelector('[data-lucide="edit"]');
+            const deleteIcon = document.querySelector('[data-lucide="trash-2"]');
+            const checkIcon = document.querySelector('[data-lucide="check"]');
+            const xIcon = document.querySelector('[data-lucide="x"]');
+
+            results.innerHTML += `<p>✅ Edit icon exists: ${editIcon !== null}</p>`;
+            results.innerHTML += `<p>✅ Delete icon exists: ${deleteIcon !== null}</p>`;
+            results.innerHTML += `<p>✅ Check icon exists: ${checkIcon !== null}</p>`;
+            results.innerHTML += `<p>✅ X icon exists: ${xIcon !== null}</p>`;
+
+            // Test 4: Show hidden icons
+            document.querySelector('.check-btn').style.display = 'inline-block';
+            document.querySelector('.x-btn').style.display = 'inline-block';
+
+            // Re-check after showing
+            setTimeout(() => {
+                const checkIconVisible = document.querySelector('[data-lucide="check"]') !== null;
+                const xIconVisible = document.querySelector('[data-lucide="x"]') !== null;
+                results.innerHTML += `<p>✅ Check icon visible after show: ${checkIconVisible}</p>`;
+                results.innerHTML += `<p>✅ X icon visible after show: ${xIconVisible}</p>`;
+            }, 100);
+        }
+    </script>
+</body>
+</html>

@@ -12,6 +12,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <!-- Custom Styles -->
     <style>
         /* CSS Variables for Theme Support */
@@ -289,6 +291,25 @@
         .dark .cancel-task-edit-btn {
             color: var(--text-secondary) !important; /* Gray for cancel in dark mode */
         }
+
+        /* Task edit mode styling */
+        .task-actions-default, .task-actions-edit {
+            min-width: 80px; /* Consistent width for button container */
+            justify-content: flex-end;
+        }
+
+        .edit-task-input {
+            min-width: 200px;
+            background-color: var(--bg-secondary) !important;
+            border-color: var(--border-focus) !important;
+            color: var(--text-primary) !important;
+        }
+
+        .dark .edit-task-input {
+            background-color: var(--bg-tertiary) !important;
+            border-color: var(--border-focus) !important;
+            color: var(--text-primary) !important;
+        }
     </style>
 </head>
 <body class="antialiased text-gray-800">
@@ -515,7 +536,7 @@ __Underlined__ ==Highlighted==
                     <div class="border-t pt-4 mt-4">
                         <h4 class="text-md font-medium text-red-600 mb-3">💣 Nuclear Option</h4>
                         <button id="clear-history-btn" class="w-full px-4 py-2 bg-white border-2 border-red-600 text-red-600 text-sm font-medium rounded-md shadow-sm hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-300 transition-colors">
-                            🗑️ Clear Everything
+                            <i data-lucide="trash-2" class="w-6 h-6"></i> Clear Everything
                         </button>
                         <p class="text-xs text-red-600 mt-2 font-medium">⚠️ DANGER: This will delete ALL blocks, tasks, notes, settings, and preferences permanently. Factory reset!</p>
                     </div>
@@ -1172,9 +1193,9 @@ __Underlined__ ==Highlighted==
                                     <input type="checkbox" class="h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 task-checkbox" ${task.completed ? 'checked' : ''}>
                                     <span class="ml-3 text-gray-800 flex-grow cursor-pointer task-text ${completedClass}">${task.text}</span>
                                 </div>
-                                <div class="flex gap-2">
-                                    <button class="text-indigo-600 hover:text-indigo-800 font-bold edit-task-btn" title="Edit Task">✏️</button>
-                                    <button class="text-red-500 hover:text-red-700 font-bold delete-task-btn" title="Delete Task">🗑️</button>
+                                <div class="flex gap-2 task-actions-default">
+                                    <button class="text-indigo-600 hover:text-indigo-800 font-bold edit-task-btn" title="Edit Task"><i data-lucide="edit" class="w-6 h-6"></i></button>
+                                    <button class="text-red-500 hover:text-red-700 font-bold delete-task-btn" title="Delete Task"><i data-lucide="trash-2" class="w-6 h-6"></i></button>
                                 </div>
                             </li>
                         `;
@@ -1187,8 +1208,8 @@ __Underlined__ ==Highlighted==
                                 <p class="text-sm text-gray-500">${timeDisplay}</p>
                             </div>
                             <div class="flex gap-2">
-                                <button class="text-indigo-600 hover:text-indigo-800 font-bold edit-block-btn" title="Edit Block">✏️</button>
-                                <button class="text-red-600 hover:text-red-800 font-bold delete-block-btn" title="Delete Block">✕</button>
+                                <button class="text-indigo-600 hover:text-indigo-800 font-bold edit-block-btn" title="Edit Block"><i data-lucide="edit" class="w-6 h-6"></i></button>
+                                <button class="text-red-600 hover:text-red-800 font-bold delete-block-btn" title="Delete Block"><i data-lucide="trash-2" class="w-6 h-6"></i></button>
                             </div>
                         </div>
                         <ul class="task-list space-y-2 mb-4">${tasksHtml}</ul>
@@ -1199,6 +1220,14 @@ __Underlined__ ==Highlighted==
                     `;
                     blocksContainer.appendChild(blockEl);
                 });
+                
+                // Reinitialize Lucide icons after dynamic content is added
+                if (typeof lucide !== 'undefined') {
+                    console.log('🎨 Reinitializing Lucide icons...');
+                    lucide.createIcons();
+                } else {
+                    console.warn('⚠️ Lucide library not loaded!');
+                }
             };
 
             // --- MODAL HANDLING ---
@@ -1365,7 +1394,7 @@ __Underlined__ ==Highlighted==
                     const taskId = Number(taskEl.dataset.id);
 
                     // Delete Task
-                    if (e.target.matches('.delete-task-btn')) {
+                    if (e.target.matches('.delete-task-btn') || e.target.closest('.delete-task-btn')) {
                         const block = state.blocks.find(b => b.id === blockId);
                         block.tasks = block.tasks.filter(t => t.id !== taskId);
                         saveState();
@@ -1373,21 +1402,26 @@ __Underlined__ ==Highlighted==
                         return;
                     }
 
-                    // Edit Task (Inline Editing)
-                    if (e.target.matches('.edit-task-btn')) {
+                    // Edit Task (Toggle to Edit Mode)
+                    if (e.target.matches('.edit-task-btn') || e.target.closest('.edit-task-btn')) {
                         const taskTextEl = taskEl.querySelector('.task-text');
+                        const actionsEl = taskEl.querySelector('.task-actions-default');
                         const currentText = taskTextEl.textContent;
                         
-                        // Create inline edit input
-                        taskTextEl.innerHTML = `
-                            <div class="flex gap-2 items-center">
-                                <input type="text" class="flex-grow px-2 py-1 border border-indigo-300 rounded edit-task-input" value="${currentText}">
-                                <button class="text-green-600 hover:text-green-800 font-bold save-task-edit-btn" title="Save">✓</button>
-                                <button class="text-gray-600 hover:text-gray-800 font-bold cancel-task-edit-btn" title="Cancel">✕</button>
-                            </div>
+                        // Replace text with input
+                        taskTextEl.innerHTML = `<input type="text" class="flex-grow px-2 py-1 border border-indigo-300 rounded edit-task-input bg-white text-gray-900" value="${currentText}">`;
+                        
+                        // Replace actions with Save/Cancel
+                        actionsEl.className = 'flex gap-2 task-actions-edit';
+                        actionsEl.innerHTML = `
+                            <button class="text-green-600 hover:text-green-800 font-bold save-task-edit-btn" title="Save"><i data-lucide="check" class="w-6 h-6"></i></button>
+                            <button class="text-gray-600 hover:text-gray-800 font-bold cancel-task-edit-btn" title="Cancel"><i data-lucide="x" class="w-6 h-6"></i></button>
                         `;
                         
-                        // Focus the input and select text
+                        // Initialize new icons and focus input
+                        if (typeof lucide !== 'undefined') {
+                            lucide.createIcons();
+                        }
                         const input = taskTextEl.querySelector('.edit-task-input');
                         input.focus();
                         input.select();
@@ -1395,23 +1429,27 @@ __Underlined__ ==Highlighted==
                     }
 
                     // Save Task Edit
-                    if (e.target.matches('.save-task-edit-btn')) {
+                    if (e.target.matches('.save-task-edit-btn') || e.target.closest('.save-task-edit-btn')) {
                         const input = taskEl.querySelector('.edit-task-input');
                         const newText = input.value.trim();
                         
                         if (newText) {
+                            // Update task data
                             const block = state.blocks.find(b => b.id === blockId);
                             const task = block.tasks.find(t => t.id === taskId);
                             task.text = newText;
                             saveState();
+                            
+                            // Return to default view
                             render();
                         }
                         return;
                     }
 
                     // Cancel Task Edit
-                    if (e.target.matches('.cancel-task-edit-btn')) {
-                        render(); // Just re-render to restore original state
+                    if (e.target.matches('.cancel-task-edit-btn') || e.target.closest('.cancel-task-edit-btn')) {
+                        // Simply re-render to restore original state
+                        render();
                         return;
                     }
 
@@ -1449,7 +1487,7 @@ __Underlined__ ==Highlighted==
                 const blockId = Number(blockEl.dataset.id);
 
                 // Delete Block
-                if (e.target.matches('.delete-block-btn')) {
+                if (e.target.matches('.delete-block-btn') || e.target.closest('.delete-block-btn')) {
                     state.blocks = state.blocks.filter(b => b.id !== blockId);
                     saveState();
                     render();
@@ -1457,7 +1495,7 @@ __Underlined__ ==Highlighted==
                 }
 
                 // Edit Block
-                if (e.target.matches('.edit-block-btn')) {
+                if (e.target.matches('.edit-block-btn') || e.target.closest('.edit-block-btn')) {
                     const block = state.blocks.find(b => b.id === blockId);
                     if (!block) return;
                     
@@ -1493,7 +1531,7 @@ __Underlined__ ==Highlighted==
                 }
 
                 // Add Task
-                if (e.target.matches('.add-task-btn')) {
+                if (e.target.matches('.add-task-btn') || e.target.closest('.add-task-btn')) {
                     const input = blockEl.querySelector('.new-task-input');
                     const taskText = input.value.trim();
                     if (taskText) {
@@ -1613,6 +1651,32 @@ __Underlined__ ==Highlighted==
             // --- INITIALIZATION ---
             loadState();
             render();
+            
+            // Initialize Lucide icons
+            if (typeof lucide !== 'undefined') {
+                console.log('🎨 Initializing Lucide icons on page load...');
+                lucide.createIcons();
+            } else {
+                console.warn('⚠️ Lucide library not loaded on initialization!');
+            }
+
+            // DEBUG: Test icon click functionality
+            window.testIconClicks = () => {
+                console.log('🧪 Testing icon click functionality...');
+                const editBtns = document.querySelectorAll('.edit-task-btn, .edit-block-btn');
+                const deleteBtns = document.querySelectorAll('.delete-task-btn, .delete-block-btn');
+                console.log(`Found ${editBtns.length} edit buttons, ${deleteBtns.length} delete buttons`);
+                
+                editBtns.forEach(btn => {
+                    const icon = btn.querySelector('[data-lucide]');
+                    console.log(`Edit button:`, btn, `Icon:`, icon);
+                });
+
+                console.log('✅ Edit Task Flow Test:');
+                console.log('1. Default: Shows Edit + Delete icons');
+                console.log('2. Click Edit: Shows Save + Cancel icons');
+                console.log('3. Click Save/Cancel: Returns to Edit + Delete icons');
+            };
         });
     </script>
 </body>

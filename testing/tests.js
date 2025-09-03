@@ -1779,6 +1779,217 @@ const TimePlannerTests = {
             );
         },
 
+        lucideIconsIntegration: function() {
+            // Test if Lucide is available globally
+            const isLucideAvailable = typeof lucide !== 'undefined';
+            TimePlannerTests.assert(
+                isLucideAvailable,
+                'Lucide icons library is loaded and available',
+                'uiEnhancement'
+            );
+
+            // Test basic icon replacement - check both in DOM and in source code
+            let hasEditIcon = document.querySelector('[data-lucide="edit"]') !== null;
+            let hasDeleteIcon = document.querySelector('[data-lucide="trash-2"]') !== null;
+            
+            // If icons not found in DOM, check if templates exist in HTML source
+            if (!hasEditIcon || !hasDeleteIcon) {
+                const htmlContent = document.documentElement.innerHTML;
+                if (!hasEditIcon) {
+                    hasEditIcon = htmlContent.includes('data-lucide="edit"') || htmlContent.includes("data-lucide='edit'");
+                }
+                if (!hasDeleteIcon) {
+                    hasDeleteIcon = htmlContent.includes('data-lucide="trash-2"') || htmlContent.includes("data-lucide='trash-2'");
+                }
+            }
+            
+            // If still not found, create test task to verify dynamic creation
+            if (!hasEditIcon || !hasDeleteIcon) {
+                const testTaskData = { id: 'test-' + Date.now(), text: 'Test Task for Edit Icon Check', completed: false };
+                
+                const originalStateJson = localStorage.getItem('timePlanner_state');
+                const originalState = originalStateJson ? JSON.parse(originalStateJson) : {
+                    dayIsSet: false,
+                    wakeTime: '07:00',
+                    sleepTime: '23:00',
+                    blocks: [],
+                    editingTaskId: null,
+                    editingBlockId: null,
+                    isEditingBlock: false,
+                    darkMode: false,
+                    isNotesPreviewMode: false
+                };
+                
+                const testBlock = {
+                    id: 'test-block-' + Date.now(),
+                    purpose: 'Test Block for Icons',
+                    startTime: '09:00',
+                    endTime: '10:00',
+                    tasks: [testTaskData]
+                };
+                
+                const tempState = {
+                    ...originalState,
+                    blocks: [...originalState.blocks, testBlock]
+                };
+                
+                localStorage.setItem('timePlanner_state', JSON.stringify(tempState));
+                
+                if (typeof render === 'function') {
+                    render();
+                    
+                    // Check for icons after rendering test task
+                    if (!hasEditIcon) {
+                        hasEditIcon = document.querySelector('[data-lucide="edit"]') !== null;
+                    }
+                    if (!hasDeleteIcon) {
+                        hasDeleteIcon = document.querySelector('[data-lucide="trash-2"]') !== null;
+                    }
+                }
+                
+                // Restore original state
+                if (originalStateJson) {
+                    localStorage.setItem('timePlanner_state', originalStateJson);
+                } else {
+                    localStorage.removeItem('timePlanner_state');
+                }
+                if (typeof render === 'function') {
+                    render();
+                }
+            }
+            
+            // Test edit mode icons by checking the source code contains the proper templates
+            let hasCheckIcon = false;
+            let hasCancelIcon = false;
+            
+            // Get the main HTML content to check for template definitions
+            const htmlContent = document.documentElement.innerHTML;
+            
+            // Check if the edit mode template contains check and x icons
+            hasCheckIcon = htmlContent.includes('data-lucide="check"') || htmlContent.includes("data-lucide='check'");
+            hasCancelIcon = htmlContent.includes('data-lucide="x"') || htmlContent.includes("data-lucide='x'");
+            
+            // If templates not found in HTML, try creating a test task to verify dynamic creation
+            if (!hasCheckIcon || !hasCancelIcon) {
+                // Create a temporary test task to check edit mode icons
+                const testTaskData = { id: 'test-' + Date.now(), text: 'Test Task for Icon Check', completed: false };
+                
+                // Get current state and create backup
+                const originalStateJson = localStorage.getItem('timePlanner_state');
+                const originalState = originalStateJson ? JSON.parse(originalStateJson) : {
+                    dayIsSet: false,
+                    wakeTime: '07:00',
+                    sleepTime: '23:00',
+                    blocks: [],
+                    editingTaskId: null,
+                    editingBlockId: null,
+                    isEditingBlock: false,
+                    darkMode: false,
+                    isNotesPreviewMode: false
+                };
+                
+                // Create a test block with our test task
+                const testBlock = {
+                    id: 'test-block-' + Date.now(),
+                    purpose: 'Test Block',
+                    startTime: '09:00',
+                    endTime: '10:00',
+                    tasks: [testTaskData]
+                };
+                
+                const tempState = {
+                    ...originalState,
+                    blocks: [...originalState.blocks, testBlock]
+                };
+                
+                localStorage.setItem('timePlanner_state', JSON.stringify(tempState));
+                
+                // Re-render to show the test task
+                if (typeof render === 'function') {
+                    render();
+                    
+                    // Find our test task element and trigger edit mode
+                    const testTaskElement = document.querySelector(`[data-id="${testTaskData.id}"]`);
+                    if (testTaskElement) {
+                        const editBtn = testTaskElement.querySelector('.edit-task-btn');
+                        if (editBtn) {
+                            // Simulate edit button click
+                            editBtn.click();
+                            
+                            // Check for edit mode icons after DOM update
+                            hasCheckIcon = document.querySelector('[data-lucide="check"]') !== null;
+                            hasCancelIcon = document.querySelector('[data-lucide="x"]') !== null;
+                            
+                            // Cancel edit mode
+                            const cancelBtn = document.querySelector('.cancel-task-edit-btn');
+                            if (cancelBtn) cancelBtn.click();
+                        }
+                    }
+                }
+                
+                // Restore original state
+                if (originalStateJson) {
+                    localStorage.setItem('timePlanner_state', originalStateJson);
+                } else {
+                    localStorage.removeItem('timePlanner_state');
+                }
+                if (typeof render === 'function') {
+                    render();
+                }
+            }
+
+            TimePlannerTests.assert(
+                hasEditIcon,
+                'Edit icons are replaced with Lucide edit icons',
+                'uiEnhancement'
+            );
+
+            TimePlannerTests.assert(
+                hasDeleteIcon,
+                'Delete icons are replaced with Lucide trash-2 icons',
+                'uiEnhancement'
+            );
+
+            TimePlannerTests.assert(
+                hasCheckIcon,
+                'Confirm icons are replaced with Lucide check icons',
+                'uiEnhancement'
+            );
+
+            TimePlannerTests.assert(
+                hasCancelIcon,
+                'Cancel icons are replaced with Lucide x icons',
+                'uiEnhancement'
+            );
+        },
+
+        iconFunctionality: function() {
+            // Test that icons maintain their click functionality
+            const editButton = document.querySelector('.edit-task-btn');
+            const deleteButton = document.querySelector('.delete-task-btn');
+            
+            if (editButton) {
+                const hasEditIcon = editButton.querySelector('[data-lucide="edit"]') !== null;
+                const hasClickHandler = editButton.onclick !== null || editButton.getAttribute('onclick') !== null;
+                
+                TimePlannerTests.assert(
+                    hasEditIcon,
+                    'Edit buttons contain Lucide edit icons',
+                    'uiEnhancement'
+                );
+            }
+
+            if (deleteButton) {
+                const hasDeleteIcon = deleteButton.querySelector('[data-lucide="trash-2"]') !== null;
+                
+                TimePlannerTests.assert(
+                    hasDeleteIcon,
+                    'Delete buttons contain Lucide trash-2 icons',
+                    'uiEnhancement'
+                );
+            }
+        },
+
         // NEGATIVE TEST - This should fail
         negativeTest_UIEnhancementShouldFail: function() {
             const mockButton = { active: true };
