@@ -12,7 +12,7 @@
 - [x] ~~tasks: replace delete with 🗑️~~
 
 
-- [ ] add styling customization for blocks of time
+- [x] ~~add styling customization for blocks of time~~
 - [ ] blocks: must be sorted by time accordingly
 - [ ] add contact us or send us a message
 

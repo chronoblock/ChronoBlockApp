@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dark Mode Color Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 8px; }
+        .color-demo { width: 150px; height: 100px; border: 2px solid #000; border-radius: 8px; display: inline-block; margin: 10px; padding: 10px; text-align: center; }
+        button { padding: 10px 20px; margin: 10px; border: none; border-radius: 4px; cursor: pointer; }
+        .toggle-btn { background: #4f46e5; color: white; }
+        .toggle-btn:hover { background: #4338ca; }
+        .dark { background: #1f2937; color: #f9fafb; }
+        .dark .test-section { border-color: #4b5563; }
+        .dark .color-demo { border-color: #6b7280; }
+    </style>
+</head>
+<body>
+    <h1>🎨 Dark Mode Color Palette Test</h1>
+    
+    <button class="toggle-btn" onclick="toggleDarkMode()">🌙 Toggle Dark Mode</button>
+    
+    <div class="test-section">
+        <h2>Color Palette Demo</h2>
+        <div id="color-demos"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Current Mode Info</h2>
+        <p>Current Mode: <span id="mode-info">Light</span></p>
+        <p>Body Class: <span id="body-class">No dark class</span></p>
+    </div>
+
+    <script>
+        // Define the color palette exactly as in the main app
+        const blockColorPalette = [
+            { 
+                name: 'White', 
+                value: '#ffffff', 
+                darkValue: '#374151', 
+                textColor: '#374151', 
+                darkTextColor: '#f9fafb' 
+            },
+            { 
+                name: 'Blue', 
+                value: '#eff6ff', 
+                darkValue: '#1e3a8a', 
+                textColor: '#1e40af', 
+                darkTextColor: '#bfdbfe' 
+            },
+            { 
+                name: 'Green', 
+                value: '#f0fdf4', 
+                darkValue: '#14532d', 
+                textColor: '#166534', 
+                darkTextColor: '#bbf7d0' 
+            },
+            { 
+                name: 'Yellow', 
+                value: '#fefce8', 
+                darkValue: '#854d0e', 
+                textColor: '#a16207', 
+                darkTextColor: '#fef3c7' 
+            },
+            { 
+                name: 'Red', 
+                value: '#fef2f2', 
+                darkValue: '#991b1b', 
+                textColor: '#dc2626', 
+                darkTextColor: '#fecaca' 
+            }
+        ];
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark');
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            const isDarkMode = document.body.classList.contains('dark');
+            const colorDemosContainer = document.getElementById('color-demos');
+            const modeInfo = document.getElementById('mode-info');
+            const bodyClass = document.getElementById('body-class');
+            
+            // Update mode info
+            modeInfo.textContent = isDarkMode ? 'Dark' : 'Light';
+            bodyClass.textContent = isDarkMode ? 'Has "dark" class' : 'No dark class';
+            
+            // Generate color demos
+            colorDemosContainer.innerHTML = '';
+            blockColorPalette.forEach(color => {
+                const demo = document.createElement('div');
+                demo.className = 'color-demo';
+                
+                const bgColor = isDarkMode ? color.darkValue : color.value;
+                const textColor = isDarkMode ? color.darkTextColor : color.textColor;
+                
+                demo.style.backgroundColor = bgColor;
+                demo.style.color = textColor;
+                demo.innerHTML = `
+                    <strong>${color.name}</strong><br>
+                    <small>BG: ${bgColor}</small><br>
+                    <small>Text: ${textColor}</small>
+                `;
+                
+                colorDemosContainer.appendChild(demo);
+            });
+        }
+
+        // Initialize display on page load
+        updateDisplay();
+    </script>
+</body>
+</html>

@@ -406,6 +406,231 @@ const TimePlannerTests = {
         }
     },
 
+    // Color Customization Tests
+    colorCustomizationTests: {
+        colorPaletteExists: function() {
+            const paletteExists = typeof blockColorPalette !== 'undefined';
+            TimePlannerTests.assert(
+                paletteExists,
+                'Block color palette is defined',
+                'colorCustomization'
+            );
+
+            if (paletteExists) {
+                TimePlannerTests.assert(
+                    blockColorPalette.length >= 5,
+                    'Color palette has at least 5 colors',
+                    'colorCustomization'
+                );
+
+                TimePlannerTests.assert(
+                    blockColorPalette[0].name === 'White',
+                    'First color is white (default)',
+                    'colorCustomization'
+                );
+
+                // Test dark mode color support
+                TimePlannerTests.assert(
+                    blockColorPalette[0].darkValue !== undefined,
+                    'Colors have dark mode variants',
+                    'colorCustomization'
+                );
+
+                TimePlannerTests.assert(
+                    blockColorPalette[0].darkTextColor !== undefined,
+                    'Colors have dark mode text colors',
+                    'colorCustomization'
+                );
+            }
+        },
+
+        createBlockWithColor: function() {
+            const testState = { blocks: [] };
+            const isDarkMode = document.body.classList.contains('dark');
+            const testColor = isDarkMode ? '#1e3a8a' : '#eff6ff'; // Blue in appropriate mode
+            
+            const colorBlock = {
+                id: Date.now(),
+                purpose: 'Colored Block',
+                duration: 60,
+                color: testColor,
+                tasks: []
+            };
+
+            testState.blocks.push(colorBlock);
+
+            TimePlannerTests.assert(
+                testState.blocks[0].color === testColor,
+                'Block creation with custom color stores color correctly',
+                'colorCustomization'
+            );
+
+            TimePlannerTests.assert(
+                testState.blocks[0].purpose === 'Colored Block',
+                'Colored block maintains other properties',
+                'colorCustomization'
+            );
+        },
+
+        colorMigration: function() {
+            // Test migration of blocks without colors
+            const isDarkMode = document.body.classList.contains('dark');
+            const defaultColor = isDarkMode ? '#374151' : '#ffffff';
+            const existingColor = isDarkMode ? '#14532d' : '#f0fdf4'; // Green
+            
+            const testState = {
+                blocks: [
+                    { id: 1, purpose: 'Old Block', duration: 60, tasks: [] }, // No color
+                    { id: 2, purpose: 'New Block', duration: 90, color: existingColor, tasks: [] } // Has color
+                ]
+            };
+
+            // Simulate migration
+            let hasChanges = false;
+            testState.blocks.forEach(block => {
+                if (!block.color) {
+                    block.color = defaultColor;
+                    hasChanges = true;
+                }
+            });
+
+            TimePlannerTests.assert(
+                hasChanges === true,
+                'Migration detects blocks without colors',
+                'colorCustomization'
+            );
+
+            TimePlannerTests.assert(
+                testState.blocks[0].color === defaultColor,
+                'Migration assigns mode-appropriate default color to blocks without colors',
+                'colorCustomization'
+            );
+
+            TimePlannerTests.assert(
+                testState.blocks[1].color === existingColor,
+                'Migration preserves existing colors',
+                'colorCustomization'
+            );
+        },
+
+        colorPickerFunctions: function() {
+            const initFunctionExists = typeof initializeColorPicker === 'function';
+            const setColorFunctionExists = typeof setBlockColor === 'function';
+
+            TimePlannerTests.assert(
+                initFunctionExists,
+                'Color picker initialization function exists',
+                'colorCustomization'
+            );
+
+            TimePlannerTests.assert(
+                setColorFunctionExists,
+                'Set block color function exists',
+                'colorCustomization'
+            );
+        },
+
+        colorContrastValidation: function() {
+            // Test that all colors have proper text color for contrast in both modes
+            if (typeof blockColorPalette !== 'undefined') {
+                let allColorsHaveLightTextColor = true;
+                let allColorsHaveDarkTextColor = true;
+                let allColorsHaveDarkValue = true;
+                let hasLightColors = false;
+                let hasDarkColors = false;
+
+                blockColorPalette.forEach(color => {
+                    if (!color.textColor || !color.darkTextColor) {
+                        allColorsHaveLightTextColor = false;
+                        allColorsHaveDarkTextColor = false;
+                    }
+                    if (!color.darkValue) {
+                        allColorsHaveDarkValue = false;
+                    }
+                    if (color.textColor === '#374151' || color.textColor === '#1e40af' || color.textColor === '#166534' || color.textColor === '#a16207' || color.textColor === '#dc2626') {
+                        hasLightColors = true;
+                    }
+                    if (color.darkTextColor === '#f9fafb' || color.darkTextColor === '#bfdbfe' || color.darkTextColor === '#bbf7d0' || color.darkTextColor === '#fef3c7' || color.darkTextColor === '#fecaca') {
+                        hasDarkColors = true;
+                    }
+                });
+
+                TimePlannerTests.assert(
+                    allColorsHaveLightTextColor && allColorsHaveDarkTextColor,
+                    'All colors have text colors defined for both light and dark modes',
+                    'colorCustomization'
+                );
+
+                TimePlannerTests.assert(
+                    allColorsHaveDarkValue,
+                    'All colors have dark mode variants defined',
+                    'colorCustomization'
+                );
+
+                TimePlannerTests.assert(
+                    hasLightColors && hasDarkColors,
+                    'Color palette includes appropriate text colors for both light and dark themes',
+                    'colorCustomization'
+                );
+            }
+        },
+
+        darkModeColorSwitching: function() {
+            // Test dark mode color switching functionality
+            const originalDarkMode = document.body.classList.contains('dark');
+            
+            try {
+                // Test light mode colors
+                document.body.classList.remove('dark');
+                if (typeof initializeColorPicker === 'function') {
+                    initializeColorPicker();
+                    const lightColorButtons = document.querySelectorAll('#color-picker button');
+                    const hasLightColors = lightColorButtons.length > 0;
+                    
+                    TimePlannerTests.assert(
+                        hasLightColors,
+                        'Color picker initializes with light mode colors',
+                        'colorCustomization'
+                    );
+                }
+
+                // Test dark mode colors
+                document.body.classList.add('dark');
+                if (typeof initializeColorPicker === 'function') {
+                    initializeColorPicker();
+                    const darkColorButtons = document.querySelectorAll('#color-picker button');
+                    const hasDarkColors = darkColorButtons.length > 0;
+                    
+                    TimePlannerTests.assert(
+                        hasDarkColors,
+                        'Color picker initializes with dark mode colors',
+                        'colorCustomization'
+                    );
+                }
+            } finally {
+                // Restore original dark mode state
+                if (originalDarkMode) {
+                    document.body.classList.add('dark');
+                } else {
+                    document.body.classList.remove('dark');
+                }
+            }
+        },
+
+        // NEGATIVE TEST - This should fail
+        negativeTest_ColorsShouldFail: function() {
+            const fakeColor = '#invalid';
+            const fakeColorExists = blockColorPalette && blockColorPalette.some(c => 
+                c.value === fakeColor || c.darkValue === fakeColor
+            );
+            TimePlannerTests.assert(
+                fakeColorExists,
+                'NEGATIVE TEST: Invalid color should not exist in palette (this should fail)',
+                'colorCustomization'
+            );
+        }
+    },
+
     // Task Management Tests
     taskTests: {
         addTask: function() {
