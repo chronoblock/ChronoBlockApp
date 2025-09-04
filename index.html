@@ -14,6 +14,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <!-- SortableJS for drag-and-drop -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <!-- Custom Styles -->
     <style>
         /* CSS Variables for Theme Support */
@@ -309,6 +311,53 @@
             background-color: var(--bg-tertiary) !important;
             border-color: var(--border-focus) !important;
             color: var(--text-primary) !important;
+        }
+
+        /* Sortable drag-and-drop styles */
+        .sortable-tasks {
+            min-height: 20px;
+        }
+
+        .sortable-ghost {
+            opacity: 0.4;
+            background-color: rgba(79, 70, 229, 0.1) !important;
+            border: 2px dashed #4f46e5 !important;
+        }
+
+        .sortable-chosen {
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+        }
+
+        .drag-handle {
+            cursor: grab;
+            opacity: 0.3;
+            transition: opacity 0.2s ease;
+            padding: 4px;
+            margin-right: 8px;
+            border-radius: 4px;
+        }
+
+        .drag-handle:hover {
+            opacity: 0.8;
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+
+        .dark .drag-handle:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .task-item {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .task-item:hover .drag-handle {
+            opacity: 0.6;
         }
     </style>
 </head>
@@ -1389,6 +1438,7 @@ __Underlined__ ==Highlighted==
                     blockEl.style.backgroundColor = blockColor;
                     blockEl.style.color = textColor;
                     blockEl.dataset.id = block.id;
+                    blockEl.dataset.blockId = block.id; // For sortable identification
 
                     let startTime, endTime, timeDisplay;
 
@@ -1409,8 +1459,9 @@ __Underlined__ ==Highlighted==
                         const completedClass = task.completed ? 'completed-task' : '';
                         const liClass = task.completed ? 'task-item completed' : 'task-item';
                         return `
-                            <li class="flex items-center justify-between py-2 border-b ${liClass}" data-id="${task.id}">
+                            <li class="flex items-center justify-between py-2 border-b ${liClass}" data-id="${task.id}" data-task-id="${task.id}">
                                 <div class="flex items-center flex-grow">
+                                    <div class="drag-handle" data-lucide="grip-vertical"></div>
                                     <input type="checkbox" class="h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 task-checkbox" ${task.completed ? 'checked' : ''}>
                                     <span class="ml-3 flex-grow cursor-pointer task-text ${completedClass}">${task.text}</span>
                                 </div>
@@ -1433,7 +1484,7 @@ __Underlined__ ==Highlighted==
                                 <button class="hover:opacity-70 font-bold delete-block-btn" title="Delete Block" style="color: ${textColor}"><i data-lucide="trash-2" class="w-6 h-6"></i></button>
                             </div>
                         </div>
-                        <ul class="task-list space-y-2 mb-4">${tasksHtml}</ul>
+                        <ul class="task-list sortable-tasks space-y-2 mb-4">${tasksHtml}</ul>
                         <div class="flex gap-2 mt-4">
                             <input type="text" class="flex-grow px-3 py-2 bg-white bg-opacity-90 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 new-task-input" placeholder="Add a new task...">
                             <button class="px-4 py-2 border border-transparent font-medium rounded-md shadow-sm text-white bg-indigo-500 hover:bg-indigo-600 add-task-btn">Add</button>
@@ -1449,6 +1500,11 @@ __Underlined__ ==Highlighted==
                 } else {
                     console.warn('⚠️ Lucide library not loaded!');
                 }
+                
+                // Initialize drag-and-drop for all task lists (with delay to ensure DOM is ready)
+                setTimeout(() => {
+                    initializeSortable();
+                }, 50);
             };
 
             // --- MODAL HANDLING ---
@@ -1676,16 +1732,54 @@ __Underlined__ ==Highlighted==
                             task.text = newText;
                             saveState();
                             
-                            // Return to default view
-                            render();
+                            // Update the UI directly without full re-render to preserve order
+                            const taskTextEl = taskEl.querySelector('.task-text');
+                            const actionsEl = taskEl.querySelector('.task-actions-edit');
+                            const completedClass = task.completed ? 'completed-task' : '';
+                            
+                            // Restore original text display
+                            taskTextEl.innerHTML = `${newText}`;
+                            taskTextEl.className = `ml-3 flex-grow cursor-pointer task-text ${completedClass}`;
+                            
+                            // Restore original actions
+                            actionsEl.className = 'flex gap-2 task-actions-default';
+                            actionsEl.innerHTML = `
+                                <button class="hover:opacity-80 font-bold edit-task-btn" title="Edit Task"><i data-lucide="edit" class="w-6 h-6"></i></button>
+                                <button class="hover:opacity-80 font-bold delete-task-btn" title="Delete Task"><i data-lucide="trash-2" class="w-6 h-6"></i></button>
+                            `;
+                            
+                            // Re-initialize icons
+                            if (typeof lucide !== 'undefined') {
+                                lucide.createIcons();
+                            }
                         }
                         return;
                     }
 
                     // Cancel Task Edit
                     if (e.target.matches('.cancel-task-edit-btn') || e.target.closest('.cancel-task-edit-btn')) {
-                        // Simply re-render to restore original state
-                        render();
+                        // Restore original state without full re-render to preserve order
+                        const block = state.blocks.find(b => b.id === blockId);
+                        const task = block.tasks.find(t => t.id === taskId);
+                        const taskTextEl = taskEl.querySelector('.task-text');
+                        const actionsEl = taskEl.querySelector('.task-actions-edit');
+                        const completedClass = task.completed ? 'completed-task' : '';
+                        
+                        // Restore original text display
+                        taskTextEl.innerHTML = `${task.text}`;
+                        taskTextEl.className = `ml-3 flex-grow cursor-pointer task-text ${completedClass}`;
+                        
+                        // Restore original actions
+                        actionsEl.className = 'flex gap-2 task-actions-default';
+                        actionsEl.innerHTML = `
+                            <button class="hover:opacity-80 font-bold edit-task-btn" title="Edit Task"><i data-lucide="edit" class="w-6 h-6"></i></button>
+                            <button class="hover:opacity-80 font-bold delete-task-btn" title="Delete Task"><i data-lucide="trash-2" class="w-6 h-6"></i></button>
+                        `;
+                        
+                        // Re-initialize icons
+                        if (typeof lucide !== 'undefined') {
+                            lucide.createIcons();
+                        }
                         return;
                     }
 
@@ -1888,9 +1982,115 @@ __Underlined__ ==Highlighted==
                 clearAllHistory();
             });
             
+            // --- SORTABLE TASK REORDERING ---
+            let sortableInstances = []; // Keep track of all instances
+            
+            function initializeSortable() {
+                console.log('🔄 Initializing sortable task lists...');
+                
+                // First, destroy all existing instances
+                sortableInstances.forEach(instance => {
+                    if (instance && instance.destroy) {
+                        try {
+                            instance.destroy();
+                        } catch (e) {
+                            console.warn('Error destroying sortable instance:', e);
+                        }
+                    }
+                });
+                sortableInstances = [];
+                
+                const sortableContainers = document.querySelectorAll('.sortable-tasks');
+                console.log(`Found ${sortableContainers.length} sortable containers`);
+                
+                sortableContainers.forEach((container, index) => {
+                    // Ensure container doesn't have existing instance
+                    if (container.sortableInstance) {
+                        try {
+                            container.sortableInstance.destroy();
+                        } catch (e) {
+                            console.warn('Error destroying container instance:', e);
+                        }
+                        container.sortableInstance = null;
+                    }
+                    
+                    // Create new sortable instance
+                    console.log(`Creating new sortable instance ${index}`);
+                    const sortableInstance = new Sortable(container, {
+                        handle: '.drag-handle', // Use the drag handle for dragging
+                        animation: 150,
+                        ghostClass: 'sortable-ghost',
+                        chosenClass: 'sortable-chosen',
+                        dragClass: 'sortable-drag',
+                        
+                        onStart: function(evt) {
+                            console.log('🎯 Drag started');
+                        },
+                        
+                        onEnd: function(evt) {
+                            console.log('🎯 Drag ended, processing reorder...');
+                            
+                            // Get the block ID from the container
+                            const blockElement = evt.from.closest('[data-block-id]');
+                            const blockId = blockElement ? blockElement.dataset.blockId : null;
+                            
+                            console.log('Block ID found:', blockId);
+                            
+                            if (!blockId) {
+                                console.error('Could not find block ID for reordered tasks');
+                                return;
+                            }
+                            
+                            // Find the block in our data
+                            const block = state.blocks.find(b => b.id === blockId);
+                            if (!block || !block.tasks) {
+                                console.error('Could not find block or tasks for ID:', blockId);
+                                return;
+                            }
+                            
+                            console.log('Found block with', block.tasks.length, 'tasks');
+                            
+                            // Reorder the tasks array based on the new DOM order
+                            const taskElements = Array.from(evt.from.children);
+                            const newTaskOrder = [];
+                            
+                            taskElements.forEach(taskEl => {
+                                const taskId = taskEl.dataset.taskId;
+                                const task = block.tasks.find(t => t.id === taskId);
+                                if (task) {
+                                    newTaskOrder.push(task);
+                                }
+                            });
+                            
+                            console.log('New task order length:', newTaskOrder.length);
+                            
+                            // Update the block's tasks array
+                            if (newTaskOrder.length === block.tasks.length) {
+                                block.tasks = newTaskOrder;
+                                // Save state directly to localStorage 
+                                saveState();
+                                console.log('✅ Tasks reordered and saved successfully for block:', blockId);
+                            } else {
+                                console.error('Task count mismatch during reorder');
+                                console.log('Expected:', block.tasks.length, 'Got:', newTaskOrder.length);
+                                // Re-render to restore correct order
+                                render();
+                            }
+                        }
+                    });
+                    
+                    // Store references
+                    container.sortableInstance = sortableInstance;
+                    sortableInstances.push(sortableInstance);
+                });
+                
+                console.log(`✅ Sortable initialization complete - ${sortableInstances.length} instances created`);
+            }
+            
             // --- INITIALIZATION ---
             loadState();
             render();
+            initializeSortable(); // Initialize drag-and-drop for tasks
             
             // Initialize Lucide icons
             if (typeof lucide !== 'undefined') {
