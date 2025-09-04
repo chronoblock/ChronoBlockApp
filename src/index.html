@@ -1,0 +1,2123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Time Planner</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="https://emojigraph.org/media/apple/spiral-calendar_1f5d3-fe0f.png">
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <!-- SortableJS for drag-and-drop -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <!-- Custom Styles -->
+    <style>
+        /* CSS Variables for Theme Support */
+        :root {
+            --bg-primary: #f3f4f6;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f9fafb;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --text-accent: #4f46e5;
+            --border-color: #d1d5db;
+            --border-focus: #6366f1;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --shadow-lg: rgba(0, 0, 0, 0.15);
+        }
+
+        .dark {
+            --bg-primary: #1f2937;
+            --bg-secondary: #374151;
+            --bg-tertiary: #4b5563;
+            --text-primary: #f9fafb;
+            --text-secondary: #d1d5db;
+            --text-accent: #818cf8;
+            --border-color: #4b5563;
+            --border-focus: #818cf8;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --shadow-lg: rgba(0, 0, 0, 0.4);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Update existing styles to use variables */
+        .bg-white { background-color: var(--bg-secondary) !important; }
+        .text-gray-800 { color: var(--text-primary) !important; }
+        .text-gray-600 { color: var(--text-secondary) !important; }
+        .text-gray-500 { color: var(--text-secondary) !important; }
+        .text-gray-700 { color: var(--text-primary) !important; }
+        .border-gray-300 { border-color: var(--border-color) !important; }
+        .bg-gray-50 { background-color: var(--bg-tertiary) !important; }
+
+        /* Dark mode specific overrides */
+        .dark .shadow-md { box-shadow: 0 4px 6px -1px var(--shadow), 0 2px 4px -1px var(--shadow); }
+        .dark .shadow-lg { box-shadow: 0 10px 15px -3px var(--shadow-lg), 0 4px 6px -2px var(--shadow); }
+        .dark .shadow-sm { box-shadow: 0 1px 2px 0 var(--shadow); }
+
+        /* Custom scrollbar for both themes */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-tertiary);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--text-secondary);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-primary);
+        }
+
+        /* Notes toggle buttons styling */
+        .notes-toggle-btn {
+            transition: all 0.2s ease;
+        }
+
+        /* Dark mode markdown elements */
+        .dark #notes-preview h3,
+        .dark #notes-preview h4,
+        .dark #notes-preview h5 {
+            color: var(--text-primary) !important;
+        }
+        .dark #notes-preview mark {
+            background-color: #fbbf24 !important;
+            color: #000 !important;
+        }
+
+        /* Dark mode toggle switch styles */
+        .toggle-checkbox {
+            transition: all 0.3s ease;
+        }
+        .toggle-checkbox:checked {
+            transform: translateX(100%);
+            border-color: #4f46e5;
+        }
+        .toggle-label {
+            transition: background-color 0.3s ease;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #4f46e5;
+        }
+
+        /* Data management button styling */
+        .data-management-section {
+            border-top: 1px solid var(--border-color);
+        }
+        
+        /* Message notifications */
+        .message-notification {
+            animation: slideInRight 0.3s ease-out;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Dark mode for new elements */
+        .dark .border-red-500 {
+            border-color: #ef4444 !important;
+        }
+        .dark .text-red-600 {
+            color: #f87171 !important;
+        }
+        .dark .hover\:bg-red-50:hover {
+            background-color: #7f1d1d !important;
+        }
+
+        /* Simple animation for modals and blocks */
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        /* Style for completed tasks */
+        .task-completed span {
+            text-decoration: line-through;
+            color: var(--text-secondary);
+        }
+
+        .completed-task {
+            text-decoration: line-through;
+            opacity: 0.6;
+            color: var(--text-secondary);
+        }
+
+        .task-item.completed {
+            background-color: var(--bg-tertiary);
+        }
+
+        /* Dark mode input and button overrides */
+        .dark input[type="time"],
+        .dark input[type="text"],
+        .dark input[type="number"],
+        .dark textarea {
+            background-color: var(--bg-tertiary);
+            border-color: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        /* Dark mode time input clock icon fix */
+        .dark input[type="time"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            cursor: pointer;
+        }
+
+        .dark input[type="time"]:focus,
+        .dark input[type="text"]:focus,
+        .dark input[type="number"]:focus,
+        .dark textarea:focus {
+            border-color: var(--border-focus);
+            --tw-ring-color: var(--border-focus);
+        }
+
+        /* Dark mode title override */
+        .dark h1 {
+            color: var(--text-primary) !important;
+        }
+
+        /* Dark mode modal titles override (only for modal h3 elements) */
+        .dark .fixed h3 {
+            color: var(--text-primary) !important;
+        }
+
+        /* Dark mode cancel button text override */
+        .dark button[id*="cancel"] {
+            color: white !important; /* White text for cancel buttons in dark mode */
+        }
+
+        /* Dark mode Notes Edit/Preview buttons */
+        .dark #notes-edit-btn {
+            background-color: var(--bg-secondary) !important;
+            color: var(--text-secondary) !important;
+            border: 1px solid var(--border-color) !important;
+        }
+
+        .dark #notes-edit-btn:hover {
+            background-color: var(--bg-tertiary) !important;
+            color: var(--text-primary) !important;
+        }
+
+        /* Keep Edit button purple when active in dark mode */
+        .dark #notes-edit-btn.bg-indigo-500 {
+            background-color: #4f46e5 !important;
+            color: white !important;
+            border: 1px solid #4f46e5 !important;
+        }
+
+        .dark #notes-edit-btn.bg-indigo-500:hover {
+            background-color: #4338ca !important;
+        }
+
+        .dark #notes-preview-btn {
+            background-color: var(--bg-secondary) !important;
+            color: var(--text-secondary) !important;
+            border: 1px solid var(--border-color) !important;
+        }
+
+        .dark #notes-preview-btn:hover {
+            background-color: var(--bg-tertiary) !important;
+            color: var(--text-primary) !important;
+        }
+
+        /* Keep Preview button purple when active in dark mode */
+        .dark #notes-preview-btn.bg-indigo-500 {
+            background-color: #4f46e5 !important;
+            color: white !important;
+            border: 1px solid #4f46e5 !important;
+        }
+
+        .dark #notes-preview-btn.bg-indigo-500:hover {
+            background-color: #4338ca !important;
+        }
+
+        /* Dark mode Notes & Comments label */
+        .dark label[for="task-notes-input"] {
+            color: var(--text-primary) !important;
+        }
+
+        /* Dark mode toggle container background */
+        .dark .bg-gray-100 {
+            background-color: var(--bg-tertiary) !important;
+        }
+
+        /* Dark mode gray backgrounds for buttons */
+        .dark .bg-gray-200 {
+            background-color: var(--bg-tertiary) !important;
+            color: var(--text-primary) !important;
+        }
+
+        /* Dark mode edit buttons */
+        .dark .edit-block-btn,
+        .dark .edit-task-btn {
+            color: #8b5cf6 !important; /* Purple for edit buttons in dark mode */
+        }
+
+        .dark .edit-block-btn:hover,
+        .dark .edit-task-btn:hover {
+            color: #a78bfa !important; /* Lighter purple on hover */
+        }
+
+        /* Dark mode inline edit inputs */
+        .dark .edit-task-input {
+            background-color: var(--bg-tertiary) !important;
+            border-color: var(--border-color) !important;
+            color: var(--text-primary) !important;
+        }
+
+        .dark .save-task-edit-btn {
+            color: #10b981 !important; /* Green for save in dark mode */
+        }
+
+        .dark .cancel-task-edit-btn {
+            color: var(--text-secondary) !important; /* Gray for cancel in dark mode */
+        }
+
+        /* Task edit mode styling */
+        .task-actions-default, .task-actions-edit {
+            min-width: 80px; /* Consistent width for button container */
+            justify-content: flex-end;
+        }
+
+        .edit-task-input {
+            min-width: 200px;
+            background-color: var(--bg-secondary) !important;
+            border-color: var(--border-focus) !important;
+            color: var(--text-primary) !important;
+        }
+
+        .dark .edit-task-input {
+            background-color: var(--bg-tertiary) !important;
+            border-color: var(--border-focus) !important;
+            color: var(--text-primary) !important;
+        }
+
+        /* Sortable drag-and-drop styles */
+        .sortable-tasks {
+            min-height: 20px;
+        }
+
+        .sortable-ghost {
+            opacity: 0.4;
+            background-color: rgba(79, 70, 229, 0.1) !important;
+            border: 2px dashed #4f46e5 !important;
+        }
+
+        .sortable-chosen {
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+        }
+
+        .drag-handle {
+            cursor: grab;
+            opacity: 0.3;
+            transition: opacity 0.2s ease;
+            padding: 4px;
+            margin-right: 8px;
+            border-radius: 4px;
+        }
+
+        .drag-handle:hover {
+            opacity: 0.8;
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+
+        .dark .drag-handle:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .task-item {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .task-item:hover .drag-handle {
+            opacity: 0.6;
+        }
+    </style>
+</head>
+<body class="antialiased text-gray-800">
+
+    <!-- Main Application Container -->
+    <div id="app" class="container mx-auto max-w-4xl p-4 sm:p-6 lg:p-8">
+        
+        <header class="text-center mb-8 relative">
+            <!-- Settings Button -->
+            <button id="settings-btn" class="absolute top-0 right-0 p-2 text-gray-600 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded-md">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+            </button>
+            <h1 class="text-4xl font-bold text-gray-900">🗓️ Daily Time Planner</h1>
+            <p class="text-lg text-gray-600 mt-2">Structure your day, budget your time, and get things done.</p>
+        </header>
+
+        <!-- Section 1: Day Setup (Visible initially or when no day is set) -->
+        <div id="setup-section" class="bg-white p-6 rounded-xl shadow-md">
+            <h2 class="text-2xl font-semibold mb-4 text-center">Define Your Day</h2>
+            <div class="flex flex-col sm:flex-row gap-4 items-center justify-center">
+                <div class="w-full sm:w-auto">
+                    <label for="wake-up-time" class="block text-sm font-medium text-gray-700">Wake-up Time</label>
+                    <input type="time" id="wake-up-time" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" value="07:00">
+                </div>
+                <div class="w-full sm:w-auto">
+                    <label for="sleep-time" class="block text-sm font-medium text-gray-700">Sleep Time</label>
+                    <input type="time" id="sleep-time" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" value="23:00">
+                </div>
+                <button id="set-day-btn" class="w-full sm:w-auto mt-4 sm:mt-6 px-6 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Set Day</button>
+            </div>
+        </div>
+
+        <!-- Section 2: Main Planner (Hidden until day is set) -->
+        <div id="planner-section" class="hidden">
+            <!-- Time Stats Display -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 text-center">
+                <div class="bg-green-100 text-green-800 p-4 rounded-lg shadow">
+                    <h3 class="font-bold text-lg">Total Time</h3>
+                    <p id="total-time-display" class="text-2xl font-semibold"></p>
+                </div>
+                <div class="bg-blue-100 text-blue-800 p-4 rounded-lg shadow">
+                    <h3 class="font-bold text-lg">Allocated</h3>
+                    <p id="allocated-time-display" class="text-2xl font-semibold"></p>
+                </div>
+                <div class="bg-yellow-100 text-yellow-800 p-4 rounded-lg shadow">
+                    <h3 class="font-bold text-lg">Remaining</h3>
+                    <p id="remaining-time-display" class="text-2xl font-semibold"></p>
+                </div>
+            </div>
+
+            <!-- Block Creation -->
+            <div class="text-center mb-8">
+                <button id="add-block-btn" class="px-8 py-3 border border-transparent text-base font-medium rounded-full shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    + Add Time Block
+                </button>
+            </div>
+
+            <!-- Blocks Container -->
+            <div id="blocks-container" class="space-y-6">
+                <!-- Time blocks will be dynamically inserted here -->
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modal for adding a new block -->
+    <div id="add-block-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white fade-in">
+            <div class="mt-3 text-center">
+                <h3 class="text-lg leading-6 font-medium text-gray-900" id="block-modal-title">Create a New Time Block</h3>
+                <div class="mt-2 px-7 py-3">
+                    <input type="text" id="block-purpose-input" placeholder="Purpose (e.g., Morning Routine)" class="mb-3 px-3 py-2 text-gray-900 placeholder-gray-500 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    
+                    <!-- Time Selection Mode Toggle -->
+                    <div class="mb-4">
+                        <div class="flex items-center justify-center space-x-4">
+                            <label class="flex items-center">
+                                <input type="radio" name="time-mode" value="duration" id="duration-mode" checked class="mr-2">
+                                <span class="text-sm text-gray-700">Duration Mode</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="time-mode" value="range" id="range-mode" class="mr-2">
+                                <span class="text-sm text-gray-700">Time Range Mode</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Duration Mode (Default) -->
+                    <div id="duration-mode-section">
+                        <div class="flex space-x-2 mb-3">
+                            <div class="flex-1">
+                                <input type="number" id="block-hours-input" placeholder="Hours" min="0" max="23" value="1" class="px-3 py-2 text-gray-900 placeholder-gray-500 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                            <div class="flex-1">
+                                <input type="number" id="block-minutes-input" placeholder="Minutes" min="0" max="59" value="0" class="px-3 py-2 text-gray-900 placeholder-gray-500 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Time Range Mode (Hidden by default) -->
+                    <div id="range-mode-section" class="hidden">
+                        <div class="space-y-3 mb-3">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 text-left">Start Time</label>
+                                <input type="time" id="block-start-time" value="09:00" class="px-3 py-2 text-gray-900 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 text-left">End Time</label>
+                                <input type="time" id="block-end-time" value="10:00" class="px-3 py-2 text-gray-900 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                            <div id="calculated-duration" class="text-sm text-gray-600 text-left">
+                                Duration: <span id="duration-display">--</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Color Selection -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 text-left mb-2">Block Color</label>
+                        <div class="grid grid-cols-4 gap-2" id="color-picker">
+                            <!-- Colors will be generated by JavaScript -->
+                        </div>
+                        <input type="hidden" id="block-color-input" value="#ffffff">
+                    </div>
+                </div>
+                <div class="items-center px-4 py-3">
+                    <button id="save-block-btn" class="px-4 py-2 bg-indigo-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+                        Save Block
+                    </button>
+                     <button id="cancel-block-btn" class="mt-2 px-4 py-2 bg-gray-200 text-gray-800 text-base font-medium rounded-md w-full shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal for task details -->
+    <div id="task-details-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white fade-in">
+            <div class="mt-3">
+                <h3 class="text-lg leading-6 font-medium text-gray-900" id="task-modal-title">Task Details</h3>
+                <div class="mt-4 space-y-4">
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label for="task-notes-input" class="block text-sm font-medium text-gray-700">Notes & Comments</label>
+                            <div class="flex bg-gray-100 rounded-md overflow-hidden">
+                                <button id="notes-edit-btn" class="px-3 py-1 text-xs font-medium bg-indigo-500 text-white hover:bg-indigo-600 transition-colors">
+                                    Edit
+                                </button>
+                                <button id="notes-preview-btn" class="px-3 py-1 text-xs font-medium bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors">
+                                    Preview
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Edit Mode -->
+                        <div id="notes-edit-container">
+                            <textarea id="task-notes-input" rows="6" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 font-mono text-sm" placeholder="Add notes with markdown support:
+
+**Bold text** *Italic text* ~~Strikethrough~~
+__Underlined__ ==Highlighted==
+
+# Header 1
+## Header 2 
+### Header 3
+
+{red:Red text} {blue:Blue text} {green:Green text}
+|center|Centered text|center|
+
+- [ ] Unchecked item
+- [x] Checked item"></textarea>
+                        </div>
+                        
+                        <!-- Preview Mode -->
+                        <div id="notes-preview-container" class="hidden">
+                            <div id="notes-preview" class="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-md min-h-[8rem] max-h-48 overflow-y-auto text-sm leading-relaxed"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="items-center px-4 py-3 mt-4 text-right">
+                    <button id="save-task-details-btn" class="px-4 py-2 bg-indigo-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+                        Save Details
+                    </button>
+                    <button id="cancel-task-details-btn" class="ml-2 px-4 py-2 bg-gray-200 text-gray-800 text-base font-medium rounded-md shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white fade-in">
+            <div class="mt-3">
+                <h3 class="text-lg leading-6 font-medium text-gray-900 text-center mb-4">Settings</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label for="settings-wake-time" class="block text-sm font-medium text-gray-700">Wake-up Time</label>
+                        <input type="time" id="settings-wake-time" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label for="settings-sleep-time" class="block text-sm font-medium text-gray-700">Sleep Time</label>
+                        <input type="time" id="settings-sleep-time" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div class="flex items-center justify-between pt-2">
+                        <label for="dark-mode-toggle" class="text-sm font-medium text-gray-700">🌙 Dark Mode</label>
+                        <div class="relative inline-block w-12 mr-2 align-middle select-none">
+                            <input type="checkbox" id="dark-mode-toggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-2 appearance-none cursor-pointer transform transition-transform duration-300 ease-in-out"/>
+                            <label for="dark-mode-toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer transition-colors duration-300 ease-in-out"></label>
+                        </div>
+                    </div>
+                    
+                    <!-- Data Management Section -->
+                    <div class="border-t pt-4 mt-4">
+                        <h4 class="text-md font-medium text-gray-800 mb-3">📊 Data Management</h4>
+                        <div class="space-y-2">
+                            <button id="export-data-btn" class="w-full px-4 py-2 bg-green-500 text-white text-sm font-medium rounded-md shadow-sm hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-300 transition-colors">
+                                📤 Export Data
+                            </button>
+                            <button id="import-data-btn" class="w-full px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-md shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300 transition-colors">
+                                📥 Import Data
+                            </button>
+                            <input type="file" id="import-file-input" accept=".json" class="hidden">
+                        </div>
+                    </div>
+                    
+                    <!-- Danger Zone -->
+                    <div class="border-t pt-4 mt-4">
+                        <h4 class="text-md font-medium text-red-600 mb-3">💣 Nuclear Option</h4>
+                        <button id="clear-history-btn" class="w-full px-4 py-2 bg-white border-2 border-red-600 text-red-600 text-sm font-medium rounded-md shadow-sm hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-300 transition-colors">
+                            🗑️ Clear Everything
+                        </button>
+                        <p class="text-xs text-red-600 mt-2 font-medium">⚠️ DANGER: This will delete ALL blocks, tasks, notes, settings, and preferences permanently. Factory reset!</p>
+                    </div>
+                </div>
+                <div class="items-center px-4 py-3 mt-6 text-right">
+                    <button id="save-settings-btn" class="px-4 py-2 bg-indigo-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+                        Save Settings
+                    </button>
+                    <button id="cancel-settings-btn" class="ml-2 px-4 py-2 bg-gray-200 text-gray-800 text-base font-medium rounded-md shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- DOM ELEMENT REFERENCES ---
+            const setupSection = document.getElementById('setup-section');
+            const plannerSection = document.getElementById('planner-section');
+            const wakeUpInput = document.getElementById('wake-up-time');
+            const sleepInput = document.getElementById('sleep-time');
+            const setDayBtn = document.getElementById('set-day-btn');
+            
+            const totalTimeDisplay = document.getElementById('total-time-display');
+            const allocatedTimeDisplay = document.getElementById('allocated-time-display');
+            const remainingTimeDisplay = document.getElementById('remaining-time-display');
+            
+            const addBlockBtn = document.getElementById('add-block-btn');
+            const blocksContainer = document.getElementById('blocks-container');
+
+            // Modals
+            const addBlockModal = document.getElementById('add-block-modal');
+            const blockModalTitle = document.getElementById('block-modal-title');
+            const blockPurposeInput = document.getElementById('block-purpose-input');
+            const blockColorInput = document.getElementById('block-color-input');
+            const colorPicker = document.getElementById('color-picker');
+            
+            // New time selection elements
+            const durationModeRadio = document.getElementById('duration-mode');
+            const rangeModeRadio = document.getElementById('range-mode');
+            const durationModeSection = document.getElementById('duration-mode-section');
+            const rangeModeSection = document.getElementById('range-mode-section');
+            const blockHoursInput = document.getElementById('block-hours-input');
+            const blockMinutesInput = document.getElementById('block-minutes-input');
+            const blockStartTimeInput = document.getElementById('block-start-time');
+            const blockEndTimeInput = document.getElementById('block-end-time');
+            const durationDisplay = document.getElementById('duration-display');
+            
+            const saveBlockBtn = document.getElementById('save-block-btn');
+            const cancelBlockBtn = document.getElementById('cancel-block-btn');
+
+            const taskDetailsModal = document.getElementById('task-details-modal');
+            const taskModalTitle = document.getElementById('task-modal-title');
+            const taskNotesInput = document.getElementById('task-notes-input');
+            const saveTaskDetailsBtn = document.getElementById('save-task-details-btn');
+            const cancelTaskDetailsBtn = document.getElementById('cancel-task-details-btn');
+            
+            // Notes toggle mode elements
+            const notesEditBtn = document.getElementById('notes-edit-btn');
+            const notesPreviewBtn = document.getElementById('notes-preview-btn');
+            const notesEditContainer = document.getElementById('notes-edit-container');
+            const notesPreviewContainer = document.getElementById('notes-preview-container');
+            const notesPreview = document.getElementById('notes-preview');
+
+            const settingsBtn = document.getElementById('settings-btn');
+            const settingsModal = document.getElementById('settings-modal');
+            const settingsWakeTimeInput = document.getElementById('settings-wake-time');
+            const settingsSleepTimeInput = document.getElementById('settings-sleep-time');
+            const saveSettingsBtn = document.getElementById('save-settings-btn');
+            const cancelSettingsBtn = document.getElementById('cancel-settings-btn');
+            const darkModeToggle = document.getElementById('dark-mode-toggle');
+            
+            // Data management elements
+            const exportDataBtn = document.getElementById('export-data-btn');
+            const importDataBtn = document.getElementById('import-data-btn');
+            const importFileInput = document.getElementById('import-file-input');
+            const clearHistoryBtn = document.getElementById('clear-history-btn');
+
+            // --- APPLICATION STATE ---
+            let state = {
+                dayIsSet: false,
+                wakeTime: '07:00',
+                sleepTime: '23:00',
+                blocks: [],
+                editingTaskId: null, // format: { blockId, taskId }
+                editingBlockId: null, // NEW: For tracking which block is being edited
+                isEditingBlock: false, // NEW: Flag for block edit mode
+                darkMode: false, // NEW: Dark mode preference
+                isNotesPreviewMode: false, // NEW: Notes toggle mode state
+            };
+
+            // --- COLOR PALETTE FOR TIME BLOCKS ---
+            const blockColorPalette = [
+                { 
+                    name: 'White', 
+                    value: '#ffffff', 
+                    darkValue: '#374151', 
+                    textColor: '#374151', 
+                    darkTextColor: '#f9fafb' 
+                },
+                { 
+                    name: 'Blue', 
+                    value: '#eff6ff', 
+                    darkValue: '#1e3a8a', 
+                    textColor: '#1e40af', 
+                    darkTextColor: '#bfdbfe' 
+                },
+                { 
+                    name: 'Green', 
+                    value: '#f0fdf4', 
+                    darkValue: '#14532d', 
+                    textColor: '#166534', 
+                    darkTextColor: '#bbf7d0' 
+                },
+                { 
+                    name: 'Yellow', 
+                    value: '#fefce8', 
+                    darkValue: '#854d0e', 
+                    textColor: '#a16207', 
+                    darkTextColor: '#fef3c7' 
+                },
+                { 
+                    name: 'Red', 
+                    value: '#fef2f2', 
+                    darkValue: '#991b1b', 
+                    textColor: '#dc2626', 
+                    darkTextColor: '#fecaca' 
+                }
+            ];
+
+            // --- UTILITY FUNCTIONS ---
+            const timeToMinutes = (timeStr) => {
+                const [hours, minutes] = timeStr.split(':').map(Number);
+                return hours * 60 + minutes;
+            };
+
+            const minutesToHM = (minutes) => {
+                if (minutes < 0) minutes = 0;
+                const h = Math.floor(minutes / 60);
+                const m = minutes % 60;
+                return `${h}h ${m}m`;
+            };
+
+            const minutesToTime = (minutes) => {
+                const h = Math.floor(minutes / 60) % 24;
+                const m = minutes % 60;
+                return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+            };
+
+            const formatTimeWithAMPM = (timeStr) => {
+                const [hours, minutes] = timeStr.split(':').map(Number);
+                const period = hours >= 12 ? 'PM' : 'AM';
+                const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
+                return `${displayHours}:${String(minutes).padStart(2, '0')} ${period}`;
+            };
+
+            // --- COLOR PICKER FUNCTIONS ---
+            const initializeColorPicker = () => {
+                const isDarkMode = document.body.classList.contains('dark');
+                
+                // Stronger colors for picker visibility with dark mode support
+                const pickerColors = [
+                    { 
+                        name: 'White', 
+                        value: '#ffffff', 
+                        darkValue: '#374151',
+                        pickerValue: isDarkMode ? '#6b7280' : '#f3f4f6', 
+                        textColor: '#374151',
+                        darkTextColor: '#f9fafb'
+                    },
+                    { 
+                        name: 'Blue', 
+                        value: '#eff6ff', 
+                        darkValue: '#1e3a8a',
+                        pickerValue: isDarkMode ? '#1d4ed8' : '#3b82f6', 
+                        textColor: '#1e40af',
+                        darkTextColor: '#bfdbfe'
+                    },
+                    { 
+                        name: 'Green', 
+                        value: '#f0fdf4', 
+                        darkValue: '#14532d',
+                        pickerValue: isDarkMode ? '#16a34a' : '#10b981', 
+                        textColor: '#166534',
+                        darkTextColor: '#bbf7d0'
+                    },
+                    { 
+                        name: 'Yellow', 
+                        value: '#fefce8', 
+                        darkValue: '#854d0e',
+                        pickerValue: isDarkMode ? '#ca8a04' : '#eab308', 
+                        textColor: '#a16207',
+                        darkTextColor: '#fef3c7'
+                    },
+                    { 
+                        name: 'Red', 
+                        value: '#fef2f2', 
+                        darkValue: '#991b1b',
+                        pickerValue: isDarkMode ? '#dc2626' : '#ef4444', 
+                        textColor: '#dc2626',
+                        darkTextColor: '#fecaca'
+                    }
+                ];
+
+                colorPicker.innerHTML = '';
+                pickerColors.forEach(color => {
+                    const colorButton = document.createElement('button');
+                    colorButton.type = 'button';
+                    colorButton.className = 'w-8 h-8 rounded-full border-2 border-gray-300 hover:border-gray-500 transition-colors';
+                    colorButton.style.backgroundColor = color.pickerValue;
+                    colorButton.title = color.name;
+                    colorButton.dataset.color = isDarkMode ? color.darkValue : color.value;
+                    colorButton.dataset.lightColor = color.value;
+                    colorButton.dataset.darkColor = color.darkValue;
+                    colorButton.dataset.textColor = isDarkMode ? color.darkTextColor : color.textColor;
+                    colorButton.dataset.lightTextColor = color.textColor;
+                    colorButton.dataset.darkTextColor = color.darkTextColor;
+                    
+                    colorButton.addEventListener('click', () => {
+                        // Remove active state from all color buttons
+                        colorPicker.querySelectorAll('button').forEach(btn => {
+                            btn.classList.remove('ring-2', 'ring-indigo-500');
+                        });
+                        
+                        // Add active state to selected color
+                        colorButton.classList.add('ring-2', 'ring-indigo-500');
+                        blockColorInput.value = colorButton.dataset.color;
+                    });
+                    
+                    colorPicker.appendChild(colorButton);
+                });
+                
+                // Set default selection based on current mode
+                const defaultColor = isDarkMode ? '#374151' : '#ffffff';
+                const defaultButton = colorPicker.querySelector(`[data-color="${defaultColor}"]`);
+                if (defaultButton) {
+                    defaultButton.classList.add('ring-2', 'ring-indigo-500');
+                }
+            };
+
+            const setBlockColor = (colorValue) => {
+                const isDarkMode = document.body.classList.contains('dark');
+                const colorButtons = colorPicker.querySelectorAll('button');
+                colorButtons.forEach(btn => {
+                    btn.classList.remove('ring-2', 'ring-indigo-500');
+                    // Check against both light and dark colors for compatibility
+                    if (btn.dataset.color === colorValue || 
+                        btn.dataset.lightColor === colorValue || 
+                        btn.dataset.darkColor === colorValue) {
+                        btn.classList.add('ring-2', 'ring-indigo-500');
+                        // Update the input with the current mode's appropriate color
+                        blockColorInput.value = btn.dataset.color;
+                    }
+                });
+                // If no match found, set the input directly (for legacy compatibility)
+                if (!colorButtons || !Array.from(colorButtons).some(btn => 
+                    btn.classList.contains('ring-2'))) {
+                    blockColorInput.value = colorValue;
+                }
+            };
+
+            // --- SIMPLE MARKDOWN PARSER ---
+            const parseSimpleMarkdown = (text) => {
+                if (!text) return '';
+                
+                return text
+                    // Bold text: **text** -> <strong>text</strong>
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    
+                    // Italic text: *text* -> <em>text</em>
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                    
+                    // Headers: # ## ###
+                    .replace(/^### (.*$)/gim, '<h5 class="text-sm font-bold mt-2 mb-1 text-gray-900">$1</h5>')
+                    .replace(/^## (.*$)/gim, '<h4 class="text-base font-bold mt-2 mb-1 text-gray-900">$1</h4>')
+                    .replace(/^# (.*$)/gim, '<h3 class="text-lg font-bold mt-2 mb-1 text-gray-900">$1</h3>')
+                    
+                    // Strikethrough: ~~text~~ -> <del>text</del>
+                    .replace(/~~(.*?)~~/g, '<del>$1</del>')
+                    
+                    // Underline: __text__ -> <u>text</u>
+                    .replace(/__(.*?)__/g, '<u>$1</u>')
+                    
+                    // Highlight: ==text== -> <mark>text</mark>
+                    .replace(/==(.*?)==/g, '<mark class="bg-yellow-200 px-1">$1</mark>')
+                    
+                    // Text colors: {color:text}
+                    .replace(/\{red:(.*?)\}/g, '<span class="text-red-600">$1</span>')
+                    .replace(/\{blue:(.*?)\}/g, '<span class="text-blue-600">$1</span>')
+                    .replace(/\{green:(.*?)\}/g, '<span class="text-green-600">$1</span>')
+                    .replace(/\{yellow:(.*?)\}/g, '<span class="text-yellow-600">$1</span>')
+                    .replace(/\{purple:(.*?)\}/g, '<span class="text-purple-600">$1</span>')
+                    .replace(/\{orange:(.*?)\}/g, '<span class="text-orange-600">$1</span>')
+                    
+                    // Checkboxes
+                    .replace(/- \[ \] (.*)/g, '<div class="flex items-center gap-2 my-1"><input type="checkbox" disabled class="h-4 w-4"> <span>$1</span></div>')
+                    .replace(/- \[x\] (.*)/g, '<div class="flex items-center gap-2 my-1"><input type="checkbox" checked disabled class="h-4 w-4"> <span>$1</span></div>')
+                    
+                    // Text alignment
+                    .replace(/\|center\|(.*?)\|center\|/g, '<div class="text-center">$1</div>')
+                    .replace(/\|right\|(.*?)\|right\|/g, '<div class="text-right">$1</div>')
+                    .replace(/\|left\|(.*?)\|left\|/g, '<div class="text-left">$1</div>')
+                    
+                    // Line breaks
+                    .replace(/\n/g, '<br>');
+            };
+
+            // --- NOTES TOGGLE MODE FUNCTIONS ---
+            const updateNotesToggleUI = () => {
+                const editBtn = document.getElementById('notes-edit-btn');
+                const previewBtn = document.getElementById('notes-preview-btn');
+                const editContainer = document.getElementById('notes-edit-container');
+                const previewContainer = document.getElementById('notes-preview-container');
+                
+                if (state.isNotesPreviewMode) {
+                    // Switch to Preview Mode
+                    editBtn.classList.remove('bg-indigo-500', 'text-white');
+                    editBtn.classList.add('bg-gray-200', 'text-gray-700');
+                    previewBtn.classList.remove('bg-gray-200', 'text-gray-700');
+                    previewBtn.classList.add('bg-indigo-500', 'text-white');
+                    
+                    editContainer.classList.add('hidden');
+                    previewContainer.classList.remove('hidden');
+                    
+                    // Update preview content
+                    const notesText = document.getElementById('task-notes-input').value;
+                    const previewDiv = document.getElementById('notes-preview');
+                    previewDiv.innerHTML = parseSimpleMarkdown(notesText) || '<em class="text-gray-500">No notes added yet...</em>';
+                } else {
+                    // Switch to Edit Mode
+                    editBtn.classList.remove('bg-gray-200', 'text-gray-700');
+                    editBtn.classList.add('bg-indigo-500', 'text-white');
+                    previewBtn.classList.remove('bg-indigo-500', 'text-white');
+                    previewBtn.classList.add('bg-gray-200', 'text-gray-700');
+                    
+                    editContainer.classList.remove('hidden');
+                    previewContainer.classList.add('hidden');
+                }
+            };
+
+            const toggleNotesMode = (isPreview) => {
+                state.isNotesPreviewMode = isPreview;
+                updateNotesToggleUI();
+            };
+
+            // --- DARK MODE UTILITIES ---
+            const applyTheme = (isDark) => {
+                document.body.classList.toggle('dark', isDark);
+                // Update any dynamic elements that need theme awareness
+                const modals = document.querySelectorAll('[id$="-modal"]');
+                modals.forEach(modal => {
+                    const content = modal.querySelector('.bg-white');
+                    if (content) {
+                        content.style.backgroundColor = isDark ? 'var(--bg-secondary)' : '';
+                        content.style.color = isDark ? 'var(--text-primary)' : '';
+                    }
+                });
+            };
+
+            const toggleDarkMode = (enabled) => {
+                state.darkMode = enabled;
+                applyTheme(enabled);
+                saveState();
+                
+                // Refresh color picker with new mode colors
+                if (colorPicker) {
+                    initializeColorPicker();
+                }
+                
+                // Re-render blocks to apply new colors
+                if (state.dayIsSet) {
+                    renderBlocks();
+                }
+            };
+
+            // --- DATA MANAGEMENT UTILITIES ---
+            const exportData = () => {
+                try {
+                    const exportData = {
+                        exportDate: new Date().toISOString(),
+                        version: "1.0",
+                        appName: "Daily Time Planner",
+                        data: {
+                            wakeTime: state.wakeTime,
+                            sleepTime: state.sleepTime,
+                            blocks: state.blocks,
+                            darkMode: state.darkMode,
+                            dayIsSet: state.dayIsSet,
+                            editingTaskId: state.editingTaskId,
+                            editingBlockId: state.editingBlockId,
+                            isEditingBlock: state.isEditingBlock,
+                            isNotesPreviewMode: state.isNotesPreviewMode
+                        }
+                    };
+
+                    const dataStr = JSON.stringify(exportData, null, 2);
+                    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                    
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(dataBlob);
+                    
+                    const date = new Date().toISOString().split('T')[0];
+                    link.download = `time-planner-backup-${date}.json`;
+                    
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    showMessage('✅ Data exported successfully!', 'success');
+                } catch (error) {
+                    showMessage('❌ Export failed: ' + error.message, 'error');
+                }
+            };
+
+            const importData = (fileContent) => {
+                try {
+                    const importedData = JSON.parse(fileContent);
+                    
+                    // Validate structure
+                    if (!importedData.data || !importedData.version) {
+                        throw new Error('Invalid file format');
+                    }
+
+                    if (!importedData.data.wakeTime || !importedData.data.sleepTime) {
+                        throw new Error('Missing required time settings');
+                    }
+
+                    // Show confirmation dialog
+                    const confirmMessage = `Import data from ${importedData.exportDate ? new Date(importedData.exportDate).toLocaleDateString() : 'unknown date'}?\n\nThis will replace your current:\n• ${state.blocks.length} time blocks\n• Wake/sleep schedule\n• Theme preferences\n\nThis cannot be undone.`;
+                    
+                    if (!confirm(confirmMessage)) {
+                        return;
+                    }
+
+                    // Import the data with fallbacks for missing fields
+                    state.wakeTime = importedData.data.wakeTime;
+                    state.sleepTime = importedData.data.sleepTime;
+                    state.blocks = importedData.data.blocks || [];
+                    state.darkMode = importedData.data.darkMode || false;
+                    state.dayIsSet = importedData.data.dayIsSet || false;
+                    state.editingTaskId = importedData.data.editingTaskId || null;
+                    state.editingBlockId = importedData.data.editingBlockId || null;
+                    state.isEditingBlock = importedData.data.isEditingBlock || false;
+                    state.isNotesPreviewMode = importedData.data.isNotesPreviewMode || false;
+
+                    // Update UI
+                    applyTheme(state.darkMode);
+                    darkModeToggle.checked = state.darkMode;
+                    
+                    // Save and refresh
+                    saveState();
+                    render();
+                    closeModal(settingsModal);
+                    
+                    showMessage('✅ Data imported successfully!', 'success');
+                } catch (error) {
+                    showMessage('❌ Import failed: ' + error.message, 'error');
+                }
+            };
+
+            const clearAllHistory = () => {
+                const totalBlocks = state.blocks.length;
+                const totalTasks = state.blocks.reduce((sum, block) => sum + block.tasks.length, 0);
+                
+                const confirmMessage = `🗑️ CLEAR EVERYTHING\n\nThis will permanently delete ALL your data:\n\n📦 ${totalBlocks} time blocks\n✅ ${totalTasks} tasks and notes\n⏰ Wake/sleep schedule\n🌙 Dark mode preference\n📊 All settings and preferences\n\nEverything will be reset to factory defaults.\n\n⚠️ THIS CANNOT BE UNDONE!\n\nHave you exported your data as backup?\n\nProceed with complete deletion?`;
+                
+                if (!confirm(confirmMessage)) {
+                    return;
+                }
+
+                // Second confirmation with enhanced warning
+                const finalConfirm = confirm('🔴 FINAL CONFIRMATION - NUCLEAR OPTION\n\nYou are about to:\n• Lose ALL your time blocks forever\n• Delete ALL tasks and notes permanently\n• Reset ALL settings to factory defaults\n• Return to welcome screen\n\nThis action is IRREVERSIBLE!\n\nType OK to proceed with COMPLETE DELETION:');
+                
+                if (!finalConfirm) {
+                    return;
+                }
+
+                // NUCLEAR RESET - Clear absolutely everything
+                localStorage.removeItem('timePlannerState');
+                
+                // Reset state to absolute factory defaults
+                state = {
+                    dayIsSet: false,
+                    wakeTime: '07:00',
+                    sleepTime: '23:00',
+                    blocks: [],
+                    editingTaskId: null,
+                    editingBlockId: null,
+                    isEditingBlock: false,
+                    darkMode: false,
+                    isNotesPreviewMode: false
+                };
+
+                // Complete UI reset
+                applyTheme(false); // Force light mode
+                darkModeToggle.checked = false;
+                setupSection.classList.remove('hidden');
+                plannerSection.classList.add('hidden');
+                
+                // Reset all inputs to factory defaults
+                wakeUpInput.value = '07:00';
+                sleepInput.value = '23:00';
+                settingsWakeTimeInput.value = '07:00';
+                settingsSleepTimeInput.value = '23:00';
+                
+                // Close any open modals
+                closeModal(settingsModal);
+                closeModal(taskDetailsModal);
+                closeModal(addBlockModal);
+                
+                // Force complete re-render
+                render();
+                
+                showMessage('🧹 Everything cleared! Welcome back to a fresh start.', 'success');
+            };
+
+            const showMessage = (text, type = 'info') => {
+                // Create temporary message element
+                const message = document.createElement('div');
+                message.className = `fixed top-4 right-4 px-4 py-2 rounded-md shadow-lg z-50 transition-all duration-300 ${
+                    type === 'success' ? 'bg-green-500 text-white' :
+                    type === 'error' ? 'bg-red-500 text-white' :
+                    'bg-blue-500 text-white'
+                }`;
+                message.textContent = text;
+                
+                document.body.appendChild(message);
+                
+                // Auto-remove after 3 seconds
+                setTimeout(() => {
+                    if (message.parentNode) {
+                        message.parentNode.removeChild(message);
+                    }
+                }, 3000);
+            };
+
+            // --- DEBUG UTILITIES ---
+            const debugTimeValidation = (startTime, endTime) => {
+                console.log('🔍 TIME VALIDATION DEBUG:');
+                console.log('==========================');
+                
+                const wakeMinutes = timeToMinutes(state.wakeTime);
+                const sleepMinutes = timeToMinutes(state.sleepTime);
+                const startMinutes = timeToMinutes(startTime);
+                const endMinutes = timeToMinutes(endTime);
+                const isOvernightSchedule = sleepMinutes <= wakeMinutes;
+                
+                console.log('📊 Current Schedule:');
+                console.log(`🌅 Wake: ${state.wakeTime} (${wakeMinutes} min)`);
+                console.log(`🌙 Sleep: ${state.sleepTime} (${sleepMinutes} min)`);
+                console.log(`🌃 Overnight schedule: ${isOvernightSchedule}`);
+                
+                console.log('\n🎯 Testing Times:');
+                console.log(`🕐 Start: ${startTime} (${startMinutes} min)`);
+                console.log(`🕕 End: ${endTime} (${endMinutes} min)`);
+                
+                if (isOvernightSchedule) {
+                    const validSameDay = startMinutes >= wakeMinutes && endMinutes <= 1440;
+                    const validNextDay = startMinutes >= 0 && endMinutes <= sleepMinutes && endMinutes > 0;
+                    const spansMidnight = startMinutes >= wakeMinutes && endMinutes <= sleepMinutes && startMinutes > endMinutes;
+                    
+                    console.log('\n✅ Overnight Validation:');
+                    console.log(`📅 Valid same day (${wakeMinutes}-1440): ${validSameDay}`);
+                    console.log(`📅 Valid next day (0-${sleepMinutes}): ${validNextDay}`);
+                    console.log(`📅 Spans midnight: ${spansMidnight}`);
+                    console.log(`🎯 Overall valid: ${validSameDay || validNextDay || spansMidnight}`);
+                } else {
+                    const valid = startMinutes >= wakeMinutes && endMinutes <= sleepMinutes;
+                    console.log(`\n✅ Same Day Validation: ${valid}`);
+                }
+                
+                console.log('\n📦 Existing Blocks:');
+                state.blocks.forEach((block, i) => {
+                    console.log(`   ${i+1}. ${block.purpose} - ${block.duration}min`);
+                    if (block.startTime) console.log(`      ⏰ ${block.startTime}-${block.endTime}`);
+                });
+                
+                // Run actual validation
+                const result = validateTimeRange(startTime, endTime);
+                console.log('\n🔍 Validation Result:', result || '✅ VALID');
+                
+                return result;
+            };
+
+            // Make debug function globally accessible
+            window.debugTimeValidation = debugTimeValidation;
+
+            // --- TIME BLOCK MODE UTILITIES ---
+            const switchTimeMode = (mode) => {
+                if (mode === 'duration') {
+                    durationModeSection.classList.remove('hidden');
+                    rangeModeSection.classList.add('hidden');
+                } else if (mode === 'range') {
+                    durationModeSection.classList.add('hidden');
+                    rangeModeSection.classList.remove('hidden');
+                    updateCalculatedDuration();
+                }
+            };
+
+            const updateCalculatedDuration = () => {
+                const startTime = blockStartTimeInput.value;
+                const endTime = blockEndTimeInput.value;
+                
+                if (startTime && endTime) {
+                    const startMinutes = timeToMinutes(startTime);
+                    const endMinutes = timeToMinutes(endTime);
+                    
+                    if (endMinutes > startMinutes) {
+                        const duration = endMinutes - startMinutes;
+                        durationDisplay.textContent = minutesToHM(duration);
+                        return duration;
+                    } else {
+                        durationDisplay.textContent = 'Invalid time range';
+                        return 0;
+                    }
+                } else {
+                    durationDisplay.textContent = '--';
+                    return 0;
+                }
+            };
+
+            const validateTimeRange = (startTime, endTime, excludeBlockId = null) => {
+                const wakeMinutes = timeToMinutes(state.wakeTime);
+                const sleepMinutes = timeToMinutes(state.sleepTime);
+                const startMinutes = timeToMinutes(startTime);
+                const endMinutes = timeToMinutes(endTime);
+
+                // DETECT OVERNIGHT SCHEDULE (e.g., 7:00 AM to 1:00 AM next day)
+                const isOvernightSchedule = sleepMinutes <= wakeMinutes;
+                
+                if (isOvernightSchedule) {
+                    // For overnight schedules, valid times are:
+                    // 1. Same day: wake time to 23:59 (e.g., 7:00 AM - 11:59 PM)
+                    // 2. Next day: 00:00 to sleep time (e.g., 12:00 AM - 1:00 AM)
+                    
+                    const validSameDay = startMinutes >= wakeMinutes && endMinutes <= 1440; // Before midnight
+                    const validNextDay = startMinutes >= 0 && endMinutes <= sleepMinutes && endMinutes > 0; // After midnight until sleep
+                    const spansMidnight = startMinutes >= wakeMinutes && endMinutes <= sleepMinutes && startMinutes > endMinutes;
+                    
+                    if (!(validSameDay || validNextDay || spansMidnight)) {
+                        const sleepDisplay = sleepMinutes === 0 ? '12:00 AM (midnight)' : state.sleepTime;
+                        return `Time must be within your overnight schedule (${state.wakeTime} - ${sleepDisplay} next day)`;
+                    }
+                } else {
+                    // NORMAL SAME-DAY SCHEDULE (e.g., 7:00 AM to 11:00 PM)
+                    if (startMinutes < wakeMinutes || endMinutes > sleepMinutes) {
+                        return `Time must be within your day schedule (${state.wakeTime} - ${state.sleepTime})`;
+                    }
+                }
+
+                // Sort blocks by start time (same logic as renderBlocks)
+                // EXCLUDE the block being edited from overlap checking
+                const blocksToCheck = state.blocks.filter(block => block.id !== excludeBlockId);
+                const sortedBlocks = [...blocksToCheck].sort((a, b) => {
+                    if (a.startTime && b.startTime) {
+                        return timeToMinutes(a.startTime) - timeToMinutes(b.startTime);
+                    } else if (a.startTime && !b.startTime) {
+                        return -1; // Scheduled blocks come first
+                    } else if (!a.startTime && b.startTime) {
+                        return 1;
+                    }
+                    return 0; // Keep original order for non-scheduled blocks
+                });
+
+                let cumulativeTime = wakeMinutes; // Track sequential block timing
+
+                for (const block of sortedBlocks) {
+                    let blockStart, blockEnd;
+                    
+                    if (block.startTime && block.endTime) {
+                        // Block has specific start/end times
+                        blockStart = timeToMinutes(block.startTime);
+                        blockEnd = timeToMinutes(block.endTime);
+                        
+                        // Handle overnight blocks
+                        if (isOvernightSchedule && blockStart > blockEnd) {
+                            blockEnd += 1440; // Add 24 hours for next day
+                        }
+                        
+                        // Update cumulative time if this scheduled block extends past current time
+                        if (blockEnd > cumulativeTime) {
+                            cumulativeTime = blockEnd;
+                        }
+                    } else {
+                        // Block uses sequential timing - starts after previous blocks
+                        blockStart = cumulativeTime;
+                        blockEnd = cumulativeTime + block.duration;
+                        cumulativeTime = blockEnd;
+                    }
+                    
+                    // Check for overlap with consideration for overnight schedules
+                    let checkStart = startMinutes;
+                    let checkEnd = endMinutes;
+                    
+                    if (isOvernightSchedule) {
+                        // For overnight schedules, handle time wrapping
+                        if (checkStart > checkEnd) {
+                            checkEnd += 1440; // Add 24 hours for next day
+                        }
+                        if (blockStart > blockEnd && block.startTime && block.endTime) {
+                            blockEnd += 1440; // Add 24 hours for overnight blocks
+                        }
+                    }
+                    
+                    // Check for overlap: new block overlaps if it starts before existing ends AND ends after existing starts
+                    if (checkStart < blockEnd && checkEnd > blockStart) {
+                        const blockTimeDisplay = block.startTime && block.endTime 
+                            ? `${block.startTime} - ${block.endTime}`
+                            : `${minutesToTime(blockStart)} - ${minutesToTime(blockEnd)}`;
+                        return `Time range overlaps with existing block: "${block.purpose}" (${blockTimeDisplay})`;
+                    }
+                }
+
+                return null; // No validation errors
+            };
+            
+            // --- STATE MANAGEMENT & PERSISTENCE ---
+            const saveState = () => {
+                localStorage.setItem('timePlannerState', JSON.stringify(state));
+            };
+
+            const loadState = () => {
+                const savedState = localStorage.getItem('timePlannerState');
+                if (savedState) {
+                    state = JSON.parse(savedState);
+                    
+                    // Migration: Add default colors to blocks that don't have them
+                    let hasChanges = false;
+                    state.blocks.forEach(block => {
+                        if (!block.color) {
+                            // Set default color based on current dark mode preference
+                            const isDarkMode = state.darkMode || false;
+                            block.color = isDarkMode ? '#374151' : '#ffffff';
+                            hasChanges = true;
+                        }
+                        // Ensure blocks have valid colors from our palette (for compatibility)
+                        else {
+                            // Check if the color exists in our palette (either light or dark version)
+                            const colorExists = blockColorPalette.some(c => 
+                                c.value === block.color || c.darkValue === block.color
+                            );
+                            if (!colorExists) {
+                                // Fallback to white/gray if color is not in our palette
+                                const isDarkMode = state.darkMode || false;
+                                block.color = isDarkMode ? '#374151' : '#ffffff';
+                                hasChanges = true;
+                            }
+                        }
+                    });
+                    
+                    // Save migrated state if changes were made
+                    if (hasChanges) {
+                        saveState();
+                    }
+                    
+                    // Apply theme after loading state
+                    applyTheme(state.darkMode || false);
+                }
+            };
+            
+            // --- RENDERING & UI UPDATES ---
+            const render = () => {
+                if (state.dayIsSet) {
+                    setupSection.classList.add('hidden');
+                    plannerSection.classList.remove('hidden');
+                    wakeUpInput.value = state.wakeTime;
+                    sleepInput.value = state.sleepTime;
+                } else {
+                    setupSection.classList.remove('hidden');
+                    plannerSection.classList.add('hidden');
+                }
+                
+                renderTimeStats();
+                renderBlocks();
+            };
+            
+            const renderTimeStats = () => {
+                let totalMinutes = timeToMinutes(state.sleepTime) - timeToMinutes(state.wakeTime);
+                if (totalMinutes < 0) { // Handles overnight case
+                    totalMinutes += 24 * 60;
+                }
+                const allocatedMinutes = state.blocks.reduce((sum, block) => sum + block.duration, 0);
+                const remainingMinutes = totalMinutes - allocatedMinutes;
+                
+                totalTimeDisplay.textContent = minutesToHM(totalMinutes);
+                allocatedTimeDisplay.textContent = minutesToHM(allocatedMinutes);
+                remainingTimeDisplay.textContent = minutesToHM(remainingMinutes);
+
+                // Disable add block button if no time is left
+                addBlockBtn.disabled = remainingMinutes <= 0;
+                addBlockBtn.classList.toggle('opacity-50', remainingMinutes <= 0);
+                addBlockBtn.classList.toggle('cursor-not-allowed', remainingMinutes <= 0);
+            };
+
+            const renderBlocks = () => {
+                blocksContainer.innerHTML = '';
+                let cumulativeTime = timeToMinutes(state.wakeTime);
+                const isDarkMode = document.body.classList.contains('dark');
+
+                // Sort blocks by start time if they have specific times, otherwise by order
+                const sortedBlocks = [...state.blocks].sort((a, b) => {
+                    if (a.startTime && b.startTime) {
+                        return timeToMinutes(a.startTime) - timeToMinutes(b.startTime);
+                    } else if (a.startTime && !b.startTime) {
+                        return -1; // Scheduled blocks come first
+                    } else if (!a.startTime && b.startTime) {
+                        return 1;
+                    }
+                    return 0; // Keep original order for non-scheduled blocks
+                });
+
+                sortedBlocks.forEach(block => {
+                    const blockEl = document.createElement('div');
+                    
+                    // Apply custom color with dark mode support
+                    let blockColor = block.color || (isDarkMode ? '#374151' : '#ffffff');
+                    let colorInfo = null;
+                    
+                    // Find color info by checking both light and dark values for compatibility
+                    for (const color of blockColorPalette) {
+                        if (color.value === blockColor || color.darkValue === blockColor) {
+                            colorInfo = color;
+                            // Set the appropriate color for current mode
+                            blockColor = isDarkMode ? color.darkValue : color.value;
+                            break;
+                        }
+                    }
+                    
+                    // Fallback to first color if no match found
+                    if (!colorInfo) {
+                        colorInfo = blockColorPalette[0];
+                        blockColor = isDarkMode ? colorInfo.darkValue : colorInfo.value;
+                    }
+                    
+                    const textColor = isDarkMode ? colorInfo.darkTextColor : colorInfo.textColor;
+                    
+                    blockEl.className = 'p-5 rounded-lg shadow-md fade-in';
+                    blockEl.style.backgroundColor = blockColor;
+                    blockEl.style.color = textColor;
+                    blockEl.dataset.id = block.id;
+                    blockEl.dataset.blockId = block.id; // For sortable identification
+
+                    let startTime, endTime, timeDisplay;
+
+                    if (block.startTime && block.endTime) {
+                        // Block has specific start/end times
+                        startTime = block.startTime;
+                        endTime = block.endTime;
+                        timeDisplay = `${minutesToHM(block.duration)} (${formatTimeWithAMPM(startTime)} - ${formatTimeWithAMPM(endTime)}) ⏰`;
+                    } else {
+                        // Block uses sequential timing
+                        startTime = minutesToTime(cumulativeTime);
+                        cumulativeTime += block.duration;
+                        endTime = minutesToTime(cumulativeTime);
+                        timeDisplay = `${minutesToHM(block.duration)} (${formatTimeWithAMPM(startTime)} - ${formatTimeWithAMPM(endTime)}) ⏰`;
+                    }
+
+                    let tasksHtml = block.tasks.map(task => {
+                        const completedClass = task.completed ? 'completed-task' : '';
+                        const liClass = task.completed ? 'task-item completed' : 'task-item';
+                        return `
+                            <li class="flex items-center justify-between py-2 border-b ${liClass}" data-id="${task.id}" data-task-id="${task.id}">
+                                <div class="flex items-center flex-grow">
+                                    <div class="drag-handle" data-lucide="grip-vertical"></div>
+                                    <input type="checkbox" class="h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 task-checkbox" ${task.completed ? 'checked' : ''}>
+                                    <span class="ml-3 flex-grow cursor-pointer task-text ${completedClass}">${task.text}</span>
+                                </div>
+                                <div class="flex gap-2 task-actions-default">
+                                    <button class="hover:opacity-80 font-bold edit-task-btn" title="Edit Task"><i data-lucide="edit" class="w-6 h-6"></i></button>
+                                    <button class="hover:opacity-80 font-bold delete-task-btn" title="Delete Task"><i data-lucide="trash-2" class="w-6 h-6"></i></button>
+                                </div>
+                            </li>
+                        `;
+                    }).join('');
+                    
+                    blockEl.innerHTML = `
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="text-xl font-bold" style="color: ${textColor}">${block.purpose}</h3>
+                                <p class="text-sm" style="color: ${textColor}; opacity: 0.8;">${timeDisplay}</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="hover:opacity-70 font-bold edit-block-btn" title="Edit Block" style="color: ${textColor}"><i data-lucide="edit" class="w-6 h-6"></i></button>
+                                <button class="hover:opacity-70 font-bold delete-block-btn" title="Delete Block" style="color: ${textColor}"><i data-lucide="trash-2" class="w-6 h-6"></i></button>
+                            </div>
+                        </div>
+                        <ul class="task-list sortable-tasks space-y-2 mb-4">${tasksHtml}</ul>
+                        <div class="flex gap-2 mt-4">
+                            <input type="text" class="flex-grow px-3 py-2 bg-white bg-opacity-90 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 new-task-input" placeholder="Add a new task...">
+                            <button class="px-4 py-2 border border-transparent font-medium rounded-md shadow-sm text-white bg-indigo-500 hover:bg-indigo-600 add-task-btn">Add</button>
+                        </div>
+                    `;
+                    blocksContainer.appendChild(blockEl);
+                });
+                
+                // Reinitialize Lucide icons after dynamic content is added
+                if (typeof lucide !== 'undefined') {
+                    console.log('🎨 Reinitializing Lucide icons...');
+                    lucide.createIcons();
+                } else {
+                    console.warn('⚠️ Lucide library not loaded!');
+                }
+                
+                // Initialize drag-and-drop for all task lists (with delay to ensure DOM is ready)
+                setTimeout(() => {
+                    initializeSortable();
+                }, 50);
+            };
+
+            // --- MODAL HANDLING ---
+            const openModal = (modal) => modal.classList.remove('hidden');
+            const closeModal = (modal) => modal.classList.add('hidden');
+
+            // --- EVENT HANDLERS ---
+            setDayBtn.addEventListener('click', () => {
+                state.dayIsSet = true;
+                state.wakeTime = wakeUpInput.value;
+                state.sleepTime = sleepInput.value;
+                saveState();
+                render();
+            });
+
+            addBlockBtn.addEventListener('click', () => {
+                // Reset edit state for new block creation
+                state.isEditingBlock = false;
+                state.editingBlockId = null;
+                
+                // Set default values for all form fields
+                blockPurposeInput.value = '';
+                blockHoursInput.value = '1';
+                blockMinutesInput.value = '0';
+                blockStartTimeInput.value = '09:00';
+                blockEndTimeInput.value = '10:00';
+                
+                // Set default mode to duration
+                durationModeRadio.checked = true;
+                switchTimeMode('duration');
+                
+                // Initialize color picker and set default color based on current mode
+                initializeColorPicker();
+                const isDarkMode = document.body.classList.contains('dark');
+                const defaultColor = isDarkMode ? '#374151' : '#ffffff';
+                setBlockColor(defaultColor);
+                
+                // Update modal title and button for creation
+                blockModalTitle.textContent = 'Add Time Block';
+                saveBlockBtn.textContent = 'Add Block';
+                
+                openModal(addBlockModal);
+                blockPurposeInput.focus();
+            });
+
+            cancelBlockBtn.addEventListener('click', () => closeModal(addBlockModal));
+
+            // Time mode switching event listeners
+            durationModeRadio.addEventListener('change', () => {
+                if (durationModeRadio.checked) {
+                    switchTimeMode('duration');
+                }
+            });
+
+            rangeModeRadio.addEventListener('change', () => {
+                if (rangeModeRadio.checked) {
+                    switchTimeMode('range');
+                }
+            });
+
+            // Update calculated duration when time range changes
+            blockStartTimeInput.addEventListener('input', updateCalculatedDuration);
+            blockEndTimeInput.addEventListener('input', updateCalculatedDuration);
+            
+            saveBlockBtn.addEventListener('click', () => {
+                const purpose = blockPurposeInput.value.trim();
+                
+                if (!purpose) {
+                    alert('Please enter a purpose for the block.');
+                    return;
+                }
+
+                let duration, startTime, endTime, validationError;
+
+                // Check which mode is selected
+                if (durationModeRadio.checked) {
+                    // Duration Mode - Enhanced with hours and minutes
+                    const hours = parseInt(blockHoursInput.value, 10) || 0;
+                    const minutes = parseInt(blockMinutesInput.value, 10) || 0;
+                    duration = hours * 60 + minutes;
+                    
+                    if (duration <= 0) {
+                        alert('Please enter a valid duration (hours and/or minutes).');
+                        return;
+                    }
+                } else {
+                    // Time Range Mode - New functionality
+                    startTime = blockStartTimeInput.value;
+                    endTime = blockEndTimeInput.value;
+                    
+                    if (!startTime || !endTime) {
+                        alert('Please select both start and end times.');
+                        return;
+                    }
+                    
+                    // Validate time range (exclude current block if editing)
+                    const excludeBlockId = state.isEditingBlock ? state.editingBlockId : null;
+                    validationError = validateTimeRange(startTime, endTime, excludeBlockId);
+                    if (validationError) {
+                        alert(validationError);
+                        return;
+                    }
+                    
+                    // Calculate duration from time range
+                    duration = updateCalculatedDuration();
+                    if (duration <= 0) {
+                        alert('End time must be after start time.');
+                        return;
+                    }
+                }
+
+                // Create or update block
+                if (state.isEditingBlock) {
+                    // Edit existing block
+                    const block = state.blocks.find(b => b.id === state.editingBlockId);
+                    if (block) {
+                        const isDarkMode = document.body.classList.contains('dark');
+                        const defaultColor = isDarkMode ? '#374151' : '#ffffff';
+                        block.purpose = purpose;
+                        block.duration = duration;
+                        block.color = blockColorInput.value || defaultColor;
+                        
+                        // Clear old time range data if switching modes
+                        if (durationModeRadio.checked) {
+                            delete block.startTime;
+                            delete block.endTime;
+                        } else {
+                            block.startTime = startTime;
+                            block.endTime = endTime;
+                        }
+                    }
+                    
+                    // Reset edit state
+                    state.isEditingBlock = false;
+                    state.editingBlockId = null;
+                } else {
+                    // Create new block
+                    const isDarkMode = document.body.classList.contains('dark');
+                    const defaultColor = isDarkMode ? '#374151' : '#ffffff';
+                    const newBlock = {
+                        id: Date.now(),
+                        purpose,
+                        duration,
+                        color: blockColorInput.value || defaultColor,
+                        tasks: []
+                    };
+
+                    // Add start/end times if in range mode
+                    if (rangeModeRadio.checked) {
+                        newBlock.startTime = startTime;
+                        newBlock.endTime = endTime;
+                    }
+
+                    state.blocks.push(newBlock);
+                }
+                saveState();
+                render();
+                closeModal(addBlockModal);
+                
+                // Reset form
+                blockPurposeInput.value = '';
+                blockHoursInput.value = '';
+                blockMinutesInput.value = '';
+                blockStartTimeInput.value = '';
+                blockEndTimeInput.value = '';
+                const isDarkMode = document.body.classList.contains('dark');
+                const defaultColor = isDarkMode ? '#374151' : '#ffffff';
+                blockColorInput.value = defaultColor;
+                durationModeRadio.checked = true;
+                switchTimeMode('duration');
+            });
+
+            blocksContainer.addEventListener('click', (e) => {
+                // First, check for task-specific actions
+                const taskEl = e.target.closest('li[data-id]');
+                if (taskEl) {
+                    const blockEl = taskEl.closest('div[data-id]');
+                    const blockId = Number(blockEl.dataset.id);
+                    const taskId = Number(taskEl.dataset.id);
+
+                    // Delete Task
+                    if (e.target.matches('.delete-task-btn') || e.target.closest('.delete-task-btn')) {
+                        const block = state.blocks.find(b => b.id === blockId);
+                        block.tasks = block.tasks.filter(t => t.id !== taskId);
+                        saveState();
+                        render();
+                        return;
+                    }
+
+                    // Edit Task (Toggle to Edit Mode)
+                    if (e.target.matches('.edit-task-btn') || e.target.closest('.edit-task-btn')) {
+                        const taskTextEl = taskEl.querySelector('.task-text');
+                        const actionsEl = taskEl.querySelector('.task-actions-default');
+                        const currentText = taskTextEl.textContent;
+                        
+                        // Replace text with input
+                        taskTextEl.innerHTML = `<input type="text" class="flex-grow px-2 py-1 border border-indigo-300 rounded edit-task-input bg-white text-gray-900" value="${currentText}">`;
+                        
+                        // Replace actions with Save/Cancel
+                        actionsEl.className = 'flex gap-2 task-actions-edit';
+                        actionsEl.innerHTML = `
+                            <button class="text-green-600 hover:text-green-800 font-bold save-task-edit-btn" title="Save"><i data-lucide="check" class="w-6 h-6"></i></button>
+                            <button class="text-gray-600 hover:text-gray-800 font-bold cancel-task-edit-btn" title="Cancel"><i data-lucide="x" class="w-6 h-6"></i></button>
+                        `;
+                        
+                        // Initialize new icons and focus input
+                        if (typeof lucide !== 'undefined') {
+                            lucide.createIcons();
+                        }
+                        const input = taskTextEl.querySelector('.edit-task-input');
+                        input.focus();
+                        input.select();
+                        return;
+                    }
+
+                    // Save Task Edit
+                    if (e.target.matches('.save-task-edit-btn') || e.target.closest('.save-task-edit-btn')) {
+                        const input = taskEl.querySelector('.edit-task-input');
+                        const newText = input.value.trim();
+                        
+                        if (newText) {
+                            // Update task data
+                            const block = state.blocks.find(b => b.id === blockId);
+                            const task = block.tasks.find(t => t.id === taskId);
+                            task.text = newText;
+                            saveState();
+                            
+                            // Update the UI directly without full re-render to preserve order
+                            const taskTextEl = taskEl.querySelector('.task-text');
+                            const actionsEl = taskEl.querySelector('.task-actions-edit');
+                            const completedClass = task.completed ? 'completed-task' : '';
+                            
+                            // Restore original text display
+                            taskTextEl.innerHTML = `${newText}`;
+                            taskTextEl.className = `ml-3 flex-grow cursor-pointer task-text ${completedClass}`;
+                            
+                            // Restore original actions
+                            actionsEl.className = 'flex gap-2 task-actions-default';
+                            actionsEl.innerHTML = `
+                                <button class="hover:opacity-80 font-bold edit-task-btn" title="Edit Task"><i data-lucide="edit" class="w-6 h-6"></i></button>
+                                <button class="hover:opacity-80 font-bold delete-task-btn" title="Delete Task"><i data-lucide="trash-2" class="w-6 h-6"></i></button>
+                            `;
+                            
+                            // Re-initialize icons
+                            if (typeof lucide !== 'undefined') {
+                                lucide.createIcons();
+                            }
+                        }
+                        return;
+                    }
+
+                    // Cancel Task Edit
+                    if (e.target.matches('.cancel-task-edit-btn') || e.target.closest('.cancel-task-edit-btn')) {
+                        // Restore original state without full re-render to preserve order
+                        const block = state.blocks.find(b => b.id === blockId);
+                        const task = block.tasks.find(t => t.id === taskId);
+                        const taskTextEl = taskEl.querySelector('.task-text');
+                        const actionsEl = taskEl.querySelector('.task-actions-edit');
+                        const completedClass = task.completed ? 'completed-task' : '';
+                        
+                        // Restore original text display
+                        taskTextEl.innerHTML = `${task.text}`;
+                        taskTextEl.className = `ml-3 flex-grow cursor-pointer task-text ${completedClass}`;
+                        
+                        // Restore original actions
+                        actionsEl.className = 'flex gap-2 task-actions-default';
+                        actionsEl.innerHTML = `
+                            <button class="hover:opacity-80 font-bold edit-task-btn" title="Edit Task"><i data-lucide="edit" class="w-6 h-6"></i></button>
+                            <button class="hover:opacity-80 font-bold delete-task-btn" title="Delete Task"><i data-lucide="trash-2" class="w-6 h-6"></i></button>
+                        `;
+                        
+                        // Re-initialize icons
+                        if (typeof lucide !== 'undefined') {
+                            lucide.createIcons();
+                        }
+                        return;
+                    }
+
+                    // Toggle Task Completion
+                    if (e.target.matches('.task-checkbox')) {
+                        const block = state.blocks.find(b => b.id === blockId);
+                        const task = block.tasks.find(t => t.id === taskId);
+                        task.completed = e.target.checked;
+                        taskEl.classList.toggle('task-completed', task.completed);
+                        saveState();
+                        return;
+                    }
+
+                    // Open Task Details Modal
+                    if (e.target.matches('.task-text')) {
+                        const block = state.blocks.find(b => b.id === blockId);
+                        const task = block.tasks.find(t => t.id === taskId);
+                        state.editingTaskId = { blockId, taskId };
+                        taskModalTitle.textContent = `Details for: ${task.text}`;
+                        taskNotesInput.value = task.notes || '';
+                        
+                        // Set default mode based on notes content
+                        const hasNotes = task.notes && task.notes.trim().length > 0;
+                        state.isNotesPreviewMode = hasNotes; // Preview if has notes, Edit if empty
+                        updateNotesToggleUI();
+                        
+                        openModal(taskDetailsModal);
+                        return;
+                    }
+                }
+
+                // Then check for block-level actions
+                const blockEl = e.target.closest('div[data-id]');
+                if (!blockEl) return;
+                const blockId = Number(blockEl.dataset.id);
+
+                // Delete Block
+                if (e.target.matches('.delete-block-btn') || e.target.closest('.delete-block-btn')) {
+                    state.blocks = state.blocks.filter(b => b.id !== blockId);
+                    saveState();
+                    render();
+                    return;
+                }
+
+                // Edit Block
+                if (e.target.matches('.edit-block-btn') || e.target.closest('.edit-block-btn')) {
+                    const block = state.blocks.find(b => b.id === blockId);
+                    if (!block) return;
+                    
+                    // Set edit mode
+                    state.isEditingBlock = true;
+                    state.editingBlockId = blockId;
+                    
+                    // Pre-populate form with existing block data
+                    blockPurposeInput.value = block.purpose;
+                    
+                    if (block.startTime && block.endTime) {
+                        // Time range mode - block has specific start/end times
+                        document.getElementById('range-mode').checked = true;
+                        document.getElementById('block-start-time').value = block.startTime;
+                        document.getElementById('block-end-time').value = block.endTime;
+                        switchTimeMode('range');
+                    } else {
+                        // Duration mode - split duration into hours and minutes
+                        document.getElementById('duration-mode').checked = true;
+                        const hours = Math.floor(block.duration / 60);
+                        const minutes = block.duration % 60;
+                        document.getElementById('block-hours-input').value = hours;
+                        document.getElementById('block-minutes-input').value = minutes;
+                        switchTimeMode('duration');
+                    }
+                    
+                    // Initialize color picker and set current block color
+                    initializeColorPicker();
+                    setBlockColor(block.color || '#f3f4f6');
+                    
+                    // Update modal title and button
+                    blockModalTitle.textContent = 'Edit Time Block';
+                    saveBlockBtn.textContent = 'Update Block';
+                    
+                    openModal(addBlockModal);
+                    return;
+                }
+
+                // Add Task
+                if (e.target.matches('.add-task-btn') || e.target.closest('.add-task-btn')) {
+                    const input = blockEl.querySelector('.new-task-input');
+                    const taskText = input.value.trim();
+                    if (taskText) {
+                        const block = state.blocks.find(b => b.id === blockId);
+                        block.tasks.push({
+                            id: Date.now(),
+                            text: taskText,
+                            completed: false,
+                            notes: ''
+                        });
+                        input.value = '';
+                        saveState();
+                        render();
+                    }
+                    return;
+                }
+            });
+
+            saveTaskDetailsBtn.addEventListener('click', () => {
+                const { blockId, taskId } = state.editingTaskId;
+                const block = state.blocks.find(b => b.id === blockId);
+                const task = block.tasks.find(t => t.id === taskId);
+                task.notes = taskNotesInput.value.trim();
+                
+                saveState();
+                closeModal(taskDetailsModal);
+                state.editingTaskId = null;
+            });
+
+            cancelTaskDetailsBtn.addEventListener('click', () => {
+                closeModal(taskDetailsModal);
+                state.editingTaskId = null;
+            });
+
+            // Notes toggle mode event listeners
+            notesEditBtn.addEventListener('click', () => {
+                toggleNotesMode(false); // Switch to Edit mode
+            });
+
+            notesPreviewBtn.addEventListener('click', () => {
+                toggleNotesMode(true); // Switch to Preview mode
+            });
+
+            // Settings modal handlers
+            settingsBtn.addEventListener('click', () => {
+                settingsWakeTimeInput.value = state.wakeTime;
+                settingsSleepTimeInput.value = state.sleepTime;
+                darkModeToggle.checked = state.darkMode || false;
+                openModal(settingsModal);
+            });
+
+            cancelSettingsBtn.addEventListener('click', () => {
+                closeModal(settingsModal);
+            });
+
+            // Dark mode toggle handler
+            darkModeToggle.addEventListener('change', (e) => {
+                toggleDarkMode(e.target.checked);
+            });
+
+            saveSettingsBtn.addEventListener('click', () => {
+                const newWakeTime = settingsWakeTimeInput.value;
+                const newSleepTime = settingsSleepTimeInput.value;
+                
+                if (!newWakeTime || !newSleepTime) {
+                    alert('Please select valid wake-up and sleep times.');
+                    return;
+                }
+
+                state.wakeTime = newWakeTime;
+                state.sleepTime = newSleepTime;
+                // Dark mode is already handled by the toggle event listener
+                saveState();
+                render();
+                closeModal(settingsModal);
+                
+                // Show a confirmation message
+                alert('Settings saved successfully!');
+            });
+
+            // Data management event listeners
+            exportDataBtn.addEventListener('click', () => {
+                exportData();
+            });
+
+            importDataBtn.addEventListener('click', () => {
+                importFileInput.click();
+            });
+
+            importFileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                if (!file.name.endsWith('.json')) {
+                    showMessage('❌ Please select a valid JSON file', 'error');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    importData(event.target.result);
+                    // Reset file input
+                    importFileInput.value = '';
+                };
+                
+                reader.onerror = () => {
+                    showMessage('❌ Failed to read file', 'error');
+                };
+                
+                reader.readAsText(file);
+            });
+
+            clearHistoryBtn.addEventListener('click', () => {
+                clearAllHistory();
+            });
+            
+            // --- SORTABLE TASK REORDERING ---
+            let sortableInstances = []; // Keep track of all instances
+            
+            function initializeSortable() {
+                console.log('🔄 Initializing sortable task lists...');
+                
+                // First, destroy all existing instances
+                sortableInstances.forEach(instance => {
+                    if (instance && instance.destroy) {
+                        try {
+                            instance.destroy();
+                        } catch (e) {
+                            console.warn('Error destroying sortable instance:', e);
+                        }
+                    }
+                });
+                sortableInstances = [];
+                
+                const sortableContainers = document.querySelectorAll('.sortable-tasks');
+                console.log(`Found ${sortableContainers.length} sortable containers`);
+                
+                sortableContainers.forEach((container, index) => {
+                    // Ensure container doesn't have existing instance
+                    if (container.sortableInstance) {
+                        try {
+                            container.sortableInstance.destroy();
+                        } catch (e) {
+                            console.warn('Error destroying container instance:', e);
+                        }
+                        container.sortableInstance = null;
+                    }
+                    
+                    // Create new sortable instance
+                    console.log(`Creating new sortable instance ${index}`);
+                    const sortableInstance = new Sortable(container, {
+                        handle: '.drag-handle', // Use the drag handle for dragging
+                        animation: 150,
+                        ghostClass: 'sortable-ghost',
+                        chosenClass: 'sortable-chosen',
+                        dragClass: 'sortable-drag',
+                        
+                        onStart: function(evt) {
+                            console.log('🎯 Drag started');
+                        },
+                        
+                        onEnd: function(evt) {
+                            console.log('🎯 Drag ended, processing reorder...');
+                            
+                            // Get the block ID from the container
+                            const blockElement = evt.from.closest('[data-block-id]');
+                            const blockId = blockElement ? blockElement.dataset.blockId : null;
+                            
+                            console.log('Block ID found:', blockId);
+                            
+                            if (!blockId) {
+                                console.error('Could not find block ID for reordered tasks');
+                                return;
+                            }
+                            
+                            // Find the block in our data
+                            const block = state.blocks.find(b => b.id === blockId);
+                            if (!block || !block.tasks) {
+                                console.error('Could not find block or tasks for ID:', blockId);
+                                return;
+                            }
+                            
+                            console.log('Found block with', block.tasks.length, 'tasks');
+                            
+                            // Reorder the tasks array based on the new DOM order
+                            const taskElements = Array.from(evt.from.children);
+                            const newTaskOrder = [];
+                            
+                            taskElements.forEach(taskEl => {
+                                const taskId = taskEl.dataset.taskId;
+                                const task = block.tasks.find(t => t.id === taskId);
+                                if (task) {
+                                    newTaskOrder.push(task);
+                                }
+                            });
+                            
+                            console.log('New task order length:', newTaskOrder.length);
+                            
+                            // Update the block's tasks array
+                            if (newTaskOrder.length === block.tasks.length) {
+                                block.tasks = newTaskOrder;
+                                // Save state directly to localStorage 
+                                saveState();
+                                console.log('✅ Tasks reordered and saved successfully for block:', blockId);
+                            } else {
+                                console.error('Task count mismatch during reorder');
+                                console.log('Expected:', block.tasks.length, 'Got:', newTaskOrder.length);
+                                // Re-render to restore correct order
+                                render();
+                            }
+                        }
+                    });
+                    
+                    // Store references
+                    container.sortableInstance = sortableInstance;
+                    sortableInstances.push(sortableInstance);
+                });
+                
+                console.log(`✅ Sortable initialization complete - ${sortableInstances.length} instances created`);
+            }
+            
+            // --- INITIALIZATION ---
+            loadState();
+            render();
+            initializeSortable(); // Initialize drag-and-drop for tasks
+            
+            // Initialize Lucide icons
+            if (typeof lucide !== 'undefined') {
+                console.log('🎨 Initializing Lucide icons on page load...');
+                lucide.createIcons();
+            } else {
+                console.warn('⚠️ Lucide library not loaded on initialization!');
+            }
+
+            // DEBUG: Test icon click functionality
+            window.testIconClicks = () => {
+                console.log('🧪 Testing icon click functionality...');
+                const editBtns = document.querySelectorAll('.edit-task-btn, .edit-block-btn');
+                const deleteBtns = document.querySelectorAll('.delete-task-btn, .delete-block-btn');
+                console.log(`Found ${editBtns.length} edit buttons, ${deleteBtns.length} delete buttons`);
+                
+                editBtns.forEach(btn => {
+                    const icon = btn.querySelector('[data-lucide]');
+                    console.log(`Edit button:`, btn, `Icon:`, icon);
+                });
+
+                console.log('✅ Edit Task Flow Test:');
+                console.log('1. Default: Shows Edit + Delete icons');
+                console.log('2. Click Edit: Shows Save + Cancel icons');
+                console.log('3. Click Save/Cancel: Returns to Edit + Delete icons');
+            };
+        });
+    </script>
+</body>
+</html>
