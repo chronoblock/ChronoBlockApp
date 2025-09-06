@@ -1,2 +1,1733 @@
 <!DOCTYPE html>
-<!-- landing page here -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChronoBlock - Transform Your Day Into Purposeful Time Blocks</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --purple: #6B46C1;
+            --gold: #D4AF37;
+            --white: #FFFFFF;
+            --gray-50: #F9FAFB;
+            --gray-100: #F3F4F6;
+            --gray-600: #4B5563;
+            --gray-900: #111827;
+            --shadow: rgba(107, 70, 193, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--gray-50);
+            color: var(--gray-900);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Navigation */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(107, 70, 193, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 80px;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--purple);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .logo-icon::before,
+        .logo-icon::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 3px;
+            background: var(--gold);
+            border-radius: 2px;
+        }
+
+        .logo-icon::before { transform: rotate(45deg); }
+        .logo-icon::after { transform: rotate(-45deg); }
+
+        .logo-text {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--purple);
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 10px;
+        }
+
+        .nav-links a {
+            color: var(--gray-600);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .nav-links a:hover {
+            background: rgba(107, 70, 193, 0.1);
+            color: var(--purple);
+        }
+
+        .nav-cta {
+            padding: 12px 24px;
+            font-size: 14px;
+        }
+
+        .hamburger {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+            z-index: 1001;
+        }
+
+        .hamburger-line {
+            display: block;
+            width: 25px;
+            height: 3px;
+            background-color: var(--gray-900);
+            margin: 5px 0;
+            transition: all 0.3s ease;
+        }
+
+        /* Common Section Styles */
+        section {
+            padding: 120px 0;
+            position: relative;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+
+        .section-title {
+            font-size: clamp(2.5rem, 5vw, 3.5rem);
+            font-weight: 800;
+            margin-bottom: 24px;
+            color: var(--gray-900);
+            line-height: 1.2;
+        }
+
+        .section-subtitle {
+            font-size: clamp(1.1rem, 2vw, 1.3rem);
+            color: var(--gray-600);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding-top: 100px;
+        }
+
+        .hero-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+        }
+
+        .hero-text h1 {
+            font-size: clamp(2.8rem, 6vw, 4.5rem);
+            font-weight: 800;
+            line-height: 1.15;
+            margin-bottom: 30px;
+            color: var(--gray-900);
+        }
+
+        .hero-text p {
+            font-size: clamp(1.2rem, 2vw, 1.4rem);
+            color: var(--gray-600);
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .hero-badges {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            background-color: var(--gray-100);
+            color: var(--gray-600);
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 600;
+            border: 1px solid var(--gray-200);
+        }
+
+        .cta-group {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary {
+            background: var(--purple);
+            color: white;
+            padding: 18px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(107, 70, 193, 0.2);
+            position: relative;
+            overflow: hidden;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(107, 70, 193, 0.3);
+        }
+
+        .btn-primary:focus {
+            outline: 4px solid rgba(107, 70, 193, 0.3);
+            outline-offset: 2px;
+        }
+
+        .btn-secondary {
+            color: var(--purple);
+            text-decoration: none;
+            font-weight: 600;
+            padding: 18px 30px;
+            border: 2px solid var(--purple);
+            border-radius: 50px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: var(--purple);
+            color: white;
+        }
+
+        .hero-visual {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(107, 70, 193, 0.1);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+        }
+
+        .time-summary {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: var(--gray-50);
+            border-radius: 16px;
+        }
+
+        .time-stat {
+            text-align: center;
+        }
+
+        .time-stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--purple);
+        }
+
+        .time-stat-label {
+            font-size: 1rem;
+            color: var(--gray-600);
+        }
+
+        .time-block {
+            background: var(--white);
+            color: var(--gray-900);
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid var(--gray-100);
+        }
+
+        /* Problem Section */
+        .problem {
+            background: var(--gray-50);
+        }
+
+        .problem-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .problem-card {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        }
+
+        .problem-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+
+        .problem-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--gray-900);
+        }
+
+        .problem-description {
+            color: var(--gray-600);
+        }
+
+        /* Solution Section */
+        .solution-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+        }
+
+        .solution-features {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .feature-item {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .feature-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--purple);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+            color: white;
+        }
+
+        .feature-content h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--gray-900);
+        }
+
+        .feature-content p {
+            color: var(--gray-600);
+        }
+
+        .solution-visual {
+            background: white;
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+        }
+
+        /* How It Works Section */
+        .how-it-works {
+            background: linear-gradient(135deg, var(--gray-50) 0%, rgba(107, 70, 193, 0.03) 100%);
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 50px;
+        }
+
+        .step {
+            text-align: center;
+            position: relative;
+        }
+
+        .step-number {
+            width: 80px;
+            height: 80px;
+            background: var(--purple);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            font-weight: 900;
+            margin: 0 auto 30px;
+            box-shadow: 0 15px 30px rgba(107, 70, 193, 0.2);
+        }
+
+        .step h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--gray-900);
+        }
+
+        .step p {
+            color: var(--gray-600);
+        }
+
+        /* Features Deep Dive */
+        .features-deep {
+            padding: 120px 0;
+        }
+
+        .features-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 60px;
+            gap: 8px;
+            background: var(--gray-100);
+            padding: 8px;
+            border-radius: 50px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            margin-bottom: 60px;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            border: none;
+            background: transparent;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            color: var(--gray-600);
+        }
+
+        .tab-btn.active {
+            background: white;
+            color: var(--purple);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .feature-showcase {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .feature-list {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .feature-list-item {
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+        }
+
+        .check-icon {
+            width: 24px;
+            height: 24px;
+            background: var(--purple);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        /* Benefits Section */
+        .benefits {
+            background: var(--gray-50);
+        }
+
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .benefit-card {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            border: 1px solid var(--gray-100);
+            text-align: left;
+        }
+
+        .benefit-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(107, 70, 193, 0.1);
+        }
+
+        .benefit-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--purple);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+            font-size: 20px;
+            color: white;
+        }
+
+        .benefit-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--gray-900);
+        }
+
+        .benefit-description {
+            color: var(--gray-600);
+            line-height: 1.6;
+        }
+
+        /* Privacy Section */
+        .privacy {
+            text-align: center;
+        }
+
+        .privacy-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-top: 60px;
+        }
+
+        .privacy-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .privacy-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--purple);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+        }
+
+        .privacy-item h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+
+        .privacy-item p {
+            color: var(--gray-600);
+            text-align: center;
+        }
+
+        /* Customization Section */
+        .customization-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-top: 60px;
+        }
+
+        .theme-preview {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .theme-preview:hover {
+            transform: translateY(-4px);
+        }
+
+        .theme-blocks {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .theme-block {
+            height: 20px;
+            border-radius: 6px;
+        }
+
+        .light-theme .theme-block:nth-child(1) { background: var(--purple); }
+        .light-theme .theme-block:nth-child(2) { background: var(--gold); }
+        .light-theme .theme-block:nth-child(3) { background: var(--gray-600); }
+
+        .dark-theme .theme-block:nth-child(1) { background: #4C1D95; }
+        .dark-theme .theme-block:nth-child(2) { background: #B45309; }
+        .dark-theme .theme-block:nth-child(3) { background: #374151; }
+        .dark-theme { background: #1F2937; color: white; }
+
+        /* Testimonials Section */
+        .testimonials {
+            background: var(--gray-50);
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .testimonial-card {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .testimonial-text {
+            color: var(--gray-600);
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .author-img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .author-name {
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+
+        .author-title {
+            color: var(--gold);
+        }
+
+        /* Social Proof */
+        .social-proof {
+            background: var(--gray-50);
+            text-align: center;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            margin-top: 60px;
+        }
+
+        .stat-item {
+            background: white;
+            padding: 40px 20px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 900;
+            color: var(--purple);
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .star-rating {
+            font-size: 1.5rem;
+            color: var(--gold);
+            margin-top: -8px;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            color: var(--gray-600);
+            font-weight: 500;
+        }
+
+        /* FAQ Section */
+        .faq {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            margin-bottom: 24px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .faq-question {
+            padding: 24px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--gray-900);
+            transition: all 0.3s ease;
+        }
+
+        .faq-question:hover {
+            background: var(--gray-50);
+        }
+
+        .faq-question::after {
+            content: '+';
+            font-size: 1.5rem;
+            color: var(--purple);
+            transition: transform 0.3s ease;
+        }
+
+        .faq-question.active::after {
+            transform: rotate(45deg);
+        }
+
+        .faq-answer {
+            padding: 0 24px;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            color: var(--gray-600);
+            line-height: 1.6;
+        }
+
+        .faq-answer.active {
+            padding: 0 24px 24px;
+            max-height: 200px;
+        }
+
+        /* Final CTA */
+        .final-cta {
+            background: var(--purple);
+            color: white;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .final-cta::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+            animation: patternMove 20s linear infinite;
+        }
+
+        @keyframes patternMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(60px, 60px); }
+        }
+
+        .final-cta-content {
+            position: relative;
+            z-index: 10;
+        }
+
+        .final-cta h2 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 900;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .final-cta p {
+            font-size: 1.3rem;
+            margin-bottom: 40px;
+            opacity: 0.9;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .final-cta .btn-primary {
+            background: white;
+            color: var(--purple);
+            font-size: 18px;
+            padding: 20px 50px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .final-cta .btn-primary:hover {
+            background: var(--gray-100);
+            transform: translateY(-3px);
+        }
+
+        /* Footer */
+        footer {
+            background: var(--gray-900);
+            color: white;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: white;
+        }
+
+        /* Animations */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease;
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .slide-in-left {
+            opacity: 0;
+            transform: translateX(-50px);
+            transition: all 0.8s ease;
+        }
+
+        .slide-in-right {
+            opacity: 0;
+            transform: translateX(50px);
+            transition: all 0.8s ease;
+        }
+
+        .slide-in-left.visible,
+        .slide-in-right.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-menu {
+                position: fixed;
+                top: 80px;
+                left: 0;
+                width: 100%;
+                height: calc(100vh - 80px);
+                background: white;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 40px;
+                transform: translateX(100%);
+                transition: transform 0.3s ease-in-out;
+            }
+
+            .nav-menu.active {
+                transform: translateX(0);
+            }
+
+            .nav-links {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+
+            .nav-links a {
+                font-size: 1.5rem;
+            }
+
+            .hamburger {
+                display: block;
+            }
+
+            .hamburger.active .hamburger-line:nth-child(1) {
+                transform: translateY(8px) rotate(45deg);
+            }
+            .hamburger.active .hamburger-line:nth-child(2) {
+                opacity: 0;
+            }
+            .hamburger.active .hamburger-line:nth-child(3) {
+                transform: translateY(-8px) rotate(-45deg);
+            }
+            
+            .hero-content {
+                grid-template-columns: 1fr;
+                gap: 40px;
+                text-align: center;
+            }
+            
+            .solution-grid,
+            .feature-showcase {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+            
+            .cta-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .features-tabs {
+                flex-direction: column;
+                max-width: 300px;
+            }
+            
+            section { padding: 80px 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <nav class="container">
+            <a href="#" class="logo-container">
+                <div class="logo-icon"></div>
+                <span class="logo-text">ChronoBlock</span>
+            </a>
+            <div class="nav-menu">
+                <ul class="nav-links">
+                    <li><a href="#solution">Features</a></li>
+                    <li><a href="#how-it-works">How It Works</a></li>
+                    <li><a href="#benefits">Benefits</a></li>
+                    <li><a href="#faq">FAQ</a></li>
+                </ul>
+                <a href="#start" class="btn-primary nav-cta">Get Started</a>
+            </div>
+            <button class="hamburger" aria-label="Open navigation menu">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+            </button>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <main>
+        <section class="hero">
+            <div class="container">
+                <div class="hero-content">
+                    <div class="hero-text">
+                        <div class="hero-badges">
+                            <span class="badge">100% Free</span>
+                            <span class="badge">Open Source</span>
+                            <span class="badge">No Login Required</span>
+                        </div>
+                        <h1>Structure Your Day, Master Your Time.</h1>
+                        <p>ChronoBlock helps you reclaim your focus by structuring your day with purpose. Ditch the chaotic to-do lists and build a schedule that works for you, not against you.</p>
+                        <div class="cta-group">
+                            <a href="#start" class="btn-primary">Start Structuring Your Day</a>
+                            <a href="#solution" class="btn-secondary">See How It Works</a>
+                        </div>
+                    </div>
+                    <div class="hero-visual">
+                        <h3 style="text-align: center; font-weight: 700; color: var(--gray-900); margin-bottom: 20px;">Visualize Your Perfect Day</h3>
+                        <div class="time-summary">
+                            <div class="time-stat">
+                                <div class="time-stat-value">16h 0m</div>
+                                <div class="time-stat-label">Total Time</div>
+                            </div>
+                            <div class="time-stat">
+                                <div class="time-stat-value">12h 0m</div>
+                                <div class="time-stat-label">Allocated</div>
+                            </div>
+                            <div class="time-stat">
+                                <div class="time-stat-value">4h 0m</div>
+                                <div class="time-stat-label">Remaining</div>
+                            </div>
+                        </div>
+                        <div class="time-block">
+                            <span>🌅 Morning Routine</span>
+                            <span>7:00 - 9:00</span>
+                        </div>
+                        <div class="time-block">
+                            <span>💼 Deep Work</span>
+                            <span>9:00 - 13:00</span>
+                        </div>
+                        <div class="time-block">
+                            <span>🏋️ Workout</span>
+                            <span>17:00 - 18:00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Problem Section -->
+    <section class="problem">
+        <div class="container">
+            <div class="section-header reveal">
+                <h2 class="section-title">Why Traditional Time Management Fails</h2>
+                <p class="section-subtitle">Most productivity apps focus on tasks, not time. Here's why that doesn't work for building sustainable routines.</p>
+            </div>
+            <div class="problem-grid">
+                <article class="problem-card reveal">
+                    <div class="problem-icon">📝</div>
+                    <h3 class="problem-title">Endless Task Lists</h3>
+                    <p class="problem-description">You add tasks faster than you complete them. Your to-do list becomes a source of stress, not productivity.</p>
+                </article>
+                <article class="problem-card reveal">
+                    <div class="problem-icon">⏰</div>
+                    <h3 class="problem-title">No Time Context</h3>
+                    <p class="problem-description">Tasks exist in a vacuum without considering when you'll actually do them or how long they'll take.</p>
+                </article>
+                <article class="problem-card reveal">
+                    <div class="problem-icon">🔄</div>
+                    <h3 class="problem-title">Broken Routines</h3>
+                    <p class="problem-description">Without structure, you can't build lasting habits or optimize your daily patterns for peak performance.</p>
+                </article>
+                <article class="problem-card reveal">
+                    <div class="problem-icon">📱</div>
+                    <h3 class="problem-title">Privacy Concerns</h3>
+                    <p class="problem-description">Your personal schedule and habits are valuable data. Why should apps collect and monetize your most intimate information?</p>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- Solution Section -->
+    <section class="solution" id="solution">
+        <div class="container">
+            <div class="solution-grid">
+                <div class="solution-features slide-in-left">
+                    <h2 class="section-title" style="text-align: left; margin-bottom: 40px;">Time Blocking Reimagined</h2>
+                    <p style="color: var(--gray-600); margin-bottom: 40px; font-size: 1.1rem;">ChronoBlock takes a fundamentally different approach. Instead of managing tasks, you structure time itself.</p>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">🎯</div>
+                        <div class="feature-content">
+                            <h3>Purpose-Driven Blocks</h3>
+                            <p>Define your day in meaningful chunks like "Morning Routine," "Deep Work," or "Family Time." Each block has a clear purpose and duration.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">📊</div>
+                        <div class="feature-content">
+                            <h3>Visual Time Budget</h3>
+                            <p>See your total waking hours, allocated time, and remaining time at a glance. Make informed decisions about how to spend your day.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">🔄</div>
+                        <div class="feature-content">
+                            <h3>Continuous Optimization</h3>
+                            <p>Notice your afternoon workout gives you more energy? Easily move it from morning to afternoon and refine your perfect routine.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="solution-visual slide-in-right">
+                    <div style="background: var(--gray-50); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                        <h4 style="margin-bottom: 15px; color: var(--gray-900);">🌅 Morning Routine (7:00 - 9:00)</h4>
+                        <div style="display: flex; flex-direction: column; gap: 8px; font-size: 14px; color: var(--gray-600);">
+                            <div>✓ Meditation & journaling</div>
+                            <div>✓ Healthy breakfast</div>
+                            <div>○ Review daily priorities</div>
+                        </div>
+                    </div>
+                    <div style="background: var(--gray-50); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                        <h4 style="margin-bottom: 15px; color: var(--gray-900);">💼 Deep Work (9:00 - 13:00)</h4>
+                        <div style="display: flex; flex-direction: column; gap: 8px; font-size: 14px; color: var(--gray-600);">
+                            <div>✓ Project Alpha - Phase 2</div>
+                            <div>○ Client presentation prep</div>
+                            <div>○ Code review</div>
+                        </div>
+                    </div>
+                    <div style="background: var(--gray-50); padding: 20px; border-radius: 12px;">
+                        <h4 style="margin-bottom: 15px; color: var(--gray-900);">🏋️ Fitness (17:00 - 18:00)</h4>
+                        <div style="display: flex; flex-direction: column; gap: 8px; font-size: 14px; color: var(--gray-600);">
+                            <div>○ Strength training</div>
+                            <div>○ 10min cooldown</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="how-it-works" id="how-it-works">
+        <div class="container">
+            <div class="section-header reveal">
+                <h2 class="section-title">Simple Setup, Powerful Results</h2>
+                <p class="section-subtitle">Get started in less than 2 minutes. No accounts, no complex setup—just pure productivity.</p>
+            </div>
+            <div class="steps-grid">
+                <div class="step reveal">
+                    <div class="step-number">1</div>
+                    <h3>Set Your Schedule</h3>
+                    <p>Enter your wake-up time (e.g., 7:00 AM) and sleep time (e.g., 11:00 PM). ChronoBlock calculates your total available waking hours.</p>
+                </div>
+                <div class="step reveal">
+                    <div class="step-number">2</div>
+                    <h3>Create Time Blocks</h3>
+                    <p>Add purposeful blocks like "Morning Routine" (2 hours), "Deep Work" (4 hours), or "Evening Wind-down" (1 hour). Watch your time budget update in real-time.</p>
+                </div>
+                <div class="step reveal">
+                    <div class="step-number">3</div>
+                    <h3>Add Tasks & Notes</h3>
+                    <p>Within each block, add specific tasks with checkboxes. Use Markdown for rich notes. Your progress is automatically tracked.</p>
+                </div>
+                <div class="step reveal">
+                    <div class="step-number">4</div>
+                    <h3>Optimize & Iterate</h3>
+                    <p>Notice patterns in your energy and productivity. Easily edit block times, move tasks around, and continuously refine your perfect day.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Deep Dive -->
+    <section class="features-deep">
+        <div class="container">
+            <div class="section-header reveal">
+                <h2 class="section-title">Everything You Need, Nothing You Don't</h2>
+                <p class="section-subtitle">Powerful features designed for simplicity and privacy</p>
+            </div>
+            
+            <div class="features-tabs">
+                <button class="tab-btn active" data-tab="core">Core Features</button>
+                <button class="tab-btn" data-tab="customization">Customization</button>
+                <button class="tab-btn" data-tab="data">Data Control</button>
+            </div>
+            
+            <div class="tab-content active" id="core">
+                <div class="feature-showcase">
+                    <div class="feature-list">
+                        <div class="feature-list-item">
+                            <div class="check-icon">✓</div>
+                            <div>
+                                <h4 style="font-weight: 600; margin-bottom: 8px;">Visual Time Budget</h4>
+                                <p style="color: var(--gray-600);">See total, allocated, and remaining time at a glance</p>
+                            </div>
+                        </div>
+                        <div class="feature-list-item">
+                            <div class="check-icon">✓</div>
+                            <div>
+                                <h4 style="font-weight: 600; margin-bottom: 8px;">Flexible Time Blocks</h4>
+                                <p style="color: var(--gray-600);">Create, edit, and reorganize blocks as needed</p>
+                            </div>
+                        </div>
+                        <div class="feature-list-item">
+                            <div class="check-icon">✓</div>
+                            <div>
+                                <h4 style="font-weight: 600; margin-bottom: 8px;">Task Management</h4>
+                                <p style="color: var(--gray-600);">Add multiple tasks per block with checkbox tracking</p>
+                            </div>
+                        </div>
+                        <div class="feature-list-item">
+                            <div class="check-icon">✓</div>
+                            <div>
+                                <h4 style="font-weight: 600; margin-bottom: 8px;">Markdown Notes</h4>
+                                <p style="color: var(--gray-600);">Add rich notes to your tasks using Markdown.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 20px; padding: 15px; background: var(--gray-50); border-radius: 10px;">
+                            <span style="font-weight: 600;">Total: 16h</span>
+                            <span style="color: var(--purple); font-weight: 600;">Used: 12h</span>
+                            <span style="color: var(--gold); font-weight: 600;">Free: 4h</span>
+                        </div>
+                        <div style="background: linear-gradient(135deg, var(--purple), var(--gold)); color: white; padding: 15px; border-radius: 10px; margin-bottom: 10px;">
+                            <strong>Deep Work Block</strong><br>
+                            <small>9:00 AM - 1:00 PM (4 hours)</small>
+                        </div>
+                        <div style="padding-left: 20px; font-size: 14px; color: var(--gray-600);">
+                            ✓ Project review<br>
+                            ○ Design mockups<br>
+                            ○ Client presentation
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="customization">
+                <div class="feature-showcase">
+                    <div class="feature-list">
+                        <div class="feature-list-item">
+                            <div class="check-icon">✓</div>
+                            <div>
+                                <h4 style="font-weight: 600; margin-bottom: 8px;">Dark & Light Modes</h4>
+                                <p style="color: var(--gray-600);">Switch between themes for your viewing comfort.</p>
+                            </div>
+                        </div>
+                        <div class="feature-list-item">
+                            <div class="check-icon">✓</div>
+                            <div>
+                                <h4 style="font-weight: 600; margin-bottom: 8px;">Color-Coded Blocks</h4>
+                                <p style="color: var(--gray-600);">Assign colors to your time blocks for at-a-glance understanding.</p>
+                            </div>
+                        </div>
+                        <div class="feature-list-item">
+                            <div class="check-icon">✓</div>
+                            <div>
+                                <h4 style="font-weight: 600; margin-bottom: 8px;">Visual Themes</h4>
+                                <p style="color: var(--gray-600);">Choose from a variety of themes to personalize your workspace.</p>
+                            </div>
+                        </div>
+                        <div class="feature-list-item">
+                            <div class="check-icon">✓</div>
+                            <div>
+                                <h4 style="font-weight: 600; margin-bottom: 8px;">Layout Adjustments</h4>
+                                <p style="color: var(--gray-600);">Customize the layout to suit your workflow.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="customization-preview">
+                        <div class="theme-preview light-theme">
+                            <div class="theme-blocks">
+                                <div class="theme-block"></div>
+                                <div class="theme-block"></div>
+                                <div class="theme-block"></div>
+                            </div>
+                            <h4>Light Theme</h4>
+                        </div>
+                        <div class="theme-preview dark-theme">
+                            <div class="theme-blocks">
+                                <div class="theme-block"></div>
+                                <div class="theme-block"></div>
+                                <div class="theme-block"></div>
+                            </div>
+                            <h4>Dark Theme</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="data">
+                <div class="feature-showcase">
+                    <div class="feature-list">
+                        <div class="feature-list-item">
+                            <div class="check-icon">✓</div>
+                            <div>
+                                <h4 style="font-weight: 600; margin-bottom: 8px;">Local Data Storage</h4>
+                                <p style="color: var(--gray-600);">All your data is stored on your device, not in the cloud.</p>
+                            </div>
+                        </div>
+                        <div class="feature-list-item">
+                            <div class="check-icon">✓</div>
+                            <div>
+                                <h4 style="font-weight: 600; margin-bottom: 8px;">Export & Import</h4>
+                                <p style="color: var(--gray-600);">Backup your data or move it between devices with ease.</p>
+                            </div>
+                        </div>
+                        <div class="feature-list-item">
+                            <div class="check-icon">✓</div>
+                            <div>
+                                <h4 style="font-weight: 600; margin-bottom: 8px;">No Account Needed</h4>
+                                <p style="color: var(--gray-600);">Use the app instantly without creating an account.</p>
+                            </div>
+                        </div>
+                        <div class="feature-list-item">
+                            <div class="check-icon">✓</div>
+                            <div>
+                                <h4 style="font-weight: 600; margin-bottom: 8px;">Open Source</h4>
+                                <p style="color: var(--gray-600);">The code is public, ensuring transparency and trust.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="text-align: center; padding: 60px 40px; background: var(--gray-50); border-radius: 20px;">
+                        <div style="font-size: 4rem; margin-bottom: 20px;">🔒</div>
+                        <h3 style="margin-bottom: 16px; color: var(--gray-900);">Your Privacy, Guaranteed</h3>
+                        <p style="color: var(--gray-600); max-width: 300px; margin: 0 auto;">Zero data collection, zero tracking, zero cloud storage. Your schedule stays yours.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Benefits Section -->
+    <section class="benefits" id="benefits">
+        <div class="container">
+            <div class="section-header reveal">
+                <h2 class="section-title">Transform Your Productivity</h2>
+                <p class="section-subtitle">See the real-world impact of time-structured living</p>
+            </div>
+            <div class="benefits-grid">
+                <article class="benefit-card reveal">
+                    <div class="benefit-icon">🎯</div>
+                    <h3 class="benefit-title">Intentional Living</h3>
+                    <p class="benefit-description">Every hour has a purpose. Stop reactive living and start designing days that align with your goals and values.</p>
+                </article>
+                <article class="benefit-card reveal">
+                    <div class="benefit-icon">⚡</div>
+                    <h3 class="benefit-title">Energy Optimization</h3>
+                    <p class="benefit-description">Discover your natural energy patterns. Schedule demanding work during peak hours and rest during low-energy periods.</p>
+                </article>
+                <article class="benefit-card reveal">
+                    <div class="benefit-icon">🔄</div>
+                    <h3 class="benefit-title">Sustainable Routines</h3>
+                    <p class="benefit-description">Build habits that stick by embedding them in structured time blocks. Consistency becomes automatic.</p>
+                </article>
+                <article class="benefit-card reveal">
+                    <div class="benefit-icon">📈</div>
+                    <h3 class="benefit-title">Continuous Improvement</h3>
+                    <p class="benefit-description">Track what works and what doesn't. Iteratively refine your schedule until you achieve your ideal day structure.</p>
+                </article>
+                <article class="benefit-card reveal">
+                    <div class="benefit-icon">🧘</div>
+                    <h3 class="benefit-title">Reduced Decision Fatigue</h3>
+                    <p class="benefit-description">Pre-plan your day structure. Spend mental energy on important decisions, not figuring out what to do next.</p>
+                </article>
+                <article class="benefit-card reveal">
+                    <div class="benefit-icon">⚖️</div>
+                    <h3 class="benefit-title">Work-Life Integration</h3>
+                    <p class="benefit-description">Allocate time for all life areas—work, family, health, hobbies. See your full life in balance, not just work tasks.</p>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- Privacy Section -->
+    <section class="privacy">
+        <div class="container">
+            <div class="section-header reveal">
+                <h2 class="section-title">Privacy-First by Design</h2>
+                <p class="section-subtitle">In a world of data harvesting, ChronoBlock takes a radically different approach</p>
+            </div>
+            <div class="privacy-features">
+                <div class="privacy-item reveal">
+                    <div class="privacy-icon">🔒</div>
+                    <h3>Zero Data Collection</h3>
+                    <p>We literally cannot access your data. Everything stays in your browser's local storage on your device.</p>
+                </div>
+                <div class="privacy-item reveal">
+                    <div class="privacy-icon">🚫</div>
+                    <h3>No Analytics or Tracking</h3>
+                    <p>No cookies, no tracking pixels, no usage analytics. We don't know who you are or how you use the app.</p>
+                </div>
+                <div class="privacy-item reveal">
+                    <div class="privacy-icon">💻</div>
+                    <h3>Offline Capable</h3>
+                    <p>Works completely offline. Once loaded, you never need an internet connection to manage your time blocks.</p>
+                </div>
+                <div class="privacy-item reveal">
+                    <div class="privacy-icon">🌐</div>
+                    <h3>Open Source</h3>
+                    <p>Full transparency. Inspect the code, contribute improvements, or host it yourself. No hidden functionality.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials">
+        <div class="container">
+            <div class="section-header reveal">
+                <h2 class="section-title">Loved by Professionals & Students</h2>
+                <p class="section-subtitle">Don't just take our word for it. Here's what users are saying about ChronoBlock.</p>
+            </div>
+            <div class="testimonials-grid">
+                <article class="testimonial-card reveal">
+                    <p class="testimonial-text">"ChronoBlock has been a game-changer for my productivity. I can finally see where my time goes and plan my days with intention. The privacy-first approach is a huge plus!"</p>
+                    <div class="testimonial-author">
+                        <img src="https://i.pravatar.cc/150?img=1" alt="Author 1" class="author-img">
+                        <div>
+                            <h4 class="author-name">Sarah K., Freelance Developer</h4>
+                            <span class="author-title">⭐⭐⭐⭐⭐</span>
+                        </div>
+                    </div>
+                </article>
+                <article class="testimonial-card reveal">
+                    <p class="testimonial-text">"As a student juggling classes, a part-time job, and personal projects, ChronoBlock is the only tool that keeps me sane. It's simple, powerful, and helps me build routines that actually stick."</p>
+                    <div class="testimonial-author">
+                        <img src="https://i.pravatar.cc/150?img=2" alt="Author 2" class="author-img">
+                        <div>
+                            <h4 class="author-name">Mike T., University Student</h4>
+                            <span class="author-title">⭐⭐⭐⭐⭐</span>
+                        </div>
+                    </div>
+                </article>
+                <article class="testimonial-card reveal">
+                    <p class="testimonial-text">"I love that it's open source and respects my data. It does exactly what it promises without any of the bloat or distractions of other productivity apps. Highly recommended."</p>
+                    <div class="testimonial-author">
+                        <img src="https://i.pravatar.cc/150?img=3" alt="Author 3" class="author-img">
+                        <div>
+                            <h4 class="author-name">Dr. Emily Carter, Researcher</h4>
+                            <span class="author-title">⭐⭐⭐⭐⭐</span>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- Social Proof -->
+    <section class="social-proof">
+        <div class="container">
+            <div class="section-header reveal">
+                <h2 class="section-title">Trusted by Productive People</h2>
+                <p class="section-subtitle">Join thousands who've transformed their daily productivity</p>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-item reveal">
+                    <span class="stat-number">10k+</span>
+                    <span class="stat-label">Active Users</span>
+                </div>
+                <div class="stat-item reveal">
+                    <span class="stat-number">100%</span>
+                    <span class="stat-label">Free Forever</span>
+                </div>
+                <div class="stat-item reveal">
+                    <span class="stat-number">0</span>
+                    <span class="stat-label">Data Collected</span>
+                </div>
+                <div class="stat-item reveal">
+                    <span class="stat-number">4.9</span>
+                    <div class="star-rating">⭐⭐⭐⭐⭐</div>
+                    <span class="stat-label">User Rating</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq" id="faq">
+        <div class="container">
+            <div class="section-header reveal">
+                <h2 class="section-title">Frequently Asked Questions</h2>
+            </div>
+            <div class="faq-item reveal">
+                <div class="faq-question">
+                    How is ChronoBlock different from other productivity apps?
+                </div>
+                <div class="faq-answer">
+                    Most apps focus on managing tasks in isolation. ChronoBlock structures your entire day by allocating your total waking hours into purposeful time blocks. Instead of endless task lists, you get a complete framework for intentional living.
+                </div>
+            </div>
+            <div class="faq-item reveal">
+                <div class="faq-question">
+                    Do I need to create an account or provide personal information?
+                </div>
+                <div class="faq-answer">
+                    No! ChronoBlock works immediately without any registration. Your data is stored locally in your browser, so we never collect, store, or have access to your personal schedule information.
+                </div>
+            </div>
+            <div class="faq-item reveal">
+                <div class="faq-question">
+                    What happens if I clear my browser data?
+                </div>
+                <div class="faq-answer">
+                    Your time blocks and tasks are stored in local browser storage. If you clear your browser data, you'll lose this information. However, ChronoBlock includes export/import functionality so you can back up your schedule data anytime.
+                </div>
+            </div>
+            <div class="faq-item reveal">
+                <div class="faq-question">
+                    Can I use ChronoBlock on multiple devices?
+                </div>
+                <div class="faq-answer">
+                    Since data is stored locally, each device maintains its own schedule. You can export your data from one device and import it to another, or use this feature to maintain different schedules for different contexts (work vs. personal).
+                </div>
+            </div>
+            <div class="faq-item reveal">
+                <div class="faq-question">
+                    Is ChronoBlock really free? What's the catch?
+                </div>
+                <div class="faq-answer">
+                    ChronoBlock is 100% free and open source. There are no premium features, no subscriptions, no ads. We believe effective time management should be accessible to everyone. The code is publicly available for full transparency.
+                </div>
+            </div>
+            <div class="faq-item reveal">
+                <div class="faq-question">
+                    How do I optimize my daily schedule using ChronoBlock?
+                </div>
+                <div class="faq-answer">
+                    Start by creating basic blocks for major activities. After using your schedule for a week, notice patterns—when do you have the most energy? Which blocks feel too long or too short? ChronoBlock makes it easy to edit and refine your time blocks until you find your optimal daily structure.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="final-cta" id="start">
+        <div class="container">
+            <div class="final-cta-content">
+                <h2>Ready to Structure Your Perfect Day?</h2>
+                <p>Join thousands of people who've transformed their productivity with intentional time blocking. No signup required—start organizing your day in the next 60 seconds.</p>
+                <a href="app/index.html" class="btn-primary">Launch ChronoBlock Now</a>
+                <p style="margin-top: 20px; font-size: 0.9rem; opacity: 0.8;">✓ 100% Free Forever &nbsp;&nbsp; ✓ No Registration &nbsp;&nbsp; ✓ Complete Privacy</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-links">
+                <a href="#">GitHub Repository</a>
+                <a href="#">Documentation</a>
+                <a href="#">Privacy Policy</a>
+                <a href="#">Support</a>
+            </div>
+            <p>&copy; 2030 ChronoBlock. Open source and privacy-first time management.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Intersection Observer for animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        // Observe all animated elements
+        document.querySelectorAll('.reveal, .slide-in-left, .slide-in-right').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Tab functionality
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const tabId = this.getAttribute('data-tab');
+                
+                // Update active tab button
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Update active content
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        // FAQ accordion
+        document.querySelectorAll('.faq-question').forEach(question => {
+            question.addEventListener('click', function() {
+                const answer = this.nextElementSibling;
+                const isActive = this.classList.contains('active');
+                
+                // Close all other FAQ items
+                document.querySelectorAll('.faq-question').forEach(q => {
+                    q.classList.remove('active');
+                    q.nextElementSibling.classList.remove('active');
+                });
+                
+                // Toggle current item
+                if (!isActive) {
+                    this.classList.add('active');
+                    answer.classList.add('active');
+                }
+            });
+        });
+
+        // Enhanced navbar scroll effect
+        window.addEventListener('scroll', function() {
+            const header = document.querySelector('header');
+            if (window.scrollY > 50) {
+                header.style.boxShadow = '0 10px 40px rgba(0, 0, 0, 0.1)';
+            } else {
+                header.style.boxShadow = 'none';
+            }
+        });
+
+        // Hamburger menu functionality
+        const hamburger = document.querySelector('.hamburger');
+        const navMenu = document.querySelector('.nav-menu');
+
+        hamburger.addEventListener('click', () => {
+            hamburger.classList.toggle('active');
+            navMenu.classList.toggle('active');
+            document.body.style.overflow = navMenu.classList.contains('active') ? 'hidden' : 'auto';
+        });
+
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                if (navMenu.classList.contains('active')) {
+                    hamburger.classList.remove('active');
+                    navMenu.classList.remove('active');
+                    document.body.style.overflow = 'auto';
+                }
+            });
+        });
+
+        // CTA button interactions with enhanced effects
+        document.querySelectorAll('.btn-primary').forEach(button => {
+            button.addEventListener('click', function(e) {
+                const href = this.getAttribute('href');
+                if (href && href.startsWith('#')) {
+                    return; // Let smooth scroll handle it
+                }
+                
+                e.preventDefault();
+                
+                // Create ripple effect
+                const rect = this.getBoundingClientRect();
+                const ripple = document.createElement('span');
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+                
+                ripple.style.cssText = `
+                    position: absolute;
+                    border-radius: 50%;
+                    transform: scale(0);
+                    animation: ripple 0.6s linear;
+                    background-color: rgba(255, 255, 255, 0.3);
+                    left: ${x}px;
+                    top: ${y}px;
+                    width: ${size}px;
+                    height: ${size}px;
+                    pointer-events: none;
+                `;
+                
+                this.appendChild(ripple);
+                
+                setTimeout(() => ripple.remove(), 600);
+                
+                // Here you would redirect to the actual app
+                console.log('Launching ChronoBlock application...');
+                if (this.href && !this.href.startsWith('#')) {
+                    setTimeout(() => {
+                        window.location.href = this.href;
+                    }, 300);
+                }
+            });
+        });
+
+        // Add ripple animation CSS
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: scale(4);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

@@ -18,6 +18,9 @@
 - [ ] add contact us or send us a message
 - [ ] task: make them easy to change the rank (dropup-down)
 
+- [ ] how to contribute in github. developer guide.
+- [ ] 
+
 - [ ] remove normal alert from the application 
 - [ ] responsive application 
 - [ ] Weekly/monthly view
