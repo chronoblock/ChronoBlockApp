@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Logo Hero</title>
+    <!-- Tailwind CSS for styling the page content -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Prevents scrollbars from the canvas */
+        }
+        /* Style for the canvas to ensure it's a background element */
+        #logo-canvas {
+            position: fixed; /* Use fixed to keep it in place even on scroll */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1; /* Place it behind all other content */
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+
+    <!-- The canvas where the 3D logo will be rendered -->
+    <canvas id="logo-canvas"></canvas>
+
+    <!-- Three.js Library Import -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+            }
+        }
+    </script>
+
+    <!-- The main 3D animation script -->
+    <script type="module">
+        import * as THREE from 'three';
+
+        // 1. SCENE AND RENDERER SETUP
+        // =================================================================
+        const scene = new THREE.Scene();
+        const canvas = document.getElementById('logo-canvas');
+        
+        const renderer = new THREE.WebGLRenderer({
+            canvas: canvas,
+            antialias: true,
+            alpha: true // Allows for a transparent background on the canvas
+        });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        // 2. CAMERA
+        // =================================================================
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.z = 5;
+        scene.add(camera);
+
+        // 3. LIGHTING
+        // =================================================================
+        // Soft ambient light to illuminate the entire object evenly
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
+        scene.add(ambientLight);
+
+        // Directional light to create highlights and shadows, giving depth
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 2.5);
+        directionalLight.position.set(5, 5, 5);
+        scene.add(directionalLight);
+
+        // 4. CREATE THE LOGO MODEL
+        // =================================================================
+        const logoGroup = new THREE.Group(); // Use a group to move/rotate all parts together
+
+        // --- Materials ---
+        const purpleMaterial = new THREE.MeshStandardMaterial({
+            color: 0x5a2d82, // A deep, rich purple
+            metalness: 0.2,
+            roughness: 0.5
+        });
+
+        const goldMaterial = new THREE.MeshStandardMaterial({
+            color: 0xFFBF00, // A vibrant gold color
+            metalness: 0.8,
+            roughness: 0.3
+        });
+
+        // --- Central Gold Cross ---
+        const crossBarGeometry = new THREE.BoxGeometry(1.5, 0.2, 0.2);
+        const crossBar1 = new THREE.Mesh(crossBarGeometry, goldMaterial);
+        const crossBar2 = new THREE.Mesh(crossBarGeometry, goldMaterial);
+        crossBar2.rotation.y = Math.PI / 2; // Rotate the second bar 90 degrees
+        logoGroup.add(crossBar1);
+        logoGroup.add(crossBar2);
+
+        // --- Purple Brackets (L-shapes) ---
+        const bracketArmLength = 1.0;
+        const bracketThickness = 0.3;
+        
+        function createBracket() {
+            const bracket = new THREE.Group();
+            const arm1Geo = new THREE.BoxGeometry(bracketArmLength, bracketThickness, bracketThickness);
+            const arm2Geo = new THREE.BoxGeometry(bracketThickness, bracketArmLength, bracketThickness);
+            
+            const arm1 = new THREE.Mesh(arm1Geo, purpleMaterial);
+            arm1.position.x = bracketArmLength / 2 - bracketThickness / 2;
+
+            const arm2 = new THREE.Mesh(arm2Geo, purpleMaterial);
+            arm2.position.y = bracketArmLength / 2 - bracketThickness / 2;
+            
+            bracket.add(arm1);
+            bracket.add(arm2);
+            return bracket;
+        }
+
+        const spacing = 1.4; // How far the brackets are from the center
+
+        const bracketPositions = [
+            { x: spacing, y: spacing, rot: -Math.PI / 4 },      // Top-right
+            { x: -spacing, y: spacing, rot: -3 * Math.PI / 4 }, // Top-left
+            { x: -spacing, y: -spacing, rot: 3 * Math.PI / 4 }, // Bottom-left
+            { x: spacing, y: -spacing, rot: Math.PI / 4 }       // Bottom-right
+        ];
+
+        bracketPositions.forEach(pos => {
+            const bracket = createBracket();
+            bracket.position.set(pos.x, pos.y, 0);
+            bracket.rotation.z = pos.rot;
+            logoGroup.add(bracket);
+        });
+
+        scene.add(logoGroup);
+
+        // 5. ANIMATION LOOP
+        // =================================================================
+        const clock = new THREE.Clock();
+
+        const animate = () => {
+            const elapsedTime = clock.getElapsedTime();
+
+            // Subtle rotation for a "little motion" effect
+            logoGroup.rotation.y = elapsedTime * 0.15;
+            logoGroup.rotation.x = elapsedTime * 0.1;
+
+            // Render the scene with the camera
+            renderer.render(scene, camera);
+
+            // Call the animate function on the next frame
+            window.requestAnimationFrame(animate);
+        };
+
+        animate();
+
+        // 6. RESPONSIVENESS
+        // =================================================================
+        window.addEventListener('resize', () => {
+            // Update camera aspect ratio
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+
+            // Update renderer size
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        });
+    </script>
+</body>
+</html>
+
