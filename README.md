@@ -2,111 +2,100 @@
 
 [![Netlify Status](https://api.netlify.com/api/v1/badges/029addff-0c26-43a4-a524-c60fbbdc4a4f/deploy-status)](https://app.netlify.com/projects/timemana/deploys)
 
-A simple, elegant web application for planning and organizing your daily schedule. Structure your day by creating time blocks, adding tasks, and tracking your progress.
+A simple, focused web app for planning your day by creating time blocks and managing tasks.
 
-## ✨ Features
+## What this repo contains
 
-- **Day Setup**: Define your wake-up and sleep times to establish your available time
-- **Time Blocks**: Create focused time periods for different activities (e.g., Morning Routine, Work, Exercise)
-- **Task Management**: Add, complete, and delete tasks within each time block
-- **Task Notes**: Add detailed notes and comments to individual tasks
-- **Settings**: Easily adjust your wake-up and sleep times at any point
-- **Dark Mode**: Toggle between light and dark themes with persistent preference
-- **Time Tracking**: Visual display of total, allocated, and remaining time
-- **Data Persistence**: All your data is saved in localStorage and persists across browser sessions
+- The main public landing is `index.html` (root). The interactive app UI lives under `app/index.html`.
+- Tests and manual test pages live in the `testing/` folder (`tests.js`, `dark.html`, etc.).
 
-## 🚀 Getting Started
+## Key features
 
-1. **Start Local Server**:
-   ```bash
-   cd /path/to/time_management_webapp
-   python3 -m http.server 8000
-   ```
+- Day setup (wake/sleep times)
+- Create and manage time blocks
+- Add tasks with notes, complete/delete tasks
+- Dark mode with persistent preference
+- Time summary (allocated vs remaining)
+- Local browser persistence via `localStorage`
 
-2. **Open in Browser**: Navigate to `http://localhost:8000`
+## Quick start (local)
 
-3. **Set Your Day**: Enter your wake-up and sleep times, then click "Set Day"
+Serve the project from the repository root and open it in your browser. Example using Python:
 
-4. **Create Time Blocks**: Click "+ Add Time Block" to create focused periods
+```bash
+cd /path/to/time_management_webapp
+python3 -m http.server 8000
+# then open http://localhost:8000 or http://localhost:8000/app/index.html
+```
 
-5. **Add Tasks**: Add specific tasks to each time block and track completion
+If you prefer Node.js (http-server):
 
-6. **Adjust Settings**: Click the ⚙️ settings icon to modify your schedule anytime
+```bash
+npx http-server -c-1 . -p 8000
+# then open http://localhost:8000 or http://localhost:8000/app/index.html
+```
 
-## 🧪 Testing
+Open `app/index.html` for the interactive planner UI. The root `index.html` is a simple landing page for the project.
 
-The app includes a comprehensive testing suite that runs in the browser console:
+## Running tests (in-browser)
 
-### How to Run Tests
+Open the app in your browser and run the test script from the Developer Console:
 
-1. Open your browser with the app running
-2. Open Developer Console (F12)
-3. Copy and paste the entire `tests.js` file content into the console
-4. Run tests with simple commands:
+1. Open the app (for example `http://localhost:8000/app/index.html`).
+2. Open DevTools (F12) and paste the contents of `testing/tests.js` into the Console.
+3. Use the provided helper commands from `tests.js`:
 
 ```javascript
-// Run all tests
+// Run full suite
 runTests()
 
-// Run specific categories
-testTasks()      // Task management tests
-testBlocks()     // Time block tests
-testSettings()   // Settings functionality
-testState()      // Data persistence tests
+// Or run a focused set
+testTasks()
+testBlocks()
+testSettings()
+testState()
 
-// Quick core functionality test
+// Quick smoke test
 quickTest()
 ```
 
-### Test Coverage
+The test suite includes unit and integration-style checks (happy-path and negative tests).
 
-The testing suite includes **37 comprehensive tests** covering:
-
-- ✅ **State Management** (4 tests) - localStorage save/load, data persistence
-- ✅ **Time Calculations** (4 tests) - Time math, overnight handling, formatting
-- ✅ **Day Setup** (3 tests) - Wake/sleep time setup, day reset
-- ✅ **Time Blocks** (4 tests) - Create, delete, time allocation
-- ✅ **Task Management** (6 tests) - Add, delete, complete, notes, validation
-- ✅ **Settings** (4 tests) - Update times, validation
-- ✅ **UI State** (4 tests) - Modal handling, section visibility
-- ✅ **Integration** (2 tests) - Complete workflows
-- ✅ **Error Handling** (3 tests) - Invalid data, edge cases
-- ✅ **DOM Elements** (3 tests) - Required elements exist
-
-### Negative Tests
-
-Each category includes **negative tests** that are designed to fail, ensuring the test framework is working correctly. These tests pass when they fail their assertions (as expected).
-
-**Expected Results**: ~100% success rate with all functional tests passing and negative tests failing as intended.
-
-## 📁 File Structure
+## File layout
 
 ```
-├── index.html          # Main application file (HTML, CSS, JavaScript)
-├── tests.js           # Comprehensive test suite for browser console
-├── README.md          # This documentation
-└── LICENSE            # Project license
+.
+├── index.html           # Project landing
+├── app/
+│   └── index.html      # Main interactive planner UI
+├── testing/
+│   ├── tests.js        # In-browser test helpers and assertions
+│   └── *.html          # Test/demo pages
+├── img/                # Images and favicon
+├── README.md
+└── LICENSE
 ```
 
-## 💾 Data Storage
+## Data & storage
 
-- Uses browser **localStorage** for data persistence
-- Data survives page refreshes and browser restarts
-- To reset all data: Open console and run `localStorage.clear()` then refresh
+- All user data is stored client-side in `localStorage`.
+- To reset the app state: open DevTools Console and run:
 
-## 🛠️ Technology Stack
+```javascript
+localStorage.clear();
+location.reload();
+```
 
-- **HTML5** - Structure and semantics
-- **Tailwind CSS** - Responsive styling and design
-- **Vanilla JavaScript** - Application logic and interactivity
-- **localStorage** - Client-side data persistence
+## Contributing & development notes
 
-## 📋 To-Do List
+- This is a small, frontend-only project. No backend required.
+- If you add build tooling, include an updated `README` section describing build steps and required versions.
 
-- [x] ~~Settings with the Wake-up Time and Sleep Time~~
-- [x] ~~Unit testing~~
-- [x] ~~Dark mode~~
-- [ ] Blocks need to have the option of custom start and end time
-- [ ] Export/import functionality
-- [ ] Weekly/monthly view
-- [ ] Task categories and priorities
+## Troubleshooting
+
+- If the UI looks unstyled, ensure Tailwind CSS is loaded or open the app via a local server rather than using the `file://` protocol.
+- If tests behave strangely, refresh the page and re-run `localStorage.clear()` to reset state.
+
+## License
+
+This project is provided under the terms of the `LICENSE` file in the repository.
