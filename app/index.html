@@ -268,6 +268,37 @@
             color: var(--text-primary) !important;
         }
 
+        /* Dark mode for merged button container */
+        .dark #settings-btn {
+            background-color: var(--bg-tertiary) !important;
+            border-color: var(--border-color) !important;
+            color: var(--text-secondary) !important;
+        }
+
+        .dark #settings-btn:hover {
+            background-color: var(--bg-secondary) !important;
+            color: var(--text-primary) !important;
+        }
+
+        /* Responsive button group styling */
+        @media (max-width: 640px) {
+            .inline-flex {
+                flex-direction: column;
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .inline-flex button {
+                border-radius: 0.5rem !important;
+                border: 1px solid !important;
+                margin-bottom: 0.25rem;
+            }
+            
+            .inline-flex button:last-child {
+                margin-bottom: 0;
+            }
+        }
+
         /* Dark mode edit buttons */
         .dark .edit-block-btn,
         .dark .edit-task-btn {
@@ -366,14 +397,7 @@
     <!-- Main Application Container -->
     <div id="app" class="container mx-auto max-w-4xl p-4 sm:p-6 lg:p-8">
         
-        <header class="text-center mb-8 relative">
-            <!-- Settings Button -->
-            <button id="settings-btn" class="absolute top-0 right-0 p-2 text-gray-600 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded-md">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                </svg>
-            </button>
+        <header class="text-center mb-8">
             <h1 class="text-4xl font-bold text-gray-900">🗓️ Daily Time Planner</h1>
             <p class="text-lg text-gray-600 mt-2">Structure your day, budget your time, and get things done.</p>
         </header>
@@ -412,11 +436,27 @@
                 </div>
             </div>
 
-            <!-- Block Creation -->
+            <!-- Merged Button Container -->
             <div class="text-center mb-8">
-                <button id="add-block-btn" class="px-8 py-3 border border-transparent text-base font-medium rounded-full shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                    + Add Time Block
-                </button>
+                <div class="inline-flex rounded-lg shadow-sm" role="group">
+                    <button id="add-block-btn" class="px-8 py-3 text-base font-medium text-white bg-indigo-600 border border-indigo-600 rounded-l-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200">
+                        <span class="flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                            </svg>
+                            Add Time Block
+                        </span>
+                    </button>
+                    <button id="settings-btn" class="px-6 py-3 text-base font-medium text-gray-700 bg-gray-200 border border-gray-300 border-l-0 rounded-r-lg hover:bg-gray-300 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-200">
+                        <span class="flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            Settings
+                        </span>
+                    </button>
+                </div>
             </div>
 
             <!-- Blocks Container -->

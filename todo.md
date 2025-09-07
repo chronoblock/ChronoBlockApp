@@ -11,12 +11,18 @@
 - [x] ~~making EDIT available for BLOCKS, TASKS~~
 - [x] ~~tasks: replace delete with 🗑️~~
 - [x] ~~add styling customization for blocks of time~~
+- [x] ~~task: make them easy to change the rank (dropup-down)~~
+
+
+
+- [ ] clean and refactore the project
+
+
 
 
 - [ ] blocks: must be sorted by time accordingly
-- [ ] add emojie to the block 
-- [ ] add contact us or send us a message
-- [ ] task: make them easy to change the rank (dropup-down)
+- [ ] add emojie to the block as mini-logo
+- [ ] add contact us or send us a message 
 
 - [ ] how to contribute in github. developer guide.
 - [ ] 
