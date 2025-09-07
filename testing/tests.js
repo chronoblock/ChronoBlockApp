@@ -47,7 +47,6 @@ const TimePlannerTests = {
             editingTaskId: null,
             editingBlockId: null,
             isEditingBlock: false,
-            darkMode: false,
             isNotesPreviewMode: false
         };
         
@@ -428,26 +427,12 @@ const TimePlannerTests = {
                     'First color is white (default)',
                     'colorCustomization'
                 );
-
-                // Test dark mode color support
-                TimePlannerTests.assert(
-                    blockColorPalette[0].darkValue !== undefined,
-                    'Colors have dark mode variants',
-                    'colorCustomization'
-                );
-
-                TimePlannerTests.assert(
-                    blockColorPalette[0].darkTextColor !== undefined,
-                    'Colors have dark mode text colors',
-                    'colorCustomization'
-                );
             }
         },
 
         createBlockWithColor: function() {
             const testState = { blocks: [] };
-            const isDarkMode = document.body.classList.contains('dark');
-            const testColor = isDarkMode ? '#1e3a8a' : '#eff6ff'; // Blue in appropriate mode
+            const testColor = '#eff6ff'; // Blue color
             
             const colorBlock = {
                 id: Date.now(),
@@ -474,9 +459,8 @@ const TimePlannerTests = {
 
         colorMigration: function() {
             // Test migration of blocks without colors
-            const isDarkMode = document.body.classList.contains('dark');
-            const defaultColor = isDarkMode ? '#374151' : '#ffffff';
-            const existingColor = isDarkMode ? '#14532d' : '#f0fdf4'; // Green
+            const defaultColor = '#ffffff';
+            const existingColor = '#f0fdf4'; // Green
             
             const testState = {
                 blocks: [
@@ -502,7 +486,7 @@ const TimePlannerTests = {
 
             TimePlannerTests.assert(
                 testState.blocks[0].color === defaultColor,
-                'Migration assigns mode-appropriate default color to blocks without colors',
+                'Migration assigns default color to blocks without colors',
                 'colorCustomization'
             );
 
@@ -531,89 +515,31 @@ const TimePlannerTests = {
         },
 
         colorContrastValidation: function() {
-            // Test that all colors have proper text color for contrast in both modes
+            // Test that all colors have proper text color for contrast
             if (typeof blockColorPalette !== 'undefined') {
-                let allColorsHaveLightTextColor = true;
-                let allColorsHaveDarkTextColor = true;
-                let allColorsHaveDarkValue = true;
-                let hasLightColors = false;
-                let hasDarkColors = false;
+                let allColorsHaveTextColor = true;
+                let hasValidColors = false;
 
                 blockColorPalette.forEach(color => {
-                    if (!color.textColor || !color.darkTextColor) {
-                        allColorsHaveLightTextColor = false;
-                        allColorsHaveDarkTextColor = false;
-                    }
-                    if (!color.darkValue) {
-                        allColorsHaveDarkValue = false;
+                    if (!color.textColor) {
+                        allColorsHaveTextColor = false;
                     }
                     if (color.textColor === '#374151' || color.textColor === '#1e40af' || color.textColor === '#166534' || color.textColor === '#a16207' || color.textColor === '#dc2626') {
-                        hasLightColors = true;
-                    }
-                    if (color.darkTextColor === '#f9fafb' || color.darkTextColor === '#bfdbfe' || color.darkTextColor === '#bbf7d0' || color.darkTextColor === '#fef3c7' || color.darkTextColor === '#fecaca') {
-                        hasDarkColors = true;
+                        hasValidColors = true;
                     }
                 });
 
                 TimePlannerTests.assert(
-                    allColorsHaveLightTextColor && allColorsHaveDarkTextColor,
-                    'All colors have text colors defined for both light and dark modes',
+                    allColorsHaveTextColor,
+                    'All colors have text colors defined',
                     'colorCustomization'
                 );
 
                 TimePlannerTests.assert(
-                    allColorsHaveDarkValue,
-                    'All colors have dark mode variants defined',
+                    hasValidColors,
+                    'Color palette includes appropriate text colors',
                     'colorCustomization'
                 );
-
-                TimePlannerTests.assert(
-                    hasLightColors && hasDarkColors,
-                    'Color palette includes appropriate text colors for both light and dark themes',
-                    'colorCustomization'
-                );
-            }
-        },
-
-        darkModeColorSwitching: function() {
-            // Test dark mode color switching functionality
-            const originalDarkMode = document.body.classList.contains('dark');
-            
-            try {
-                // Test light mode colors
-                document.body.classList.remove('dark');
-                if (typeof initializeColorPicker === 'function') {
-                    initializeColorPicker();
-                    const lightColorButtons = document.querySelectorAll('#color-picker button');
-                    const hasLightColors = lightColorButtons.length > 0;
-                    
-                    TimePlannerTests.assert(
-                        hasLightColors,
-                        'Color picker initializes with light mode colors',
-                        'colorCustomization'
-                    );
-                }
-
-                // Test dark mode colors
-                document.body.classList.add('dark');
-                if (typeof initializeColorPicker === 'function') {
-                    initializeColorPicker();
-                    const darkColorButtons = document.querySelectorAll('#color-picker button');
-                    const hasDarkColors = darkColorButtons.length > 0;
-                    
-                    TimePlannerTests.assert(
-                        hasDarkColors,
-                        'Color picker initializes with dark mode colors',
-                        'colorCustomization'
-                    );
-                }
-            } finally {
-                // Restore original dark mode state
-                if (originalDarkMode) {
-                    document.body.classList.add('dark');
-                } else {
-                    document.body.classList.remove('dark');
-                }
             }
         },
 
@@ -621,7 +547,7 @@ const TimePlannerTests = {
         negativeTest_ColorsShouldFail: function() {
             const fakeColor = '#invalid';
             const fakeColorExists = blockColorPalette && blockColorPalette.some(c => 
-                c.value === fakeColor || c.darkValue === fakeColor
+                c.value === fakeColor
             );
             TimePlannerTests.assert(
                 fakeColorExists,
@@ -821,58 +747,6 @@ const TimePlannerTests = {
             TimePlannerTests.assert(
                 '07:00' === '19:00', // These times are NOT equal
                 'NEGATIVE TEST: Different time values should fail comparison',
-                'settings'
-            );
-        },
-
-        // Dark Mode Tests
-        darkModeToggle: function() {
-            const testState = { darkMode: false };
-            
-            // Toggle dark mode on
-            testState.darkMode = true;
-            TimePlannerTests.assert(
-                testState.darkMode === true,
-                'Dark mode can be enabled',
-                'settings'
-            );
-
-            // Toggle dark mode off
-            testState.darkMode = false;
-            TimePlannerTests.assert(
-                testState.darkMode === false,
-                'Dark mode can be disabled',
-                'settings'
-            );
-        },
-
-        darkModePersistence: function() {
-            const testState = { darkMode: true };
-            
-            // Simulate saving to localStorage
-            const stateString = JSON.stringify(testState);
-            const loadedState = JSON.parse(stateString);
-            
-            TimePlannerTests.assert(
-                loadedState.darkMode === true,
-                'Dark mode preference persists in localStorage',
-                'settings'
-            );
-        },
-
-        darkModeDefault: function() {
-            const newState = {
-                dayIsSet: false,
-                wakeTime: '07:00',
-                sleepTime: '23:00',
-                blocks: [],
-                editingTaskId: null,
-                darkMode: false  // Should default to false
-            };
-
-            TimePlannerTests.assert(
-                newState.darkMode === false,
-                'Dark mode defaults to false for new users',
                 'settings'
             );
         }
@@ -2082,26 +1956,6 @@ const TimePlannerTests = {
             );
         },
 
-        darkModeCompatibility: function() {
-            const testState = { darkMode: false };
-            
-            // Test dark mode toggle
-            testState.darkMode = true;
-            TimePlannerTests.assert(
-                testState.darkMode === true,
-                'Dark mode can be enabled for enhanced features',
-                'uiEnhancement'
-            );
-
-            // Test CSS class application
-            const bodyClass = testState.darkMode ? 'dark' : '';
-            TimePlannerTests.assert(
-                bodyClass === 'dark',
-                'Dark mode applies correct CSS class',
-                'uiEnhancement'
-            );
-        },
-
         responsiveDesign: function() {
             // Test modal width classes
             const modalClasses = 'w-full max-w-lg';
@@ -2157,7 +2011,6 @@ const TimePlannerTests = {
                     editingTaskId: null,
                     editingBlockId: null,
                     isEditingBlock: false,
-                    darkMode: false,
                     isNotesPreviewMode: false
                 };
                 
@@ -2225,7 +2078,7 @@ const TimePlannerTests = {
                     editingTaskId: null,
                     editingBlockId: null,
                     isEditingBlock: false,
-                    darkMode: false,
+                    
                     isNotesPreviewMode: false
                 };
                 
@@ -2353,7 +2206,7 @@ const TimePlannerTests = {
                         { id: 1, text: 'Brush teeth', completed: true, notes: '**Important** task' }
                     ]}
                 ],
-                darkMode: true,
+                
                 dayIsSet: true
             };
 
@@ -2399,7 +2252,7 @@ const TimePlannerTests = {
                     wakeTime: "07:00",
                     sleepTime: "23:00",
                     blocks: [],
-                    darkMode: false,
+                    
                     dayIsSet: false
                 }
             };
@@ -2454,7 +2307,7 @@ const TimePlannerTests = {
                         { id: 1, text: 'Test Task', completed: true, notes: '**Important** notes with markdown' }
                     ]}
                 ],
-                darkMode: true,
+                
                 isNotesPreviewMode: true,
                 editingTaskId: { blockId: 1, taskId: 1 }
             };
@@ -2466,7 +2319,7 @@ const TimePlannerTests = {
                 sleepTime: '23:00',
                 blocks: [],
                 editingTaskId: null,
-                darkMode: false,
+                
                 isNotesPreviewMode: false
             };
 
@@ -2480,12 +2333,6 @@ const TimePlannerTests = {
             TimePlannerTests.assert(
                 factoryDefaults.dayIsSet === false,
                 'Nuclear clear resets day setup to initial state',
-                'dataManagement'
-            );
-
-            TimePlannerTests.assert(
-                factoryDefaults.darkMode === false,
-                'Nuclear clear resets dark mode to light theme',
                 'dataManagement'
             );
 
@@ -2549,7 +2396,7 @@ const TimePlannerTests = {
                         ]
                     }
                 ],
-                darkMode: true,
+                
                 isNotesPreviewMode: true,
                 editingTaskId: { blockId: 1, taskId: 1 }
             };
@@ -2561,7 +2408,7 @@ const TimePlannerTests = {
                 sleepTime: '23:00',
                 blocks: [],
                 editingTaskId: null,
-                darkMode: false,
+                
                 isNotesPreviewMode: false
             };
 
@@ -2571,7 +2418,6 @@ const TimePlannerTests = {
                 tasks: maximalState.blocks.reduce((sum, b) => sum + b.tasks.length, 0),
                 customWake: maximalState.wakeTime !== '07:00',
                 customSleep: maximalState.sleepTime !== '23:00',
-                darkEnabled: maximalState.darkMode,
                 hasEditingState: maximalState.editingTaskId !== null
             };
 
@@ -2580,7 +2426,6 @@ const TimePlannerTests = {
                 tasks: postNuclearState.blocks.reduce((sum, b) => sum + (b.tasks ? b.tasks.length : 0), 0),
                 customWake: postNuclearState.wakeTime !== '07:00',
                 customSleep: postNuclearState.sleepTime !== '23:00',
-                darkEnabled: postNuclearState.darkMode,
                 hasEditingState: postNuclearState.editingTaskId !== null
             };
 
@@ -2605,12 +2450,6 @@ const TimePlannerTests = {
             TimePlannerTests.assert(
                 beforeData.customSleep && !afterData.customSleep,
                 'Nuclear reset restores default sleep time (custom→23:00)',
-                'dataManagement'
-            );
-
-            TimePlannerTests.assert(
-                beforeData.darkEnabled && !afterData.darkEnabled,
-                'Nuclear reset disables dark mode (dark→light)',
                 'dataManagement'
             );
 
@@ -2679,7 +2518,7 @@ const TimePlannerTests = {
                 wakeTime: '08:00',
                 sleepTime: '22:00',
                 blocks: [{ id: 1, purpose: 'Important Work', duration: 120, tasks: [] }],
-                darkMode: true
+                
             };
 
             // Step 1: Export (backup) data
@@ -2701,7 +2540,7 @@ const TimePlannerTests = {
                 wakeTime: '07:00',
                 sleepTime: '23:00',
                 blocks: [],
-                darkMode: false
+                
             };
 
             TimePlannerTests.assert(
@@ -2725,11 +2564,6 @@ const TimePlannerTests = {
                 'dataManagement'
             );
 
-            TimePlannerTests.assert(
-                restoredState.darkMode === originalState.darkMode,
-                'Import restores theme preferences',
-                'dataManagement'
-            );
         },
 
         // NEGATIVE TEST - This should fail
@@ -2933,7 +2767,6 @@ const TimePlannerTests = {
                 wakeTime: window.state.wakeTime,
                 sleepTime: window.state.sleepTime,
                 blocks: window.state.blocks,
-                darkMode: window.state.darkMode,
                 dayIsSet: window.state.dayIsSet,
                 editingTaskId: window.state.editingTaskId,
                 editingBlockId: window.state.editingBlockId,
@@ -2973,7 +2806,7 @@ const TimePlannerTests = {
                 editingTaskId: null,
                 editingBlockId: null,
                 isEditingBlock: false,
-                darkMode: false,
+                
                 isNotesPreviewMode: false
             };
 
@@ -3310,7 +3143,6 @@ window.testTasks = () => TimePlannerTests.runCategory('task');
 window.testBlocks = () => TimePlannerTests.runCategory('timeBlock');
 window.testSettings = () => TimePlannerTests.runCategory('settings');
 window.testTimeValidation = () => TimePlannerTests.runCategory('timeValidation');
-window.testDarkMode = () => TimePlannerTests.runCategory('settings'); // Dark mode tests are in settings
 
 // NEW: Test aliases for enhanced features
 window.testMarkdown = () => TimePlannerTests.runCategory('markdown');

@@ -18,7 +18,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <!-- Custom Styles -->
     <style>
-        /* CSS Variables for Theme Support */
+        /* CSS Variables for Light Theme */
         :root {
             --bg-primary: #f3f4f6;
             --bg-secondary: #ffffff;
@@ -32,24 +32,10 @@
             --shadow-lg: rgba(0, 0, 0, 0.15);
         }
 
-        .dark {
-            --bg-primary: #1f2937;
-            --bg-secondary: #374151;
-            --bg-tertiary: #4b5563;
-            --text-primary: #f9fafb;
-            --text-secondary: #d1d5db;
-            --text-accent: #818cf8;
-            --border-color: #4b5563;
-            --border-focus: #818cf8;
-            --shadow: rgba(0, 0, 0, 0.3);
-            --shadow-lg: rgba(0, 0, 0, 0.4);
-        }
-
         body {
             font-family: 'Inter', sans-serif;
             background-color: var(--bg-primary);
             color: var(--text-primary);
-            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         /* Update existing styles to use variables */
@@ -61,12 +47,7 @@
         .border-gray-300 { border-color: var(--border-color) !important; }
         .bg-gray-50 { background-color: var(--bg-tertiary) !important; }
 
-        /* Dark mode specific overrides */
-        .dark .shadow-md { box-shadow: 0 4px 6px -1px var(--shadow), 0 2px 4px -1px var(--shadow); }
-        .dark .shadow-lg { box-shadow: 0 10px 15px -3px var(--shadow-lg), 0 4px 6px -2px var(--shadow); }
-        .dark .shadow-sm { box-shadow: 0 1px 2px 0 var(--shadow); }
-
-        /* Custom scrollbar for both themes */
+        /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -84,32 +65,6 @@
         /* Notes toggle buttons styling */
         .notes-toggle-btn {
             transition: all 0.2s ease;
-        }
-
-        /* Dark mode markdown elements */
-        .dark #notes-preview h3,
-        .dark #notes-preview h4,
-        .dark #notes-preview h5 {
-            color: var(--text-primary) !important;
-        }
-        .dark #notes-preview mark {
-            background-color: #fbbf24 !important;
-            color: #000 !important;
-        }
-
-        /* Dark mode toggle switch styles */
-        .toggle-checkbox {
-            transition: all 0.3s ease;
-        }
-        .toggle-checkbox:checked {
-            transform: translateX(100%);
-            border-color: #4f46e5;
-        }
-        .toggle-label {
-            transition: background-color 0.3s ease;
-        }
-        .toggle-checkbox:checked + .toggle-label {
-            background-color: #4f46e5;
         }
 
         /* Data management button styling */
@@ -131,17 +86,6 @@
                 transform: translateX(0);
                 opacity: 1;
             }
-        }
-
-        /* Dark mode for new elements */
-        .dark .border-red-500 {
-            border-color: #ef4444 !important;
-        }
-        .dark .text-red-600 {
-            color: #f87171 !important;
-        }
-        .dark .hover\:bg-red-50:hover {
-            background-color: #7f1d1d !important;
         }
 
         /* Simple animation for modals and blocks */
@@ -168,115 +112,16 @@
             background-color: var(--bg-tertiary);
         }
 
-        /* Dark mode input and button overrides */
-        .dark input[type="time"],
-        .dark input[type="text"],
-        .dark input[type="number"],
-        .dark textarea {
-            background-color: var(--bg-tertiary);
-            border-color: var(--border-color);
-            color: var(--text-primary);
+        /* Task edit mode styling */
+        .task-actions-default, .task-actions-edit {
+            min-width: 80px; /* Consistent width for button container */
+            justify-content: flex-end;
         }
 
-        /* Dark mode time input clock icon fix */
-        .dark input[type="time"]::-webkit-calendar-picker-indicator {
-            filter: invert(1);
-            cursor: pointer;
-        }
-
-        .dark input[type="time"]:focus,
-        .dark input[type="text"]:focus,
-        .dark input[type="number"]:focus,
-        .dark textarea:focus {
-            border-color: var(--border-focus);
-            --tw-ring-color: var(--border-focus);
-        }
-
-        /* Dark mode title override */
-        .dark h1 {
-            color: var(--text-primary) !important;
-        }
-
-        /* Dark mode modal titles override (only for modal h3 elements) */
-        .dark .fixed h3 {
-            color: var(--text-primary) !important;
-        }
-
-        /* Dark mode cancel button text override */
-        .dark button[id*="cancel"] {
-            color: white !important; /* White text for cancel buttons in dark mode */
-        }
-
-        /* Dark mode Notes Edit/Preview buttons */
-        .dark #notes-edit-btn {
+        .edit-task-input {
+            min-width: 200px;
             background-color: var(--bg-secondary) !important;
-            color: var(--text-secondary) !important;
-            border: 1px solid var(--border-color) !important;
-        }
-
-        .dark #notes-edit-btn:hover {
-            background-color: var(--bg-tertiary) !important;
-            color: var(--text-primary) !important;
-        }
-
-        /* Keep Edit button purple when active in dark mode */
-        .dark #notes-edit-btn.bg-indigo-500 {
-            background-color: #4f46e5 !important;
-            color: white !important;
-            border: 1px solid #4f46e5 !important;
-        }
-
-        .dark #notes-edit-btn.bg-indigo-500:hover {
-            background-color: #4338ca !important;
-        }
-
-        .dark #notes-preview-btn {
-            background-color: var(--bg-secondary) !important;
-            color: var(--text-secondary) !important;
-            border: 1px solid var(--border-color) !important;
-        }
-
-        .dark #notes-preview-btn:hover {
-            background-color: var(--bg-tertiary) !important;
-            color: var(--text-primary) !important;
-        }
-
-        /* Keep Preview button purple when active in dark mode */
-        .dark #notes-preview-btn.bg-indigo-500 {
-            background-color: #4f46e5 !important;
-            color: white !important;
-            border: 1px solid #4f46e5 !important;
-        }
-
-        .dark #notes-preview-btn.bg-indigo-500:hover {
-            background-color: #4338ca !important;
-        }
-
-        /* Dark mode Notes & Comments label */
-        .dark label[for="task-notes-input"] {
-            color: var(--text-primary) !important;
-        }
-
-        /* Dark mode toggle container background */
-        .dark .bg-gray-100 {
-            background-color: var(--bg-tertiary) !important;
-        }
-
-        /* Dark mode gray backgrounds for buttons */
-        .dark .bg-gray-200 {
-            background-color: var(--bg-tertiary) !important;
-            color: var(--text-primary) !important;
-        }
-
-        /* Dark mode for merged button container */
-        .dark #settings-btn {
-            background-color: var(--bg-tertiary) !important;
-            border-color: var(--border-color) !important;
-            color: var(--text-secondary) !important;
-        }
-
-        .dark #settings-btn:hover {
-            background-color: var(--bg-secondary) !important;
+            border-color: var(--border-focus) !important;
             color: var(--text-primary) !important;
         }
 
@@ -297,51 +142,6 @@
             .inline-flex button:last-child {
                 margin-bottom: 0;
             }
-        }
-
-        /* Dark mode edit buttons */
-        .dark .edit-block-btn,
-        .dark .edit-task-btn {
-            color: #8b5cf6 !important; /* Purple for edit buttons in dark mode */
-        }
-
-        .dark .edit-block-btn:hover,
-        .dark .edit-task-btn:hover {
-            color: #a78bfa !important; /* Lighter purple on hover */
-        }
-
-        /* Dark mode inline edit inputs */
-        .dark .edit-task-input {
-            background-color: var(--bg-tertiary) !important;
-            border-color: var(--border-color) !important;
-            color: var(--text-primary) !important;
-        }
-
-        .dark .save-task-edit-btn {
-            color: #10b981 !important; /* Green for save in dark mode */
-        }
-
-        .dark .cancel-task-edit-btn {
-            color: var(--text-secondary) !important; /* Gray for cancel in dark mode */
-        }
-
-        /* Task edit mode styling */
-        .task-actions-default, .task-actions-edit {
-            min-width: 80px; /* Consistent width for button container */
-            justify-content: flex-end;
-        }
-
-        .edit-task-input {
-            min-width: 200px;
-            background-color: var(--bg-secondary) !important;
-            border-color: var(--border-focus) !important;
-            color: var(--text-primary) !important;
-        }
-
-        .dark .edit-task-input {
-            background-color: var(--bg-tertiary) !important;
-            border-color: var(--border-focus) !important;
-            color: var(--text-primary) !important;
         }
 
         /* Sortable drag-and-drop styles */
@@ -377,10 +177,6 @@
 
         .drag-handle:active {
             cursor: grabbing;
-        }
-
-        .dark .drag-handle:hover {
-            background-color: rgba(255, 255, 255, 0.1);
         }
 
         .task-item {
@@ -608,13 +404,6 @@ __Underlined__ ==Highlighted==
                         <label for="settings-sleep-time" class="block text-sm font-medium text-gray-700">Sleep Time</label>
                         <input type="time" id="settings-sleep-time" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                     </div>
-                    <div class="flex items-center justify-between pt-2">
-                        <label for="dark-mode-toggle" class="text-sm font-medium text-gray-700">🌙 Dark Mode</label>
-                        <div class="relative inline-block w-12 mr-2 align-middle select-none">
-                            <input type="checkbox" id="dark-mode-toggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-2 appearance-none cursor-pointer transform transition-transform duration-300 ease-in-out"/>
-                            <label for="dark-mode-toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer transition-colors duration-300 ease-in-out"></label>
-                        </div>
-                    </div>
                     
                     <!-- Data Management Section -->
                     <div class="border-t pt-4 mt-4">
@@ -708,7 +497,6 @@ __Underlined__ ==Highlighted==
             const settingsSleepTimeInput = document.getElementById('settings-sleep-time');
             const saveSettingsBtn = document.getElementById('save-settings-btn');
             const cancelSettingsBtn = document.getElementById('cancel-settings-btn');
-            const darkModeToggle = document.getElementById('dark-mode-toggle');
             
             // Data management elements
             const exportDataBtn = document.getElementById('export-data-btn');
@@ -725,7 +513,6 @@ __Underlined__ ==Highlighted==
                 editingTaskId: null, // format: { blockId, taskId }
                 editingBlockId: null, // NEW: For tracking which block is being edited
                 isEditingBlock: false, // NEW: Flag for block edit mode
-                darkMode: false, // NEW: Dark mode preference
                 isNotesPreviewMode: false, // NEW: Notes toggle mode state
             };
 
@@ -734,37 +521,27 @@ __Underlined__ ==Highlighted==
                 { 
                     name: 'White', 
                     value: '#ffffff', 
-                    darkValue: '#374151', 
-                    textColor: '#374151', 
-                    darkTextColor: '#f9fafb' 
+                    textColor: '#374151'
                 },
                 { 
                     name: 'Blue', 
                     value: '#eff6ff', 
-                    darkValue: '#1e3a8a', 
-                    textColor: '#1e40af', 
-                    darkTextColor: '#bfdbfe' 
+                    textColor: '#1e40af'
                 },
                 { 
                     name: 'Green', 
                     value: '#f0fdf4', 
-                    darkValue: '#14532d', 
-                    textColor: '#166534', 
-                    darkTextColor: '#bbf7d0' 
+                    textColor: '#166534'
                 },
                 { 
                     name: 'Yellow', 
                     value: '#fefce8', 
-                    darkValue: '#854d0e', 
-                    textColor: '#a16207', 
-                    darkTextColor: '#fef3c7' 
+                    textColor: '#a16207'
                 },
                 { 
                     name: 'Red', 
                     value: '#fef2f2', 
-                    darkValue: '#991b1b', 
-                    textColor: '#dc2626', 
-                    darkTextColor: '#fecaca' 
+                    textColor: '#dc2626'
                 }
             ];
 
@@ -796,49 +573,37 @@ __Underlined__ ==Highlighted==
 
             // --- COLOR PICKER FUNCTIONS ---
             const initializeColorPicker = () => {
-                const isDarkMode = document.body.classList.contains('dark');
-                
-                // Stronger colors for picker visibility with dark mode support
+                // Light theme colors for picker
                 const pickerColors = [
                     { 
                         name: 'White', 
-                        value: '#ffffff', 
-                        darkValue: '#374151',
-                        pickerValue: isDarkMode ? '#6b7280' : '#f3f4f6', 
-                        textColor: '#374151',
-                        darkTextColor: '#f9fafb'
+                        value: '#ffffff',
+                        pickerValue: '#f3f4f6', 
+                        textColor: '#374151'
                     },
                     { 
                         name: 'Blue', 
-                        value: '#eff6ff', 
-                        darkValue: '#1e3a8a',
-                        pickerValue: isDarkMode ? '#1d4ed8' : '#3b82f6', 
-                        textColor: '#1e40af',
-                        darkTextColor: '#bfdbfe'
+                        value: '#eff6ff',
+                        pickerValue: '#3b82f6', 
+                        textColor: '#1e40af'
                     },
                     { 
                         name: 'Green', 
-                        value: '#f0fdf4', 
-                        darkValue: '#14532d',
-                        pickerValue: isDarkMode ? '#16a34a' : '#10b981', 
-                        textColor: '#166534',
-                        darkTextColor: '#bbf7d0'
+                        value: '#f0fdf4',
+                        pickerValue: '#10b981', 
+                        textColor: '#166534'
                     },
                     { 
                         name: 'Yellow', 
-                        value: '#fefce8', 
-                        darkValue: '#854d0e',
-                        pickerValue: isDarkMode ? '#ca8a04' : '#eab308', 
-                        textColor: '#a16207',
-                        darkTextColor: '#fef3c7'
+                        value: '#fefce8',
+                        pickerValue: '#eab308', 
+                        textColor: '#a16207'
                     },
                     { 
                         name: 'Red', 
-                        value: '#fef2f2', 
-                        darkValue: '#991b1b',
-                        pickerValue: isDarkMode ? '#dc2626' : '#ef4444', 
-                        textColor: '#dc2626',
-                        darkTextColor: '#fecaca'
+                        value: '#fef2f2',
+                        pickerValue: '#ef4444', 
+                        textColor: '#dc2626'
                     }
                 ];
 
@@ -849,12 +614,8 @@ __Underlined__ ==Highlighted==
                     colorButton.className = 'w-8 h-8 rounded-full border-2 border-gray-300 hover:border-gray-500 transition-colors';
                     colorButton.style.backgroundColor = color.pickerValue;
                     colorButton.title = color.name;
-                    colorButton.dataset.color = isDarkMode ? color.darkValue : color.value;
-                    colorButton.dataset.lightColor = color.value;
-                    colorButton.dataset.darkColor = color.darkValue;
-                    colorButton.dataset.textColor = isDarkMode ? color.darkTextColor : color.textColor;
-                    colorButton.dataset.lightTextColor = color.textColor;
-                    colorButton.dataset.darkTextColor = color.darkTextColor;
+                    colorButton.dataset.color = color.value;
+                    colorButton.dataset.textColor = color.textColor;
                     
                     colorButton.addEventListener('click', () => {
                         // Remove active state from all color buttons
@@ -870,8 +631,8 @@ __Underlined__ ==Highlighted==
                     colorPicker.appendChild(colorButton);
                 });
                 
-                // Set default selection based on current mode
-                const defaultColor = isDarkMode ? '#374151' : '#ffffff';
+                // Set default selection
+                const defaultColor = '#ffffff';
                 const defaultButton = colorPicker.querySelector(`[data-color="${defaultColor}"]`);
                 if (defaultButton) {
                     defaultButton.classList.add('ring-2', 'ring-indigo-500');
@@ -879,16 +640,11 @@ __Underlined__ ==Highlighted==
             };
 
             const setBlockColor = (colorValue) => {
-                const isDarkMode = document.body.classList.contains('dark');
                 const colorButtons = colorPicker.querySelectorAll('button');
                 colorButtons.forEach(btn => {
                     btn.classList.remove('ring-2', 'ring-indigo-500');
-                    // Check against both light and dark colors for compatibility
-                    if (btn.dataset.color === colorValue || 
-                        btn.dataset.lightColor === colorValue || 
-                        btn.dataset.darkColor === colorValue) {
+                    if (btn.dataset.color === colorValue) {
                         btn.classList.add('ring-2', 'ring-indigo-500');
-                        // Update the input with the current mode's appropriate color
                         blockColorInput.value = btn.dataset.color;
                     }
                 });
@@ -983,36 +739,6 @@ __Underlined__ ==Highlighted==
                 updateNotesToggleUI();
             };
 
-            // --- DARK MODE UTILITIES ---
-            const applyTheme = (isDark) => {
-                document.body.classList.toggle('dark', isDark);
-                // Update any dynamic elements that need theme awareness
-                const modals = document.querySelectorAll('[id$="-modal"]');
-                modals.forEach(modal => {
-                    const content = modal.querySelector('.bg-white');
-                    if (content) {
-                        content.style.backgroundColor = isDark ? 'var(--bg-secondary)' : '';
-                        content.style.color = isDark ? 'var(--text-primary)' : '';
-                    }
-                });
-            };
-
-            const toggleDarkMode = (enabled) => {
-                state.darkMode = enabled;
-                applyTheme(enabled);
-                saveState();
-                
-                // Refresh color picker with new mode colors
-                if (colorPicker) {
-                    initializeColorPicker();
-                }
-                
-                // Re-render blocks to apply new colors
-                if (state.dayIsSet) {
-                    renderBlocks();
-                }
-            };
-
             // --- DATA MANAGEMENT UTILITIES ---
             const exportData = () => {
                 try {
@@ -1024,7 +750,6 @@ __Underlined__ ==Highlighted==
                             wakeTime: state.wakeTime,
                             sleepTime: state.sleepTime,
                             blocks: state.blocks,
-                            darkMode: state.darkMode,
                             dayIsSet: state.dayIsSet,
                             editingTaskId: state.editingTaskId,
                             editingBlockId: state.editingBlockId,
@@ -1066,7 +791,7 @@ __Underlined__ ==Highlighted==
                     }
 
                     // Show confirmation dialog
-                    const confirmMessage = `Import data from ${importedData.exportDate ? new Date(importedData.exportDate).toLocaleDateString() : 'unknown date'}?\n\nThis will replace your current:\n• ${state.blocks.length} time blocks\n• Wake/sleep schedule\n• Theme preferences\n\nThis cannot be undone.`;
+                    const confirmMessage = `Import data from ${importedData.exportDate ? new Date(importedData.exportDate).toLocaleDateString() : 'unknown date'}?\n\nThis will replace your current:\n• ${state.blocks.length} time blocks\n• Wake/sleep schedule\n\nThis cannot be undone.`;
                     
                     if (!confirm(confirmMessage)) {
                         return;
@@ -1076,17 +801,12 @@ __Underlined__ ==Highlighted==
                     state.wakeTime = importedData.data.wakeTime;
                     state.sleepTime = importedData.data.sleepTime;
                     state.blocks = importedData.data.blocks || [];
-                    state.darkMode = importedData.data.darkMode || false;
                     state.dayIsSet = importedData.data.dayIsSet || false;
                     state.editingTaskId = importedData.data.editingTaskId || null;
                     state.editingBlockId = importedData.data.editingBlockId || null;
                     state.isEditingBlock = importedData.data.isEditingBlock || false;
                     state.isNotesPreviewMode = importedData.data.isNotesPreviewMode || false;
 
-                    // Update UI
-                    applyTheme(state.darkMode);
-                    darkModeToggle.checked = state.darkMode;
-                    
                     // Save and refresh
                     saveState();
                     render();
@@ -1102,7 +822,7 @@ __Underlined__ ==Highlighted==
                 const totalBlocks = state.blocks.length;
                 const totalTasks = state.blocks.reduce((sum, block) => sum + block.tasks.length, 0);
                 
-                const confirmMessage = `🗑️ CLEAR EVERYTHING\n\nThis will permanently delete ALL your data:\n\n📦 ${totalBlocks} time blocks\n✅ ${totalTasks} tasks and notes\n⏰ Wake/sleep schedule\n🌙 Dark mode preference\n📊 All settings and preferences\n\nEverything will be reset to factory defaults.\n\n⚠️ THIS CANNOT BE UNDONE!\n\nHave you exported your data as backup?\n\nProceed with complete deletion?`;
+                const confirmMessage = `🗑️ CLEAR EVERYTHING\n\nThis will permanently delete ALL your data:\n\n📦 ${totalBlocks} time blocks\n✅ ${totalTasks} tasks and notes\n⏰ Wake/sleep schedule\n📊 All settings and preferences\n\nEverything will be reset to factory defaults.\n\n⚠️ THIS CANNOT BE UNDONE!\n\nHave you exported your data as backup?\n\nProceed with complete deletion?`;
                 
                 if (!confirm(confirmMessage)) {
                     return;
@@ -1127,13 +847,10 @@ __Underlined__ ==Highlighted==
                     editingTaskId: null,
                     editingBlockId: null,
                     isEditingBlock: false,
-                    darkMode: false,
                     isNotesPreviewMode: false
                 };
 
                 // Complete UI reset
-                applyTheme(false); // Force light mode
-                darkModeToggle.checked = false;
                 setupSection.classList.remove('hidden');
                 plannerSection.classList.add('hidden');
                 
@@ -1368,21 +1085,19 @@ __Underlined__ ==Highlighted==
                     let hasChanges = false;
                     state.blocks.forEach(block => {
                         if (!block.color) {
-                            // Set default color based on current dark mode preference
-                            const isDarkMode = state.darkMode || false;
-                            block.color = isDarkMode ? '#374151' : '#ffffff';
+                            // Set default color (light theme only)
+                            block.color = '#ffffff';
                             hasChanges = true;
                         }
                         // Ensure blocks have valid colors from our palette (for compatibility)
                         else {
-                            // Check if the color exists in our palette (either light or dark version)
+                            // Check if the color exists in our palette
                             const colorExists = blockColorPalette.some(c => 
-                                c.value === block.color || c.darkValue === block.color
+                                c.value === block.color
                             );
                             if (!colorExists) {
-                                // Fallback to white/gray if color is not in our palette
-                                const isDarkMode = state.darkMode || false;
-                                block.color = isDarkMode ? '#374151' : '#ffffff';
+                                // Fallback to white if color is not in our palette
+                                block.color = '#ffffff';
                                 hasChanges = true;
                             }
                         }
@@ -1392,9 +1107,6 @@ __Underlined__ ==Highlighted==
                     if (hasChanges) {
                         saveState();
                     }
-                    
-                    // Apply theme after loading state
-                    applyTheme(state.darkMode || false);
                 }
             };
             
@@ -1435,7 +1147,6 @@ __Underlined__ ==Highlighted==
             const renderBlocks = () => {
                 blocksContainer.innerHTML = '';
                 let cumulativeTime = timeToMinutes(state.wakeTime);
-                const isDarkMode = document.body.classList.contains('dark');
 
                 // Sort blocks by start time if they have specific times, otherwise by order
                 const sortedBlocks = [...state.blocks].sort((a, b) => {
@@ -1452,16 +1163,15 @@ __Underlined__ ==Highlighted==
                 sortedBlocks.forEach(block => {
                     const blockEl = document.createElement('div');
                     
-                    // Apply custom color with dark mode support
-                    let blockColor = block.color || (isDarkMode ? '#374151' : '#ffffff');
+                    // Apply custom color (light theme only)
+                    let blockColor = block.color || '#ffffff';
                     let colorInfo = null;
                     
-                    // Find color info by checking both light and dark values for compatibility
+                    // Find color info by checking the value
                     for (const color of blockColorPalette) {
-                        if (color.value === blockColor || color.darkValue === blockColor) {
+                        if (color.value === blockColor) {
                             colorInfo = color;
-                            // Set the appropriate color for current mode
-                            blockColor = isDarkMode ? color.darkValue : color.value;
+                            blockColor = color.value;
                             break;
                         }
                     }
@@ -1469,10 +1179,10 @@ __Underlined__ ==Highlighted==
                     // Fallback to first color if no match found
                     if (!colorInfo) {
                         colorInfo = blockColorPalette[0];
-                        blockColor = isDarkMode ? colorInfo.darkValue : colorInfo.value;
+                        blockColor = colorInfo.value;
                     }
                     
-                    const textColor = isDarkMode ? colorInfo.darkTextColor : colorInfo.textColor;
+                    const textColor = colorInfo.textColor;
                     
                     blockEl.className = 'p-5 rounded-lg shadow-md fade-in';
                     blockEl.style.backgroundColor = blockColor;
@@ -1576,10 +1286,9 @@ __Underlined__ ==Highlighted==
                 durationModeRadio.checked = true;
                 switchTimeMode('duration');
                 
-                // Initialize color picker and set default color based on current mode
+                // Initialize color picker and set default color
                 initializeColorPicker();
-                const isDarkMode = document.body.classList.contains('dark');
-                const defaultColor = isDarkMode ? '#374151' : '#ffffff';
+                const defaultColor = '#ffffff';
                 setBlockColor(defaultColor);
                 
                 // Update modal title and button for creation
@@ -1661,8 +1370,7 @@ __Underlined__ ==Highlighted==
                     // Edit existing block
                     const block = state.blocks.find(b => b.id === state.editingBlockId);
                     if (block) {
-                        const isDarkMode = document.body.classList.contains('dark');
-                        const defaultColor = isDarkMode ? '#374151' : '#ffffff';
+                        const defaultColor = '#ffffff';
                         block.purpose = purpose;
                         block.duration = duration;
                         block.color = blockColorInput.value || defaultColor;
@@ -1682,8 +1390,7 @@ __Underlined__ ==Highlighted==
                     state.editingBlockId = null;
                 } else {
                     // Create new block
-                    const isDarkMode = document.body.classList.contains('dark');
-                    const defaultColor = isDarkMode ? '#374151' : '#ffffff';
+                    const defaultColor = '#ffffff';
                     const newBlock = {
                         id: Date.now(),
                         purpose,
@@ -1710,8 +1417,7 @@ __Underlined__ ==Highlighted==
                 blockMinutesInput.value = '';
                 blockStartTimeInput.value = '';
                 blockEndTimeInput.value = '';
-                const isDarkMode = document.body.classList.contains('dark');
-                const defaultColor = isDarkMode ? '#374151' : '#ffffff';
+                const defaultColor = '#ffffff';
                 blockColorInput.value = defaultColor;
                 durationModeRadio.checked = true;
                 switchTimeMode('duration');
@@ -1953,17 +1659,11 @@ __Underlined__ ==Highlighted==
             settingsBtn.addEventListener('click', () => {
                 settingsWakeTimeInput.value = state.wakeTime;
                 settingsSleepTimeInput.value = state.sleepTime;
-                darkModeToggle.checked = state.darkMode || false;
                 openModal(settingsModal);
             });
 
             cancelSettingsBtn.addEventListener('click', () => {
                 closeModal(settingsModal);
-            });
-
-            // Dark mode toggle handler
-            darkModeToggle.addEventListener('change', (e) => {
-                toggleDarkMode(e.target.checked);
             });
 
             saveSettingsBtn.addEventListener('click', () => {
@@ -1977,7 +1677,6 @@ __Underlined__ ==Highlighted==
 
                 state.wakeTime = newWakeTime;
                 state.sleepTime = newSleepTime;
-                // Dark mode is already handled by the toggle event listener
                 saveState();
                 render();
                 closeModal(settingsModal);
