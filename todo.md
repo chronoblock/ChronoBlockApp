@@ -14,6 +14,10 @@
 - [x] ~~task: make them easy to change the rank (dropup-down)~~
 
 
+- [ ] add user counter
+- [ ] add contact us + feature request
+
+- [ ] post on SM
 
 - [ ] clean and refactore the project
 
