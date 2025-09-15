@@ -96,6 +96,13 @@
             from { opacity: 0; transform: scale(0.95); }
             to { opacity: 1; transform: scale(1); }
         }
+        .fade-out {
+            animation: fadeOut 0.3s ease-in-out forwards;
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; transform: scale(1); }
+            to { opacity: 0; transform: scale(0.95); }
+        }
         /* Style for completed tasks */
         .task-completed span {
             text-decoration: line-through;
@@ -186,6 +193,22 @@
         .task-item:hover .drag-handle {
             opacity: 0.6;
         }
+
+        /* Pulse animation for the main button */
+        .pulse-once {
+            animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1);
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.05);
+                opacity: .95;
+            }
+        }
     </style>
 </head>
 <body class="antialiased text-gray-800">
@@ -199,18 +222,30 @@
         </header>
 
         <!-- Section 1: Day Setup (Visible initially or when no day is set) -->
-        <div id="setup-section" class="bg-white p-6 rounded-xl shadow-md">
+        <div id="setup-section" class="bg-white p-6 rounded-xl shadow-lg transition-shadow duration-300 hover:shadow-xl">
             <h2 class="text-2xl font-semibold mb-4 text-center">Define Your Day</h2>
             <div class="flex flex-col sm:flex-row gap-4 items-center justify-center">
                 <div class="w-full sm:w-auto">
-                    <label for="wake-up-time" class="block text-sm font-medium text-gray-700">Wake-up Time</label>
+                    <label for="wake-up-time" class="block text-sm font-medium text-gray-700">☀️ Wake-up Time</label>
                     <input type="time" id="wake-up-time" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" value="07:00">
                 </div>
                 <div class="w-full sm:w-auto">
-                    <label for="sleep-time" class="block text-sm font-medium text-gray-700">Sleep Time</label>
+                    <label for="sleep-time" class="block text-sm font-medium text-gray-700">🌙 Sleep Time</label>
                     <input type="time" id="sleep-time" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" value="23:00">
                 </div>
-                <button id="set-day-btn" class="w-full sm:w-auto mt-4 sm:mt-6 px-6 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Set Day</button>
+            </div>
+            <div class="mt-6 text-center">
+                <button id="set-day-btn" class="w-full sm:w-auto px-8 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-transform transform hover:scale-105 active:scale-95 pulse-once">
+                    ▶ Start Planning
+                </button>
+            </div>
+            <div class="mt-6 text-center">
+                <p class="text-sm text-gray-500 mb-2">Or use a quick preset:</p>
+                <div class="flex gap-2 justify-center">
+                    <button class="quick-preset-btn text-xs px-3 py-1 rounded-full bg-gray-200 hover:bg-gray-300" data-wake="06:00" data-sleep="22:00">6am–10pm</button>
+                    <button class="quick-preset-btn text-xs px-3 py-1 rounded-full bg-gray-200 hover:bg-gray-300" data-wake="08:00" data-sleep="00:00">8am–12am</button>
+                    <button class="quick-preset-btn text-xs px-3 py-1 rounded-full bg-gray-200 hover:bg-gray-300" data-wake="09:00" data-sleep="01:00">9am–1am</button>
+                </div>
             </div>
         </div>
 
@@ -449,6 +484,7 @@ __Underlined__ ==Highlighted==
             const wakeUpInput = document.getElementById('wake-up-time');
             const sleepInput = document.getElementById('sleep-time');
             const setDayBtn = document.getElementById('set-day-btn');
+            const quickPresetBtns = document.querySelectorAll('.quick-preset-btn');
             
             const totalTimeDisplay = document.getElementById('total-time-display');
             const allocatedTimeDisplay = document.getElementById('allocated-time-display');
@@ -851,8 +887,9 @@ __Underlined__ ==Highlighted==
                 };
 
                 // Complete UI reset
-                setupSection.classList.remove('hidden');
-                plannerSection.classList.add('hidden');
+                setupSection.style.display = 'block';
+                plannerSection.style.display = 'none';
+                setupSection.classList.remove('fade-out');
                 
                 // Reset all inputs to factory defaults
                 wakeUpInput.value = '07:00';
@@ -1268,6 +1305,13 @@ __Underlined__ ==Highlighted==
                 state.sleepTime = sleepInput.value;
                 saveState();
                 render();
+            });
+
+            quickPresetBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    wakeUpInput.value = btn.dataset.wake;
+                    sleepInput.value = btn.dataset.sleep;
+                });
             });
 
             addBlockBtn.addEventListener('click', () => {

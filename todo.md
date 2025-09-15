@@ -16,6 +16,7 @@
 
 - [ ] add user counter
 - [ ] add contact us + feature request
+- [ ] donate and buy me a coffe
 
 - [ ] post on SM
 
