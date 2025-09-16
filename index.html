@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ChronoBlock - Transform Your Day Into Purposeful Time Blocks</title>
     <link rel="icon" type="image/png" href="img/favicon.png">
+        <!-- PayPal SDK (include once per page) -->
+        <script 
+            src="https://www.paypal.com/sdk/js?client-id=BAApuMHwuyNhaQquaqZYjcdqWhBGm_ismjMhdRxnx6K3x3mYDah3cAlDaKGbb_GHPHlNZfrLdQvZxULrA0&components=hosted-buttons&disable-funding=venmo&currency=USD">
+        </script>
     <style>
         * {
             margin: 0;
@@ -949,6 +953,122 @@
             transition: all 0.8s ease;
         }
 
+        /* Donation minor polish */
+        .donation {
+            background: linear-gradient(180deg, rgba(107, 70, 193, 0.04) 0%, rgba(255,255,255,0) 40%);
+            padding: 56px 0;
+        }
+
+        /* Donation layout */
+        .donation .donation-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* make both columns equal width */
+            gap: 32px;
+            align-items: stretch; /* stretch children to equal height */
+            max-width: 980px;
+            margin: 0 auto;
+        }
+
+        .donation .donation-content > * {
+            align-self: stretch;
+        }
+
+        .donation .section-header { max-width: 900px; margin: 0 auto 28px; }
+        .donation .section-title { font-size: clamp(1.6rem, 3.5vw, 2.4rem); }
+
+        .donation-card {
+            background: white;
+            border: 1px solid var(--gray-100);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            border-radius: 20px;
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .donation-why h3 {
+            font-size: 1.25rem;
+            margin-bottom: 12px;
+            color: var(--gray-900);
+        }
+
+        .donation-why ul { color: var(--gray-600); line-height: 1.8; padding-left: 18px; }
+
+        .donation-paypal {
+            display: grid;
+            place-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: transparent;
+            border-radius: 12px;
+        }
+
+        /* PayPal button styling moved into stylesheet for consistent sizing */
+        .pp-KCPSV3QU7342C {
+            text-align: center;
+            border: none;
+            border-radius: 8px;
+            min-width: 11.625rem;
+            padding: 10px 18px;
+            height: 44px;
+            font-weight: 700;
+            background-color: #FFD140;
+            color: #000000;
+            font-family: "Helvetica Neue", Arial, sans-serif;
+            font-size: 1rem;
+            line-height: 1.25rem;
+            cursor: pointer;
+            width: 100%;
+            max-width: 280px;
+        }
+
+        .donation-paypal img {
+            max-width: 160px;
+            opacity: 0.95;
+            margin: 8px auto; /* auto horizontal margin centers the image */
+            display: block;
+        }
+
+        .donation-paypal .pp-credit {
+            font-size: 0.78rem;
+            color: var(--gray-600);
+            margin: 5px;
+        }
+
+        /* Center PayPal form and credit line */
+        .paypal-form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .pp-credit {
+            text-align: center;
+            width: 100%;
+        }
+
+        /* Make both donation cards equal height (reduced to 200px) */
+        .donation .donation-content > * {
+            min-height: 200px; /* user-requested min height */
+        }
+
+        /* Keep same min-height on wide screens */
+        @media (min-width: 900px) {
+            .donation .donation-content > * {
+                min-height: 200px;
+            }
+        }
+
+        /* Tweak card spacing and vertical layout */
+        .donation-card {
+            padding: 36px;
+            justify-content: flex-start; /* match top-aligned content while keeping equal height */
+        }
+
         .reveal.visible {
             opacity: 1;
             transform: translateY(0);
@@ -974,6 +1094,10 @@
 
         /* Responsive */
         @media (max-width: 768px) {
+            .donation { padding: 40px 0; }
+            .donation .donation-content { grid-template-columns: 1fr !important; gap: 20px; padding: 0 12px; }
+            .donation-paypal { width: 100%; }
+            #paypal-container-KCPSV3QU7342C { max-width: 100%; }
             .nav-menu {
                 position: fixed;
                 top: 80px;
@@ -1062,6 +1186,7 @@
                     <li><a href="#solution">Features</a></li>
                     <li><a href="#how-it-works">How It Works</a></li>
                     <li><a href="#benefits">Benefits</a></li>
+                    <li><a href="#donate">Donate</a></li>
                     <li><a href="#faq">FAQ</a></li>
                 </ul>
                 <a href="/app/index.html" class="btn-primary nav-cta">Get Started</a>
@@ -1154,6 +1279,35 @@
                     <h3 class="problem-title">Privacy Concerns</h3>
                     <p class="problem-description">Your personal schedule and habits are valuable data. Why should apps collect and monetize your most intimate information?</p>
                 </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- Donation Section (moved here as section 3) -->
+    <section id="donate" class="donation">
+        <div class="container">
+            <div class="section-header reveal">
+                <h2 class="section-title">Support ChronoBlock</h2>
+                <p class="section-subtitle">If this tool helps you structure your day and stay focused, consider supporting its development. Your donation keeps it free, open source, and privacy-first for everyone.</p>
+            </div>
+            <div class="donation-content">
+                <div class="reveal donation-card donation-why">
+                        <h3>Why donate?</h3>
+                        <ul>
+                                <li>Zero ads, zero tracking—always.</li>
+                                <li>New features and improvements shipped regularly.</li>
+                                <li>Community-driven roadmap and transparency.</li>
+                        </ul>
+                </div>
+                <div class="reveal slide-in-right donation-card">
+                    <div class="donation-paypal">
+                        <form action="https://www.paypal.com/ncp/payment/KCPSV3QU7342C" method="post" target="_blank" class="paypal-form">
+                            <input class="pp-KCPSV3QU7342C" type="submit" value="Donate via PayPal" />
+                            <img src="https://www.paypalobjects.com/images/Debit_Credit.svg" alt="cards" />
+                            <div class="pp-credit">Powered by <img src="https://www.paypalobjects.com/paypal-ui/logos/svg/paypal-wordmark-color.svg" alt="paypal" style="height:0.875rem;vertical-align:middle;"/></div>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
