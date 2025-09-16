@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daily Time Planner</title>
+    <title>ChronoBlock - App</title>
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="https://emojigraph.org/media/apple/spiral-calendar_1f5d3-fe0f.png">
+    <link rel="icon" type="image/png" href="../img/favicon.png">
     <!-- Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts: Inter -->
@@ -18,18 +18,30 @@
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <!-- Custom Styles -->
     <style>
-        /* CSS Variables for Light Theme */
+        /* CSS Variables for Theme */
         :root {
-            --bg-primary: #f3f4f6;
-            --bg-secondary: #ffffff;
-            --bg-tertiary: #f9fafb;
-            --text-primary: #1f2937;
-            --text-secondary: #6b7280;
-            --text-accent: #4f46e5;
-            --border-color: #d1d5db;
-            --border-focus: #6366f1;
-            --shadow: rgba(0, 0, 0, 0.1);
-            --shadow-lg: rgba(0, 0, 0, 0.15);
+            --purple: #6B46C1;
+            --gold: #D4AF37;
+            --white: #FFFFFF;
+            --gray-50: #F9FAFB;
+            --gray-100: #F3F4F6;
+            --gray-200: #E5E7EB;
+            --gray-300: #D1D5DB;
+            --gray-600: #4B5563;
+            --gray-700: #374151;
+            --gray-800: #1F2937;
+            --gray-900: #111827;
+            
+            --bg-primary: var(--gray-50);
+            --bg-secondary: var(--white);
+            --bg-tertiary: var(--gray-100);
+            --text-primary: var(--gray-900);
+            --text-secondary: var(--gray-600);
+            --text-accent: var(--purple);
+            --border-color: var(--gray-300);
+            --border-focus: var(--purple);
+            --shadow: rgba(107, 70, 193, 0.1);
+            --shadow-lg: rgba(107, 70, 193, 0.15);
         }
 
         body {
@@ -43,9 +55,41 @@
         .text-gray-800 { color: var(--text-primary) !important; }
         .text-gray-600 { color: var(--text-secondary) !important; }
         .text-gray-500 { color: var(--text-secondary) !important; }
-        .text-gray-700 { color: var(--text-primary) !important; }
+        .text-gray-700 { color: var(--text-secondary) !important; }
         .border-gray-300 { border-color: var(--border-color) !important; }
         .bg-gray-50 { background-color: var(--bg-tertiary) !important; }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--purple);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            flex-shrink: 0;
+            transform: rotate(45deg);
+        }
+
+        .logo-icon::before,
+        .logo-icon::after {
+            content: '';
+            position: absolute;
+            background: var(--gold);
+            border-radius: 2px;
+        }
+
+        .logo-icon::before {
+            width: 20px;
+            height: 4px;
+        }
+
+        .logo-icon::after {
+            width: 4px;
+            height: 20px;
+        }
+
 
         /* Custom scrollbar */
         ::-webkit-scrollbar {
@@ -216,9 +260,12 @@
     <!-- Main Application Container -->
     <div id="app" class="container mx-auto max-w-4xl p-4 sm:p-6 lg:p-8">
         
-        <header class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-gray-900">🗓️ Daily Time Planner</h1>
-            <p class="text-lg text-gray-600 mt-2">Structure your day, budget your time, and get things done.</p>
+        <header class="text-center mb-8 bg-purple-100 p-6 rounded-lg shadow">
+            <div class="flex items-center justify-center gap-4">
+                <div class="logo-icon"></div>
+                <h1 class="text-4xl font-bold text-purple-900">ChronoBlock</h1>
+            </div>
+            <p class="text-lg text-purple-700 mt-2">Transform Your Day Into Purposeful Time Blocks</p>
         </header>
 
         <!-- Section 1: Day Setup (Visible initially or when no day is set) -->
@@ -235,7 +282,7 @@
                 </div>
             </div>
             <div class="mt-6 text-center">
-                <button id="set-day-btn" class="w-full sm:w-auto px-8 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-transform transform hover:scale-105 active:scale-95 pulse-once">
+                <button id="set-day-btn" class="w-full sm:w-auto px-8 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-transform transform hover:scale-105 active:scale-95 pulse-once">
                     ▶ Start Planning
                 </button>
             </div>
@@ -253,15 +300,15 @@
         <div id="planner-section" class="hidden">
             <!-- Time Stats Display -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 text-center">
-                <div class="bg-green-100 text-green-800 p-4 rounded-lg shadow">
+                <div class="bg-purple-100 text-purple-800 p-4 rounded-lg shadow">
                     <h3 class="font-bold text-lg">Total Time</h3>
                     <p id="total-time-display" class="text-2xl font-semibold"></p>
                 </div>
-                <div class="bg-blue-100 text-blue-800 p-4 rounded-lg shadow">
+                <div class="bg-yellow-100 text-yellow-800 p-4 rounded-lg shadow">
                     <h3 class="font-bold text-lg">Allocated</h3>
                     <p id="allocated-time-display" class="text-2xl font-semibold"></p>
                 </div>
-                <div class="bg-yellow-100 text-yellow-800 p-4 rounded-lg shadow">
+                <div class="bg-gray-100 text-gray-800 p-4 rounded-lg shadow">
                     <h3 class="font-bold text-lg">Remaining</h3>
                     <p id="remaining-time-display" class="text-2xl font-semibold"></p>
                 </div>

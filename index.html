@@ -78,28 +78,73 @@
         }
 
         .logo-icon {
-            width: 32px;
+            width: 32px; /* Base size */
             height: 32px;
-            background: var(--purple);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             position: relative;
         }
 
-        .logo-icon::before,
-        .logo-icon::after {
-            content: '';
+        .logo-icon .bracket {
+            width: 8px;
+            height: 8px;
+            border: 4px solid var(--purple);
             position: absolute;
-            width: 16px;
-            height: 3px;
-            background: var(--gold);
-            border-radius: 2px;
         }
 
-        .logo-icon::before { transform: rotate(45deg); }
-        .logo-icon::after { transform: rotate(-45deg); }
+        .logo-icon .top-left {
+            top: 0;
+            left: 0;
+            border-right: none;
+            border-bottom: none;
+        }
+
+        .logo-icon .top-right {
+            top: 0;
+            right: 0;
+            border-left: none;
+            border-bottom: none;
+        }
+
+        .logo-icon .bottom-left {
+            bottom: 0;
+            left: 0;
+            border-right: none;
+            border-top: none;
+        }
+
+        .logo-icon .bottom-right {
+            bottom: 0;
+            right: 0;
+            border-left: none;
+            border-top: none;
+        }
+
+        .logo-icon .x-shape {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: 24px;
+            height: 24px;
+        }
+
+        .logo-icon .x-shape::before,
+        .logo-icon .x-shape::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 2px;
+            height: 18px; /* Adjusted for visual proportion */
+            background-color: var(--gold);
+            transform-origin: center;
+        }
+
+        .logo-icon .x-shape::before {
+            transform: translate(-50%, -50%) rotate(45deg);
+        }
+
+        .logo-icon .x-shape::after {
+            transform: translate(-50%, -50%) rotate(-45deg);
+        }
 
         .logo-text {
             font-size: 18px;
@@ -1003,7 +1048,13 @@
     <header>
         <nav class="container">
             <a href="#" class="logo-container">
-                <div class="logo-icon"></div>
+                <div class="logo-icon">
+                    <div class="bracket top-left"></div>
+                    <div class="bracket top-right"></div>
+                    <div class="bracket bottom-left"></div>
+                    <div class="bracket bottom-right"></div>
+                    <div class="x-shape"></div>
+                </div>
                 <span class="logo-text">ChronoBlock</span>
             </a>
             <div class="nav-menu">
