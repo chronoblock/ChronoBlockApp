@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Bold Logo Replication</title>
+  <style>
+    body {
+      background: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .logo {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background-color: white;
+      position: relative;
+    }
+
+    .bracket {
+      width: 40px;
+      height: 40px;
+      border: 20px solid #4B2E83; /* Bolder Purple */
+      position: absolute;
+    }
+
+    .top-left {
+      top: 30px;
+      left: 30px;
+      border-right: none;
+      border-bottom: none;
+    }
+
+    .top-right {
+      top: 30px;
+      right: 30px;
+      border-left: none;
+      border-bottom: none;
+    }
+
+    .bottom-left {
+      bottom: 30px;
+      left: 30px;
+      border-right: none;
+      border-top: none;
+    }
+
+    .bottom-right {
+      bottom: 30px;
+      right: 30px;
+      border-left: none;
+      border-top: none;
+    }
+
+    .x-shape {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 80px;
+      height: 80px;
+      transform: translate(-50%, -50%);
+    }
+
+    .x-shape::before,
+    .x-shape::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 6px;
+      height: 100%;
+      background-color: #C19A33; /* Gold */
+      transform-origin: center;
+    }
+
+    .x-shape::before {
+      transform: rotate(45deg);
+    }
+
+    .x-shape::after {
+      transform: rotate(-45deg);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="logo">
+    <div class="bracket top-left"></div>
+    <div class="bracket top-right"></div>
+    <div class="bracket bottom-left"></div>
+    <div class="bracket bottom-right"></div>
+    <div class="x-shape"></div>
+  </div>
+
+</body>
+</html>
