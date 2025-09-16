@@ -12,7 +12,7 @@
 - [x] ~~tasks: replace delete with 🗑️~~
 - [x] ~~add styling customization for blocks of time~~
 - [x] ~~task: make them easy to change the rank (dropup-down)~~
-
+- [x] ~~responsive application ~~
 
 - [ ] add user counter
 - [ ] add contact us + feature request
@@ -33,7 +33,7 @@
 - [ ] 
 
 - [ ] remove normal alert from the application 
-- [ ] responsive application 
+
 - [ ] Weekly/monthly view
 - [ ] a landing page to introduce the project
 

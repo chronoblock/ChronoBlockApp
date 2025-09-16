@@ -70,6 +70,7 @@
             position: relative;
             flex-shrink: 0;
             transform: rotate(45deg);
+            transition: width .2s ease, height .2s ease;
         }
 
         .logo-icon::before,
@@ -193,6 +194,46 @@
             .inline-flex button:last-child {
                 margin-bottom: 0;
             }
+            .logo-icon { width:32px; height:32px; }
+            header h1 { font-size:2rem; }
+            header p { font-size:0.95rem; }
+            #app { padding-top:0.5rem; }
+            /* Ensure add-task input/button stack nicely and don't overflow card */
+            .task-list + div.flex { /* the add-task row */
+                width: 100%;
+            }
+            .task-list + div.flex .new-task-input {
+                width: 100%;
+            }
+            .task-list + div.flex .add-task-btn {
+                width: 100%;
+            }
+        }
+
+        /* Ultra small devices */
+        @media (max-width: 400px) {
+            .logo-icon { width:28px; height:28px; }
+            header h1 { font-size:1.75rem; }
+            header p { font-size:0.9rem; }
+        }
+
+        /* Medium range refinements */
+        @media (min-width:640px) and (max-width:900px) {
+            header { padding:2.5rem 1.5rem; }
+            header h1 { font-size:2.5rem; }
+            header p { font-size:1.05rem; }
+        }
+
+        /* Fluid modal widths on narrow screens */
+        @media (max-width:500px) {
+            #add-block-modal > div,
+            #task-details-modal > div,
+            #settings-modal > div { width:100%; max-width:95%; margin-left:auto; margin-right:auto; }
+        }
+
+        /* Adjust stats grid gap on narrow mid screens */
+        @media (max-width:700px) {
+            .grid.grid-cols-1.md\:grid-cols-3 { gap:1rem; }
         }
 
         /* Sortable drag-and-drop styles */
@@ -261,11 +302,11 @@
     <div id="app" class="container mx-auto max-w-4xl p-4 sm:p-6 lg:p-8">
         
         <header class="text-center mb-8 bg-purple-100 p-6 rounded-lg shadow">
-            <div class="flex items-center justify-center gap-4">
+            <div class="flex items-center justify-center gap-4 flex-wrap">
                 <div class="logo-icon"></div>
-                <h1 class="text-4xl font-bold text-purple-900">ChronoBlock</h1>
+                <h1 class="text-4xl md:text-5xl font-bold text-purple-900 leading-tight">ChronoBlock</h1>
             </div>
-            <p class="text-lg text-purple-700 mt-2">Transform Your Day Into Purposeful Time Blocks</p>
+            <p class="text-lg md:text-xl text-purple-700 mt-2 max-w-2xl mx-auto px-2">Transform Your Day Into Purposeful Time Blocks</p>
         </header>
 
         <!-- Section 1: Day Setup (Visible initially or when no day is set) -->
@@ -1345,9 +1386,9 @@ __Underlined__ ==Highlighted==
                             </div>
                         </div>
                         <ul class="task-list sortable-tasks space-y-2 mb-4">${tasksHtml}</ul>
-                        <div class="flex gap-2 mt-4">
-                            <input type="text" class="flex-grow px-3 py-2 bg-white bg-opacity-90 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 new-task-input" placeholder="Add a new task...">
-                            <button class="px-4 py-2 border border-transparent font-medium rounded-md shadow-sm text-white bg-indigo-500 hover:bg-indigo-600 add-task-btn">Add</button>
+                        <div class="flex flex-col sm:flex-row gap-2 mt-4">
+                            <input type="text" class="w-full sm:flex-grow min-w-0 px-3 py-2 bg-white bg-opacity-90 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 new-task-input" placeholder="Add a new task...">
+                            <button class="w-full sm:w-auto px-4 py-2 border border-transparent font-medium rounded-md shadow-sm text-white bg-indigo-500 hover:bg-indigo-600 add-task-btn">Add</button>
                         </div>
                     `;
                     blocksContainer.appendChild(blockEl);
