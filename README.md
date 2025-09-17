@@ -13,7 +13,7 @@
 
 <p align="center"><b>If you find this project useful, consider supporting development with a small donation via PayPal. Thank you!</b></p>
 
-[![Netlify Status](https://api.netlify.com/api/v1/badges/029addff-0c26-43a4-a524-c60fbbdc4a4f/deploy-status)](https://app.netlify.com/projects/timemana/deploys)
+[![Netlify Status](https://api.netlify.com/api/v1/badges/a28372ba-4db9-4931-b76f-da08062438ac/deploy-status)](https://app.netlify.com/projects/chronoblock/deploys)
 
 ChronoBlock is a simple, privacy-first web app to help you structure your day, build empowering routines, and optimize your productivity. No login, no cloud, no tracking—just a clean, modern tool for time blocking and task management. 100% free and open source.
 
