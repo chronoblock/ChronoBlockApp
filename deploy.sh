@@ -5,7 +5,7 @@
 # Documentation: https://docs.netlify.com/build/configure-builds/build-hooks/
 
 # Netlify build hook URL
-BUILD_HOOK_URL="https://api.netlify.com/build_hooks/68b839a238c8f1777209461f"
+BUILD_HOOK_URL=""
 
 # Colors for output
 RED='\033[0;31m'
@@ -53,7 +53,7 @@ deploy() {
     if [ "$HTTP_STATUS" -eq 200 ]; then
         print_status "✅ Build hook triggered successfully!"
         print_status "Netlify is now rebuilding your website..."
-        print_status "You can monitor the build progress at: https://app.netlify.com/projects/timemana/deploys"
+        print_status "You can monitor the build progress at: https://app.netlify.com/projects/chronoblock/deploys"
         echo ""
         print_warning "Note: It may take a few minutes for the changes to appear on your live site."
     else
