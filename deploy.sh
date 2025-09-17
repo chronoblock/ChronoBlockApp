@@ -5,7 +5,12 @@
 # Documentation: https://docs.netlify.com/build/configure-builds/build-hooks/
 
 # Netlify build hook URL
-BUILD_HOOK_URL=""
+if [ -f "./build-hook.api" ]; then
+    BUILD_HOOK_URL=$(cat ./build-hook.api)
+else
+    echo -e "${RED}[ERROR]${NC} build-hook.api does not exist. Please create the file with your Netlify build hook URL."
+    exit 1
+fi
 
 # Colors for output
 RED='\033[0;31m'
