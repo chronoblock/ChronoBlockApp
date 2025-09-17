@@ -7,7 +7,7 @@
 
 <p align="center">
 	<a href="https://www.paypal.com/ncp/payment/KCPSV3QU7342C" target="_blank" rel="noopener noreferrer">
-		<img src="https://www.paypalobjects.com/webstatic/mktg/Logo/pp-donate.png" alt="Donate with PayPal" style="height:48px;">
+		<img src="https://perlmancamp.org/wp-content/uploads/2023/12/donate-with-paypal-payment-button-free-png-21635275830wcls7sprzu-1.png" alt="Donate with PayPal" style="height:48px;">
 	</a>
 </p>
 
