@@ -4,21 +4,13 @@
 </p>
 
 # ChronoBlock: Transform Your Day Into Purposeful Time Blocks
-<head>
-<!-- <img src="https://perlmancamp.org/wp-content/uploads/2023/12/donate-with-paypal-payment-button-free-png-21635275830wcls7sprzu-1.png" alt="Donate with PayPal" style="height:48px;"> -->
-		<style>.pp-KCPSV3QU7342C{text-align:center;border:none;border-radius:0.25rem;min-width:11.625rem;padding:0 2rem;height:2.625rem;font-weight:bold;background-color:#FFD140;color:#000000;font-family:"Helvetica Neue",Arial,sans-serif;font-size:1rem;line-height:1.25rem;cursor:pointer;}</style>
-</head>
-<body>
+
 <p align="center">
 	<a href="https://www.paypal.com/ncp/payment/KCPSV3QU7342C" target="_blank" rel="noopener noreferrer">
-		<form action="https://www.paypal.com/ncp/payment/KCPSV3QU7342C" method="post" target="_blank" style="display:inline-grid;justify-items:center;align-content:start;gap:0.5rem;">
-		<input class="pp-KCPSV3QU7342C" type="submit" value="Donate via PayPal" />
-		<img src=https://www.paypalobjects.com/images/Debit_Credit.svg alt="cards" />
-		<section style="font-size: 0.75rem;"> Powered by <img src="https://www.paypalobjects.com/paypal-ui/logos/svg/paypal-wordmark-color.svg" alt="paypal" style="height:0.875rem;vertical-align:middle;"/></section>
-		</form>
+		<img src="https://lavendercottagecattery.co.uk/wp-content/uploads/2022/10/CITYPNG.COMDownload-PayPal-Yellow-Payment-Button-PNG-2100x770-2.png" alt="Donate with PayPal" style="height:48px;">
 	</a>
 </p>
-</body>
+
 <p align="center"><b>If you find this project useful, consider supporting development with a small donation via PayPal. Thank you!</b></p>
 
 [![Netlify Status](https://api.netlify.com/api/v1/badges/029addff-0c26-43a4-a524-c60fbbdc4a4f/deploy-status)](https://app.netlify.com/projects/timemana/deploys)
