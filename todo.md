@@ -13,10 +13,8 @@
 - [x] ~~add styling customization for blocks of time~~
 - [x] ~~task: make them easy to change the rank (dropup-down)~~
 - [x] ~~responsive application ~~
-
-- [ ] add user counter
-- [ ] add contact us + feature request
-- [ ] donate and buy me a coffe
+- [x] ~~add contact us + feature request~~
+- [x] ~~donate and buy me a coffe~~
 
 - [ ] post on SM
 
